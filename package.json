@@ -1,0 +1,46 @@
+{
+  "name": "apiCheck.js",
+  "version": "1.0.0",
+  "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
+  "main": "./dist/apiCheck.js",
+  "dependencies": {
+    "chai": "^1.10.0",
+    "lodash-node": "^3.1.0"
+  },
+  "devDependencies": {
+    "6to5": "^3.3.12",
+    "6to5-core": "^3.3.12",
+    "6to5-loader": "^3.0.0",
+    "istanbul": "^0.3.5",
+    "jshint": "^2.6.0",
+    "jshint-loader": "^0.8.2",
+    "mocha": "^2.1.0",
+    "mocha-loader": "^0.7.1",
+    "webpack": "^1.5.3"
+  },
+  "scripts": {
+    "test": "mocha src/index.test.js --compilers js:6to5/register",
+    "dev": "mocha src/index.test.js --watch --compilers js:6to5/register",
+    "build:dist": "node node_modules/.bin/webpack",
+    "build:prod": "node node_modules/.bin/webpack --config webpack.config.minify.js",
+    "build": "npm run build:dist & npm run build:prod",
+    "ci": "npm run test && npm run build",
+    "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- src/index.test.js --compilers js:6to5/register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kentcdodds/apiCheck.js"
+  },
+  "keywords": [
+    "javascript",
+    "validation",
+    "api",
+    "function"
+  ],
+  "author": "Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kentcdodds/apiCheck.js/issues"
+  },
+  "homepage": "https://github.com/kentcdodds/apiCheck.js"
+}
