@@ -24,7 +24,7 @@
     "build:dist": "node node_modules/.bin/webpack",
     "build:prod": "node node_modules/.bin/webpack --config webpack.config.minify.js",
     "build": "npm run build:dist & npm run build:prod",
-    "ci": "npm run test && npm run build",
+    "ci": "npm run test && npm run coverage && npm run build",
     "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- src/index.test.js --compilers js:6to5/register"
   },
   "repository": {

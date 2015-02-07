@@ -6,3 +6,5 @@ before_script:
 - npm install
 script:
 - npm run ci
+after_success:
+- coveralls

@@ -1,5 +1,10 @@
 # apiCheck.js
 
+[![Build Status](https://travis-ci.org/kentcdodds/apiCheck.js.svg)](https://travis-ci.org/kentcdodds/apiCheck.js)
+
+[![Coverage Status](https://coveralls.io/repos/kentcdodds/apiCheck.js/badge.svg)](https://coveralls.io/r/kentcdodds/apiCheck.js)
+
+
 It's like ReactJS `propTypes` without React. Actually, it's very heavily inspired by this concept. It's purpose is for
 normal JavaScript functions rather than React Components.
 
@@ -14,7 +19,7 @@ function foo(bar, foobar) {
   apiCheck.warn([apiCheck.number, apiCheck.arrayOf(apiCheck.string)], arguments);
   // do stuff
 }
-// the function below can be called like so:
+// the function above can be called like so:
 foo(3, ['a','b','c']);
 
 // if it were called like so, a descriptive warning would be logged to the console
