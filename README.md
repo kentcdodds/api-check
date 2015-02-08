@@ -239,7 +239,7 @@ apiCheck.shape({
   },
   age: 27,
   isOld: false,
-  walk: coveredFunction,
+  walk: function() {},
   childrenNames: []
 }); // <-- true
 apiCheck.shape({
