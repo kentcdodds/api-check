@@ -129,7 +129,7 @@ apiCheck.array(23); // <-- false
 
 ```javascript
 apiCheck.bool(false); // <-- true
-apiCheck.bool('me bool too?'); <-- // false
+apiCheck.bool('me bool too?'); // <-- false
 ```
 
 ### func
