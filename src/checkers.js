@@ -110,7 +110,9 @@ function getShapeCheckGetter() {
           } else {
             return checker(val[prop], prop, val);
           }
-        });
+        }) && (!shapeChecker.strict || each(val, (prop, name) => {
+          return shape.hasOwnProperty(name);
+        }));
     }
 
     var copiedShape = copy(shape);

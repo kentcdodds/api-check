@@ -216,7 +216,12 @@ apiCheck.objectOf(apiCheck.arrayOf(apiCheck.bool))({a: [true, false], b: [false,
 apiCheck.objectOf(apiCheck.number)({a: 'not a number?', b: 'yeah, me neither (◞‸◟；)'}); // <-- false
 ```
 
-### shape
+### shape *
+
+*Note: React `propTypes` **does** support `shape`, however it does not support the `strict` option*
+
+If you add `strict = true` to the `shape`, then it will enforce that the given object does not have any extra properties
+outside those specified in the `shape`. See below for an example...
 
 ```javascript
 apiCheck.shape({
@@ -242,6 +247,30 @@ apiCheck.shape({
   mint: checkers.bool,
   chocolate: checkers.bool
 })({mint: true}); // <-- false
+```
+
+Example of `strict`
+
+```javascript
+var strictShape = apiCheck.shape({
+  cookies: apiCheck.bool,
+  milk: apiCheck.bool,
+  popcorn: apiCheck.bool.optional
+});
+
+strictShape.strict = true; // <-- that!
+
+strictShape({
+  cookies: true,
+  milk: true,
+  popcorn: true,
+  candy: true
+}); // <-- false because the extra `candy` property
+
+strictShape({
+  cookies: true,
+  milk: true
+}); // <-- true because it has no extra properties and `popcorn` is optional
 ```
 
 #### shape.onlyIf *

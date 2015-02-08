@@ -167,6 +167,26 @@ describe('checkers', () => {
       expect(check({mint: true})).to.be.true;
     });
 
+    it('should pass when it is strict and the given object conforms to the shape exactly', () => {
+      var check = checkers.shape({
+        mint: checkers.bool,
+        chocolate: checkers.bool,
+        milk: checkers.bool
+      });
+      check.strict = true;
+      expect(check({mint: true, chocolate: true, milk: true})).to.be.true;
+    });
+
+    it('should fail when it is strict and the given object has extra properties', () => {
+      var check = checkers.shape({
+        mint: checkers.bool,
+        chocolate: checkers.bool,
+        milk: checkers.bool
+      });
+      check.strict = true;
+      expect(check({mint: true, chocolate: true, milk: true, cookies: true})).to.be.false;
+    });
+
     describe('ifNot', () => {
 
       it('should pass if the specified property exists but the other does not', () => {

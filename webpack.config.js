@@ -68,6 +68,10 @@ function getConfig(env) {
       loaders: [
         {test: /\.js$/, loader: '6to5!jshint', exclude: /node_modules/}
       ]
+    },
+    jshint: {
+      failOnHint: true,
+      emitErrors: true
     }
   };
 

@@ -2,7 +2,6 @@
 var expect = require('chai').expect;
 describe('apiCheckUtil', () => {
   var {each} = require('./apiCheckUtil');
-  var checkers = require('./checkers');
 
   describe('each', () => {
     it('should iterate over objects', () => {
