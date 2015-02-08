@@ -332,6 +332,37 @@ apiCheck.any(jfio,.jgo); // <-- Syntax error.... ಠ_ಠ
 
 ## Customization
 
+*Note, obviously, these things are specific to `apiCheck` and not part of React `propTypes`*
+
+### config.output
+
+You can specify some extra options for the output of the message.
+
+```javascript
+apiCheck.config.output = {
+  prefix: 'Global prefix',
+  suffix: 'global suffix',
+  docsBaseUrl: 'https://example.com/errors-and-warnings#'
+};
+```
+
+You can also specify an `output` object to each `apiCheck()`, `apiCheck.throw()`, and `apiCheck.warn()` request:
+
+```javascript
+apiCheck(apiCheck.bool, arguments, {
+  prefix: 'instance prefix:',
+  suffix: 'instance suffix',
+  url: 'example-error-additional-info'
+});
+```
+
+A failure with the above configuration would yield something like this:
+
+```
+Global prefix instance prefix {{error message}} instance suffix global suffix https://example.com/errors-and-warnings#example-error-additional-info
+```
+
+
 ### getErrorMessage
 
 This is the method that apiCheck uses to get the message it throws or console.warns. If you don't like it, feel free to
