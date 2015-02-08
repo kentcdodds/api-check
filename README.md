@@ -356,5 +356,6 @@ apiCheck.enable();
 
 ## Credits
 
-This library was written by Kent C. Dodds. Again, big credits go to the team working on React for thinking up the api.
-This library was written from scratch, but I'd be lying if I didn't say that I referenced their functions a time or two.
+This library was written by [Kent C. Dodds](https://twitter.com/kentcdodds). Again, big credits go to the team working
+on React for thinking up the api. This library was written from scratch, but I'd be lying if I didn't say that I
+referenced their functions a time or two.
