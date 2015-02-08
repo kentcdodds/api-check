@@ -148,7 +148,7 @@ apiCheck.number({}); // <-- false
 
 ### object *
 
-`null` fails, use [`object.nullOk`](#object.nullok-) to allow null to pass
+`null` fails, use [`object.nullOk`](#objectnullok-) to allow null to pass
 
 ```javascript
 apiCheck.object({}); // <-- true
