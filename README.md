@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/kentcdodds/apiCheck.js.svg)](https://travis-ci.org/kentcdodds/apiCheck.js)
 [![Coverage Status](https://coveralls.io/repos/kentcdodds/apiCheck.js/badge.svg?branch=master)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
-
+*<-- if that build is ever red or that number is ever less than 100% then I want you to
+[flame me on twitter](https://twitter.com/kentcdodds) and be sure to mention how disappointed @josepheames would be in
+me*
 
 It's like [ReactJS `propTypes`](http://facebook.github.io/react/docs/reusable-components.html) without React. Actually,
 it's very heavily inspired by this concept. It's purpose is for normal JavaScript functions rather than just React
