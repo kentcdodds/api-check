@@ -117,7 +117,6 @@ apiCheck(apiCheck.bool, [false]);
 array-like thing (like `arguments`).
 
 ## Supported types
-```
 
 ### array
 
