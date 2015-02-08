@@ -1,6 +1,5 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
-var _ = require('lodash-node');
 describe('apiCheck', () => {
   var apiCheck = require('./index');
 
@@ -12,7 +11,7 @@ describe('apiCheck', () => {
       })('hello');
     });
 
-    it('should handle single dimentional array with types', () => {
+    it('should handle array with types', () => {
       (function(a, b, c) {
         var result = apiCheck([apiCheck.string, apiCheck.number, apiCheck.bool], arguments);
         expect(result).to.be.null;
@@ -39,6 +38,12 @@ describe('apiCheck', () => {
         var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
         expect(result).to.match(/string.*number.*string.*ipAddressString/i);
       })('a', 32);
+    });
+
+    it('should handle when the api is an array and the arguments array is empty', () => {
+      (function(a, b) {
+        expect(() => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(/you passed.*nothing.*string/i);
+      })();
     });
   });
 
@@ -199,6 +204,77 @@ describe('apiCheck', () => {
         })();
         return result;
       }
+    });
+  });
+
+
+  describe('#getErrorMessage', () => {
+    it('should say "nothing" when the args is empty', () => {
+      expect(apiCheck.getErrorMessage()).to.match(/nothing/i);
+    });
+
+    it('should say the types of the values I passed', () => {
+      expect(apiCheck.getErrorMessage([], ['string', 3, true])).to.match(/string.*number.*boolean/i);
+    });
+
+    it('should show only one api when only no optional arguments are provided', () => {
+      expect(apiCheck.getErrorMessage([apiCheck.object])).to.match(/you passed.*should have passed.*object/i);
+    });
+
+    it('should show optional arguments', () => {
+      expect(apiCheck.getErrorMessage([
+        apiCheck.object,
+        apiCheck.array.optional,
+        apiCheck.string,
+        apiCheck.bool.optional
+      ])).to.match(
+        /you passed.*nothing.*should have passed.*object, array \(optional\), string, boolean \(optional\)/i
+      );
+    });
+
+    it('should be overrideable', () => {
+      var originalGetErrorMessage = apiCheck.getErrorMessage;
+      var api = [apiCheck.string, apiCheck.shape({}), apiCheck.array];
+      var args = [1,2,3];
+      var output = {};
+      apiCheck.getErrorMessage = (_api, _args, _output) => {
+        expect(_api).to.equal(api);
+        expect(_args).to.eql(args); // only eql because the args are cloned
+        expect(_output).to.equal(output);
+      };
+      (function(a) {
+        apiCheck(api, args, output);
+      })();
+      apiCheck.getErrorMessage = originalGetErrorMessage;
+    });
+  });
+
+  describe('#handleErrorMessage', () => {
+    it('should send the message to console.warn when the second argument is falsy', () => {
+      var originalWarn = console.warn;
+      var warnCalls = [];
+      console.warn = function() {
+        warnCalls.push([...arguments]);
+      };
+      apiCheck.handleErrorMessage('message', false);
+      expect(warnCalls).to.have.length(1);
+      expect(warnCalls[0].join(' ')).to.equal('message');
+      console.warn = originalWarn;
+    });
+    it('should throw the message when the second argument is truthy', () => {
+      expect(() => apiCheck.handleErrorMessage('message', true)).to.throw('message');
+    });
+
+    it('should be overrideable', () => {
+      var originalHandle = apiCheck.handleErrorMessage;
+      apiCheck.handleErrorMessage = (message, shouldThrow) => {
+        expect(message).to.match(/nothing.*string/i);
+        expect(shouldThrow).to.be.true;
+      };
+      (function(a) {
+        apiCheck.throw(apiCheck.string, arguments);
+      })();
+      apiCheck.handleErrorMessage = originalHandle;
     });
   });
 

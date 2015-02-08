@@ -1,4 +1,4 @@
-var {each, getErrorMessage} = require('./apiCheckUtil');
+var {each, arrayify, getCheckerDisplay, typeOf} = require('./apiCheckUtil');
 var checkers = require('./checkers');
 var disabled = false;
 
@@ -9,6 +9,8 @@ var additionalProperties = {
   warn: getApiCheck(false),
   disable: () => disabled = true,
   enable: () => disabled = false,
+  getErrorMessage,
+  handleErrorMessage,
   config: {
     output: {
       prefix: '',
@@ -26,20 +28,21 @@ each(checkers, (checker, name) => module.exports[name] = checker);
 function apiCheck(api, args, output) {
   /* jshint maxcomplexity:6 */
   var success;
+  if (disabled) {
+    return null;
+  }
   if (!args) {
     throw new Error('apiCheck failed: Must pass arguments to check');
   }
   args = Array.prototype.slice.call(args);
-  if (disabled) {
-    success = true;
-  } else if (checkers.array(api) && args) {
-    success = checkMultiArgApi(api, args);
+  if (checkers.array(api)) {
+    success = checkEnoughArgs(api, args) && checkMultiArgApi(api, args);
   } else if (checkers.func(api)) {
     success = api(args[0]);
   } else {
     throw new Error('apiCheck failed: Must pass an array or a function');
   }
-  return success ? null : getFailedMessage(api, args, output);
+  return success ? null : module.exports.getErrorMessage(api, args, output);
 }
 
 function checkMultiArgApi(api, args) {
@@ -60,25 +63,45 @@ function checkMultiArgApi(api, args) {
   return success;
 }
 
+function checkEnoughArgs(api, args) {
+  var requiredArgs = api.filter(a => !a.isOptional);
+  return args.length >= requiredArgs.length;
+}
+
 
 function getApiCheck(shouldThrow) {
   return function apiCheckWrapper(api, args, output) {
-    var message = apiCheck(api, args, output);
-    args = Array.prototype.slice.call(args);
-
-    if (shouldThrow && message) {
-      throw new Error(message);
-    } else if (message) {
-      console.warn(message);
+    if (disabled) {
+      return null;
     }
+    var message = apiCheck(api, args, output);
+    module.exports.handleErrorMessage(message, shouldThrow);
   };
 }
 
-function getFailedMessage(api, args, output = {}) {
+function handleErrorMessage(message, shouldThrow) {
+  if (shouldThrow && message) {
+    throw new Error(message);
+  } else if (message) {
+    console.warn(message);
+  }
+}
+
+function getErrorMessage(api, args, output = {}) {
   /* jshint maxcomplexity:7 */
   var gOut = module.exports.config.output || {};
   var prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
   var suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
   var url = gOut.docsBaseUrl && output.url && `${gOut.docsBaseUrl}${output.url}`.trim();
-  return `${prefix} ${getErrorMessage(api, args)} ${suffix} ${url}`.trim();
+  return `${prefix} ${buildMessageFromApiAndArgs(api, args)} ${suffix} ${url}`.trim();
+}
+
+function buildMessageFromApiAndArgs(api, args) {
+  api = arrayify(api);
+  args = arrayify(args);
+  var apiTypes = api.map(checker => {
+    return getCheckerDisplay(checker) + (checker.isOptional ? ' (optional)' : '');
+  }).join(', ');
+  var passedTypes = args.length ? '`' + args.map(typeOf).join(', ') + '`' : 'nothing';
+  return 'apiCheck failed! You passed: ' + passedTypes + ' and should have passed: `' + apiTypes + '`';
 }

@@ -1,6 +1,6 @@
 
 
-module.exports = {each, copy, typeOf, getErrorMessage, getCheckerDisplay};
+module.exports = {each, copy, typeOf, arrayify, getCheckerDisplay};
 
 function copy(obj) {
   var daCopy = Array.isArray(obj) ? [] : {};
@@ -17,16 +17,6 @@ function typeOf(obj) {
   } else {
     return typeof obj;
   }
-}
-
-function getErrorMessage(api, args) {
-  api = arrayify(api);
-  args = arrayify(args);
-  var apiTypes = api.map(checker => {
-    return getCheckerDisplay(checker) + (checker.isOptional ? ' (optional)' : '');
-  }).join(', ');
-  var passedTypes = args.length ? args.map(typeOf).join(', ') : 'nothing';
-  return 'apiCheck failed! You passed: `' + passedTypes + '` and should have passed: `' + apiTypes + '`';
 }
 
 function getCheckerDisplay(checker) {

@@ -5,8 +5,11 @@
 [![Coverage Status](https://coveralls.io/repos/kentcdodds/apiCheck.js/badge.svg?branch=master)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
 
 
-It's like ReactJS `propTypes` without React. Actually, it's very heavily inspired by this concept. It's purpose is for
-normal JavaScript functions rather than React Components.
+It's like [ReactJS `propTypes`](http://facebook.github.io/react/docs/reusable-components.html) without React. Actually,
+it's very heavily inspired by this concept. It's purpose is for normal JavaScript functions rather than just React
+Components.
+
+![Demo Screenshot](other/screenshot.png)
 
 ## Example
 
@@ -59,8 +62,20 @@ var obj = {
   },
   age: 27,
   isOld: false,
-  walk: () => {}
+  walk: function() {}
 };
+
+// if you only wish to check the first argument to a function, you don't need to supply an array.
+function bar(a) {
+  var errorMessage = apiCheck(apiCheck.string, arguments);
+  if (errorMessage === null) {
+    // success
+  } else if (typeof errorMessage === 'string') {
+    // there was a problem and errorMessage would like to tell you about it
+  } else {
+    // this should never happen... if it does, log a bug :-)
+  }
+}
 ```
 
 ## Differences from React's propTypes
@@ -134,7 +149,7 @@ apiCheck.number({}); // <-- false
 
 ### object *
 
-`null` fails, use [`object.nullOk`](#object.nullok) to allow null to pass
+`null` fails, use [`object.nullOk`](#object.nullok-) to allow null to pass
 
 ```javascript
 apiCheck.object({}); // <-- true
@@ -288,7 +303,19 @@ apiCheck.any(3.14159265359); // <-- true
 apiCheck.any(jfio,.jgo); // <-- Syntax error.... ಠ_ಠ
 ```
 
-## Disable apiCheck
+## Customization
+
+### getErrorMessage
+
+This is the method that apiCheck uses to get the message it throws or console.warns. If you don't like it, feel free to
+make a better one by simply: `apiCheck.getErrorMessage = function(api, args, output) {/* return message */}`
+
+### handleErrorMessage
+
+This is the method that apiCheck uses to throw or warn the message. If you prefer to do your own thing, that's cool.
+Simply `apiCheck.handleErrorMessage = function(message, shouldThrow) { /* throw or warn */ }`
+
+### Disable apiCheck
 
 It's a good idea to disable the apiCheck in production. To do this, simply invoke `disable()`
 
@@ -298,3 +325,8 @@ apiCheck.disable();
 // to re-enable it
 apiCheck.enable();
 ```
+
+## Credits
+
+This library was written by Kent C. Dodds. Again, big credits go to the team working on React for thinking up the api.
+This library was written from scratch, but I'd be lying if I didn't say that I referenced their functions a time or two.
