@@ -1,6 +1,11 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
 var _ = require('lodash-node');
+function coveredFunction() {
+  // this is only run so I can get 100% code coverage. I know right?
+}
+coveredFunction(); // yeah, code coverage. I'm OCD I guess...
+
 describe('checkers', () => {
   var checkers = require('./checkers');
   describe('typeOfs', () => {
@@ -12,18 +17,27 @@ describe('checkers', () => {
       expect(checkers.bool(true)).to.be.true;
       expect(checkers.bool('whatever')).to.be.false;
     });
+    it('should check number', () => {
+      expect(checkers.number(234)).to.be.true;
+      expect(checkers.number(234.42)).to.be.true;
+      expect(checkers.number(false)).to.be.false;
+    });
     it('should check object', () => {
       expect(checkers.object({})).to.be.true;
-      expect(checkers.object(null)).to.be.true;
+      expect(checkers.object(null)).to.be.false;
       expect(checkers.object([])).to.be.false;
+    });
+    it('should check object.nullOk', () => {
+      expect(checkers.object.nullOk({})).to.be.true;
+      expect(checkers.object.nullOk(null)).to.be.true;
+      expect(checkers.object.nullOk([])).to.be.false;
     });
     it('should check array', () => {
       expect(checkers.array([])).to.be.true;
       expect(checkers.array({})).to.be.false;
     });
     it('should check function', () => {
-      expect(checkers.func(()=> {
-      })).to.be.true;
+      expect(checkers.func(coveredFunction)).to.be.true;
       expect(checkers.func(null)).to.be.false;
     });
   });
@@ -110,7 +124,7 @@ describe('checkers', () => {
         },
         age: 27,
         isOld: false,
-        walk: () => {},
+        walk: coveredFunction,
         childrenNames: []
       };
       expect(check(obj)).to.be.true;
@@ -151,6 +165,98 @@ describe('checkers', () => {
         chocolate: checkers.bool.optional
       });
       expect(check({mint: true})).to.be.true;
+    });
+
+    describe('ifNot', () => {
+
+      it('should pass if the specified property exists but the other does not', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot('mint', checkers.bool)
+        });
+        expect(check({cookies: true})).to.be.true;
+      });
+
+      it('should pass if the specified array of properties do not exist', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)
+        });
+        expect(check({cookies: true})).to.be.true;
+      });
+
+      it('should fail if any of the specified array of properties exists', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)
+        });
+        expect(check({cookies: true, chips: true})).to.be.false;
+      });
+
+      it('should fail even if both ifNots are optional', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot('mint', checkers.bool).optional,
+          mint: checkers.shape.ifNot('cookies', checkers.bool).optional
+        });
+        expect(check({cookies: true, mint: true})).to.be.false;
+      });
+
+      it('should fail if the specified property exists and the other does too', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot('mint', checkers.bool),
+          mint: checkers.shape.ifNot('cookies', checkers.bool)
+        });
+        expect(check({cookies: true, mint: true})).to.be.false;
+      });
+
+      it('should fail if it fails the specified checker', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot('mint', checkers.bool)
+        });
+        expect(check({cookies: 43})).to.be.false;
+      });
+
+    });
+
+    describe('onlyIf', () => {
+      it('should pass only if the specified property is also present', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.onlyIf('mint', checkers.bool)
+        });
+        expect(check({cookies: true, mint: true})).to.be.true;
+      });
+
+      it('should pass only if all specified properties are also present', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
+        });
+        expect(check({cookies: true, mint: true, chip: true})).to.be.true;
+      });
+
+      it('should fail if the specified property is not present', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.onlyIf('mint', checkers.bool)
+        });
+        expect(check({cookies: true})).to.be.false;
+      });
+
+      it('should fail if any specified properties are not present', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
+        });
+        expect(check({cookies: true, chip: true})).to.be.false;
+      });
+
+      it('should fail if all specified properties are not present', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
+        });
+        expect(check({cookies: true})).to.be.false;
+      });
+
+      it('should fail if it fails the specified checker', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
+        });
+        expect(check({cookies: 42, mint: true, chip: true})).to.be.false;
+      });
     });
   });
 

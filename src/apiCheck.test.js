@@ -8,41 +8,36 @@ describe('apiCheck', () => {
     it('should handle a single argument type specification', () => {
       (function(a) {
         var result = apiCheck(apiCheck.string, arguments);
-        expectArrayWithLength(result, arguments.length);
-        expect(result[0]).to.be.true;
+        expect(result).to.be.null;
       })('hello');
     });
 
     it('should handle single dimentional array with types', () => {
       (function(a, b, c) {
         var result = apiCheck([apiCheck.string, apiCheck.number, apiCheck.bool], arguments);
-        expectArrayWithLength(result, arguments.length);
-        allTrue(result);
+        expect(result).to.be.null;
       })('a', 1, true);
     });
 
     it('should handle optional arguments', () => {
       (function(a, b, c) {
         var result = apiCheck([apiCheck.string, apiCheck.number.optional, apiCheck.bool], arguments);
-        expectArrayWithLength(result, arguments.length);
-        allTrue(result);
+        expect(result).to.be.null;
       })('a', true);
     });
 
     it('should accept custom checkers', () => {
       var ipAddressChecker = value => /(\d{1,3}\.){3}\d{1,3}/.test(value);
-      (function(a,b) {
+      ipAddressChecker.type = 'ipAddressString';
+      (function(a, b) {
         var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        expectArrayWithLength(result, arguments.length);
-        allTrue(result);
+        expect(result).to.be.null;
       })('a', '127.0.0.1');
 
 
-      (function(a,b) {
+      (function(a, b) {
         var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        expectArrayWithLength(result, arguments.length);
-        expect(result[0]).to.be.true;
-        expect(result[1]).to.be.false;
+        expect(result).to.match(/string.*number.*string.*ipAddressString/i);
       })('a', 32);
     });
   });
@@ -93,7 +88,7 @@ describe('apiCheck', () => {
   });
 
   describe('#disable/enable', () => {
-    it('should disable apiCheck, and results will always be an array of true', () => {
+    it('should disable apiCheck, and results will always be null', () => {
       apiCheck.disable();
       check(true);
       apiCheck.enable();
@@ -103,12 +98,9 @@ describe('apiCheck', () => {
         (function(a, b) {
           var results = apiCheck([apiCheck.instanceOf(RegExp), apiCheck.number], arguments);
           if (disabled) {
-            expectArrayWithLength(results, arguments.length);
-            allTrue(results);
+            expect(results).to.be.null;
           } else {
-            console.log(results);
-            expectArrayWithLength(results, 1);
-            expect(results[0]).to.be.false;
+            expect(results).to.match(/string.*RegExp.*number/i);
           }
         })('hey');
       }
@@ -133,14 +125,81 @@ describe('apiCheck', () => {
     });
   });
 
+  describe('apiCheck config', () => {
+    describe('output', () => {
 
-  function expectArrayWithLength(arry, length) {
-    expect(arry).to.be.instanceOf(Array);
-    expect(arry).to.have.length(length);
-  }
+      it('should fallback to an empty object is output is removed', () => {
+        var original = apiCheck.config.output;
+        apiCheck.config.output = null;
+        expect(getFailure).to.not.throw();
+        apiCheck.config.output = original;
+      });
 
-  function allTrue(vals) {
-    expect(vals).to.eql(_.times(vals.length, ()=>true));
-  }
+      describe('prefix', () => {
+        var gPrefix = 'global prefix';
+        beforeEach(() => {
+          apiCheck.config.output.prefix = gPrefix;
+        });
+        it('should prefix the error message', () => {
+          expect(getFailure()).to.match(new RegExp(`^${gPrefix}`));
+        });
+
+        it('should allow the specification of an additional prefix that comes after the global config prefix', () => {
+          var prefix = 'secondary prefix';
+          expect(getFailure({prefix})).to.match(new RegExp(`^${gPrefix} ${prefix}`));
+        });
+
+        afterEach(() => {
+          apiCheck.config.output.prefix = '';
+        });
+      });
+
+      describe('suffix', () => {
+        var gSuffix = 'global suffix';
+        beforeEach(() => {
+          apiCheck.config.output.suffix = gSuffix;
+        });
+        it('should suffix the error message', () => {
+          expect(getFailure()).to.match(new RegExp(`${gSuffix}$`));
+        });
+
+        it('should allow the specification of an additional suffix that comes after the global config suffix', () => {
+          var suffix = 'secondary suffix';
+          expect(getFailure({suffix})).to.match(new RegExp(`${suffix} ${gSuffix}$`));
+        });
+
+        afterEach(() => {
+          apiCheck.config.output.suffix = '';
+        });
+      });
+
+      describe('url', () => {
+        var urlBase = 'http://www.example.com/errors#';
+        beforeEach(() => {
+          apiCheck.config.output.docsBaseUrl = urlBase;
+        });
+        it('should not be in the message if a url is not specified', () => {
+          expect(getFailure()).to.not.contain(urlBase);
+        });
+
+        it('should be added to the message if a url is specified', () => {
+          var url = 'some-error-message';
+          expect(getFailure({url})).to.contain(`${urlBase}${url}`);
+        });
+
+        afterEach(() => {
+          apiCheck.config.output.docsBaseUrl = '';
+        });
+      });
+
+      function getFailure(output) {
+        var result;
+        (function(a) {
+          result = apiCheck(apiCheck.string, arguments, output);
+        })();
+        return result;
+      }
+    });
+  });
 
 });

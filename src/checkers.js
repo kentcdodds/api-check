@@ -4,8 +4,8 @@ var checkers = module.exports = {
   bool: getTypeOfChecker('boolean'),
   func: getTypeOfChecker('function'),
   number: getTypeOfChecker('number'),
-  object: getTypeOfChecker('object'),
   string: getTypeOfChecker('string'),
+  object: getObjectChecker(),
 
   instanceOf: instanceCheckGetter,
   oneOf: oneOfCheckGetter,
@@ -14,7 +14,7 @@ var checkers = module.exports = {
   arrayOf: arrayOfCheckGetter,
   objectOf: objectOfCheckGetter,
 
-  shape: shapeCheckGetter,
+  shape: getShapeCheckGetter(),
 
   any: anyCheckGetter()
 };
@@ -32,6 +32,22 @@ function getTypeOfChecker(type) {
   typeOfChecker.type = type;
   makeOptional(typeOfChecker);
   return typeOfChecker;
+}
+
+function getObjectChecker() {
+  function objectNullOkChecker(val) {
+    return typeOf(val) === 'object';
+  }
+  objectNullOkChecker.type = 'object[null ok]';
+  makeOptional(objectNullOkChecker);
+  function objectChecker(val) {
+    return val !== null && objectNullOkChecker(val);
+  }
+  objectChecker.type = 'object';
+  makeOptional(objectChecker);
+  objectChecker.nullOk = objectNullOkChecker;
+
+  return objectChecker;
 }
 
 
@@ -85,24 +101,52 @@ function objectOfCheckGetter(checker) {
   return objectOfChecker;
 }
 
-function shapeCheckGetter(shape) {
-  function shapeChecker(val) {
-    return checkers.object(val) && each(shape, (checker, prop) => {
-        if (!val[prop] && checker.isOptional) {
-          return true;
-        } else {
-          return checker(val[prop]);
-        }
-      });
+function getShapeCheckGetter() {
+  function shapeCheckGetter(shape) {
+    function shapeChecker(val) {
+      return checkers.object(val) && each(shape, (checker, prop) => {
+          if (!val.hasOwnProperty(prop) && checker.isOptional) {
+            return true;
+          } else {
+            return checker(val[prop], prop, val);
+          }
+        });
+    }
+
+    var copiedShape = copy(shape);
+    each(copiedShape, (val, prop) => {
+      copiedShape[prop] = getCheckerDisplay(val);
+    });
+    shapeChecker.type = `shape(${JSON.stringify(copiedShape)})`;
+    makeOptional(shapeChecker);
+    return shapeChecker;
   }
 
-  var copiedShape = copy(shape);
-  each(copiedShape, (val, prop) => {
-    copiedShape[prop] = getCheckerDisplay(val);
-  });
-  shapeChecker.type = `shape(${JSON.stringify(copiedShape)})`;
-  makeOptional(shapeChecker);
-  return shapeChecker;
+  shapeCheckGetter.ifNot = function ifNot(otherProps, propChecker) {
+    if (!Array.isArray(otherProps)) {
+      otherProps = [otherProps];
+    }
+    function ifNotChecker(prop, propName, obj) {
+      return !otherProps.some(prop => obj.hasOwnProperty(prop)) && propChecker(prop);
+    }
+    ifNotChecker.type = `ifNot[${otherProps.join(', ')}]`;
+    makeOptional(ifNotChecker);
+    return ifNotChecker;
+  };
+
+  shapeCheckGetter.onlyIf = function onlyIf(otherProps, propChecker) {
+    if (!Array.isArray(otherProps)) {
+      otherProps = [otherProps];
+    }
+    function onlyIfChecker(prop, propName, obj) {
+      return otherProps.every(prop => obj.hasOwnProperty(prop)) && propChecker(prop);
+    }
+    onlyIfChecker.type = `onlyIf[${otherProps.join(', ')}]`;
+    makeOptional(onlyIfChecker);
+    return onlyIfChecker;
+  };
+
+  return shapeCheckGetter;
 }
 
 function anyCheckGetter() {
