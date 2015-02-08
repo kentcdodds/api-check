@@ -217,7 +217,7 @@ apiCheck.objectOf(apiCheck.number)({a: 'not a number?', b: 'yeah, me neither (â—
 
 ### shape *
 
-*Note: React `propTypes` **does** support `shape`, however it does not support the `strict` option*
+*Note: React `propTypes` does support `shape`, however it does not support the `strict` option*
 
 If you add `strict = true` to the `shape`, then it will enforce that the given object does not have any extra properties
 outside those specified in the `shape`. See below for an example...
