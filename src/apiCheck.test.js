@@ -59,6 +59,13 @@ describe('apiCheck', () => {
         expect(() => apiCheck.throw(apiCheck.number, args)).to.throw(/you passed.*should have passed.*/i);
       })('a', 3);
     });
+    it('should do nothing when disabled', () => {
+      apiCheck.disable();
+      (function(a) {
+        expect(apiCheck.throw(apiCheck.number, arguments)).to.not.throw;
+      })('a', 3);
+      apiCheck.enable();
+    });
   });
 
   describe('#warn', () => {
@@ -85,6 +92,14 @@ describe('apiCheck', () => {
       })();
       expect(warnCalls).to.have.length(1);
       expect(warnCalls[0].join(' ')).to.match(/failed/i);
+    });
+    it('should do nothing when disabled', () => {
+      apiCheck.disable();
+      (function(a) {
+        apiCheck.warn(apiCheck.string, arguments);
+      })();
+      expect(warnCalls).to.have.length(0);
+      apiCheck.enable();
     });
 
     afterEach(() => {
