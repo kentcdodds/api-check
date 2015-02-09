@@ -252,6 +252,14 @@ describe('apiCheck', () => {
     });
 
     it('should show the user\'s arguments nicely', () => {
+      console.log(apiCheck.getErrorMessage([
+        apiCheck.object,
+        apiCheck.array.optional,
+        apiCheck.string
+      ], [
+        {a: 'a', r: new RegExp(), b: undefined},
+        [new Date(), 23, false, null]
+      ]));
       expect(apiCheck.getErrorMessage([
         apiCheck.object,
         apiCheck.array.optional,
@@ -260,7 +268,7 @@ describe('apiCheck', () => {
         {a: 'a', r: new RegExp(), b: undefined},
         [new Date(), 23, false, null]
       ])).to.match(
-        /you passed.*a.*string.*r.*regexp.*date.*number.*boolean/i
+        /you passed.*a.*string.*r.*regexp.*b.*undefined.*date.*number.*boolean.*null.*?should.*?object.*array.*?optional.*?string/i
       );
     });
 

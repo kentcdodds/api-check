@@ -119,5 +119,5 @@ function getDisplay(obj) {
 
 function getArgDisplay(arg) {
   var cName = arg && arg.constructor && arg.constructor.name;
-  return cName ? stringifyable[cName] ? stringifyable[cName](arg) : cName : typeOf(arg);
+  return cName ? stringifyable[cName] ? stringifyable[cName](arg) : cName : arg === null ? 'null' : typeOf(arg);
 }
