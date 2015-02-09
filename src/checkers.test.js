@@ -198,6 +198,14 @@ describe('checkers', () => {
         expect(check({cookies: true})).to.be.true;
       });
 
+      it('should fail if neither of the ifNot properties exists', () => {
+        var check = checkers.shape({
+          cookies: checkers.shape.ifNot('mint', checkers.bool),
+          mint: checkers.shape.ifNot('cookies', checkers.bool)
+        });
+        expect(check({foo: true})).to.be.false;
+      });
+
       it('should pass if the specified array of properties do not exist', () => {
         var check = checkers.shape({
           cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)

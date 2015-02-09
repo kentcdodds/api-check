@@ -130,8 +130,10 @@ function getShapeCheckGetter() {
       otherProps = [otherProps];
     }
     function ifNotChecker(prop, propName, obj) {
-      var propExists = !obj.hasOwnProperty(propName);
-      return propExists || (!otherProps.some(otherProp => obj.hasOwnProperty(otherProp)) && propChecker(prop));
+      var propExists = obj.hasOwnProperty(propName);
+      var otherPropsExist = otherProps.some(otherProp => obj.hasOwnProperty(otherProp));
+      return (propExists !== otherPropsExist) && (!propExists || propExists && propChecker(prop) && !otherPropsExist);
+
     }
     ifNotChecker.type = `ifNot[${otherProps.join(', ')}]`;
     makeOptional(ifNotChecker);
