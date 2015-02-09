@@ -32,8 +32,9 @@
     "build:dist": "node node_modules/.bin/webpack",
     "build:prod": "node node_modules/.bin/webpack --config webpack.config.minify.js",
     "build": "npm run build:dist & npm run build:prod",
-    "ci": "npm run only-check && npm run test && npm run coverage && npm run build",
+    "ci": "npm run only-check && npm run test && npm run coverage && npm run check-coverage && npm run build",
     "coverage": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- src/index.test.js --compilers js:6to5/register",
+    "check-coverage": "./node_modules/istanbul/lib/cli.js check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
     "coveralls": "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "only-check": "node other/only-check.js"
   },
