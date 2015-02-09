@@ -100,7 +100,7 @@ function buildMessageFromApiAndArgs(api, args) {
   api = arrayify(api);
   args = arrayify(args);
   var apiTypes = api.map(checker => {
-    return getCheckerDisplay(checker) + (checker.isOptional ? ' (optional)' : '');
+    return getCheckerDisplay(checker);
   }).join(', ');
   var passedTypes = args.length ? '`' + args.map(typeOf).join(', ') + '`' : 'nothing';
   return 'apiCheck failed! You passed: ' + passedTypes + ' and should have passed: `' + apiTypes + '`';

@@ -20,7 +20,7 @@ function typeOf(obj) {
 }
 
 function getCheckerDisplay(checker) {
-  return checker.type || checker.displayName || checker.name;
+  return (checker.type || checker.displayName || checker.name) + (checker.isOptional ? ' (optional)' : '');
 }
 
 function arrayify(obj) {

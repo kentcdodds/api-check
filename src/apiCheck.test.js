@@ -248,6 +248,13 @@ describe('apiCheck', () => {
       );
     });
 
+    it('should show optional types in shapes', () => {
+      expect(apiCheck.getErrorMessage(apiCheck.shape({
+        name: apiCheck.string,
+        cool: apiCheck.bool.optional
+      }))).to.match(/you passed.*nothing.*should have passed.*shape.*name.*string.*cool.*boolean.*?optional/i);
+    });
+
     it('should be overrideable', () => {
       var originalGetErrorMessage = apiCheck.getErrorMessage;
       var api = [apiCheck.string, apiCheck.shape({}), apiCheck.array];
