@@ -62,19 +62,19 @@ function instanceCheckGetter(classToCheck) {
   return instanceChecker;
 }
 
-function oneOfCheckGetter(items) {
+function oneOfCheckGetter(enums) {
   function oneOfChecker(val) {
-    return items.some(item => item === val);
+    return enums.some(enm => enm === val);
   }
 
-  oneOfChecker.type = `enum[${items.join(', ')}]`;
+  oneOfChecker.type = `enum[${enums.join(', ')}]`;
   makeOptional(oneOfChecker);
   return oneOfChecker;
 }
 
 function oneOfTypeCheckGetter(checkers) {
   function oneOfTypeChecker(val) {
-    return checkers.some(item => item(val));
+    return checkers.some(checker => checker(val));
   }
 
   oneOfTypeChecker.type = checkers.map(getCheckerDisplay).join(' or ');
