@@ -1,10 +1,10 @@
 var {typeOf, each, copy, getCheckerDisplay} = require('./apiCheckUtil');
 var checkers = module.exports = {
-  array: getTypeOfChecker('array'),
-  bool: getTypeOfChecker('boolean'),
-  func: getTypeOfChecker('function'),
-  number: getTypeOfChecker('number'),
-  string: getTypeOfChecker('string'),
+  array: getTypeOfChecker('Array'),
+  bool: getTypeOfChecker('Boolean'),
+  func: getTypeOfChecker('Function'),
+  number: getTypeOfChecker('Number'),
+  string: getTypeOfChecker('String'),
   object: getObjectChecker(),
 
   instanceOf: instanceCheckGetter,
@@ -25,8 +25,9 @@ each(checkers, checker => {
 
 
 function getTypeOfChecker(type) {
+  var lType = type.toLowerCase();
   function typeOfChecker(val) {
-    return typeOf(val) === type;
+    return typeOf(val) === lType;
   }
 
   typeOfChecker.type = type;
@@ -38,12 +39,12 @@ function getObjectChecker() {
   function objectNullOkChecker(val) {
     return typeOf(val) === 'object';
   }
-  objectNullOkChecker.type = 'object[null ok]';
+  objectNullOkChecker.type = 'Object[null ok]';
   makeOptional(objectNullOkChecker);
   function objectChecker(val) {
     return val !== null && objectNullOkChecker(val);
   }
-  objectChecker.type = 'object';
+  objectChecker.type = 'Object';
   makeOptional(objectChecker);
   objectChecker.nullOk = objectNullOkChecker;
 
