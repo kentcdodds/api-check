@@ -192,7 +192,8 @@ describe('checkers', () => {
 
       it('should pass if the specified property exists but the other does not', () => {
         var check = checkers.shape({
-          cookies: checkers.shape.ifNot('mint', checkers.bool)
+          cookies: checkers.shape.ifNot('mint', checkers.bool),
+          mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
         expect(check({cookies: true})).to.be.true;
       });
