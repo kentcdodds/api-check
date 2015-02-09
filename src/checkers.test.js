@@ -52,6 +52,7 @@ describe('checkers', () => {
   describe('oneOf', () => {
     it('should pass when the value is one of the enums given', () => {
       expect(checkers.oneOf(['--,--`--,{@', '┐( ˘_˘)┌'])('┐( ˘_˘)┌')).to.be.true;
+      expect(checkers.oneOf([null])(null)).to.be.true;
       expect(checkers.oneOf([5, false])(false)).to.be.true;
     });
 
