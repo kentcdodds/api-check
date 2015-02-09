@@ -200,6 +200,7 @@ describe('apiCheck', () => {
         });
         it('should not be in the message if a url is not specified', () => {
           expect(getFailure()).to.not.contain(urlBase);
+          expect(getFailure()).to.not.contain('undefined');
         });
 
         it('should be added to the message if a url is specified', () => {

@@ -93,7 +93,7 @@ function getErrorMessage(api, args, output = {}) {
   var prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
   var suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
   var url = gOut.docsBaseUrl && output.url && `${gOut.docsBaseUrl}${output.url}`.trim();
-  return `${prefix} ${buildMessageFromApiAndArgs(api, args)} ${suffix} ${url}`.trim();
+  return `${prefix} ${buildMessageFromApiAndArgs(api, args)} ${suffix} ${url || ''}`.trim();
 }
 
 function buildMessageFromApiAndArgs(api, args) {
