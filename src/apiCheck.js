@@ -102,6 +102,22 @@ function buildMessageFromApiAndArgs(api, args) {
   var apiTypes = api.map(checker => {
     return getCheckerDisplay(checker);
   }).join(', ');
-  var passedTypes = args.length ? '`' + args.map(typeOf).join(', ') + '`' : 'nothing';
+  var passedTypes = args.length ? '`' + args.map(getArgDisplay).join(', ') + '`' : 'nothing';
   return 'apiCheck failed! You passed: ' + passedTypes + ' and should have passed: `' + apiTypes + '`';
+}
+
+var stringifyable = {
+  Object: getDisplay,
+  Array: getDisplay
+};
+
+function getDisplay(obj) {
+  var argDisplay = {};
+  each(obj, (v,k) => argDisplay[k] = getArgDisplay(v));
+  return JSON.stringify(obj, (k, v) => argDisplay[k] || v);
+}
+
+function getArgDisplay(arg) {
+  var cName = arg && arg.constructor && arg.constructor.name;
+  return cName ? stringifyable[cName] ? stringifyable[cName](arg) : cName : typeOf(arg);
 }

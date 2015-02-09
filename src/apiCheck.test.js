@@ -42,7 +42,9 @@ describe('apiCheck', () => {
 
     it('should handle when the api is an array and the arguments array is empty', () => {
       (function(a, b) {
-        expect(() => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(/you passed.*nothing.*string/i);
+        expect(
+          () => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(/you passed.*nothing.*string/i
+        );
       })();
     });
   });
@@ -242,9 +244,23 @@ describe('apiCheck', () => {
         apiCheck.object,
         apiCheck.array.optional,
         apiCheck.string,
+        apiCheck.instanceOf(RegExp),
         apiCheck.bool.optional
       ])).to.match(
-        /you passed.*nothing.*should have passed.*object, array \(optional\), string, boolean \(optional\)/i
+        /you passed.*nothing.*should have passed.*object, array \(optional\), string, RegExp, boolean \(optional\)/i
+      );
+    });
+
+    it('should show the user\'s arguments nicely', () => {
+      expect(apiCheck.getErrorMessage([
+        apiCheck.object,
+        apiCheck.array.optional,
+        apiCheck.string
+      ], [
+        {a: 'a', r: new RegExp(), b: undefined},
+        [new Date(), 23, false, null]
+      ])).to.match(
+        /you passed.*a.*string.*r.*regexp.*date.*number.*boolean/i
       );
     });
 
