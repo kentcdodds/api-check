@@ -1,5 +1,5 @@
 {
-  "name": "apiCheck",
+  "name": "api-check",
   "version": "1.0.0",
   "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
   "main": "./dist/apiCheck.js",
