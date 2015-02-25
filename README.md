@@ -12,6 +12,14 @@ Components.
 
 ![Demo Screenshot](other/screenshot.png)
 
+## Installation
+
+`$ npm i -S api-check` or `$bower i -S api-check`
+
+apiCheck.js utilizes [UMD](https://github.com/umdjs/umd), so you can:
+
+`var apiCheck = require('api-check');` (also available as AMD module or global)
+
 ## Example
 
 Note, there are a bunch of tests. Those should be instructive as well.
