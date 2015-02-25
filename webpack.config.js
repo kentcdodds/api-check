@@ -1,4 +1,3 @@
-var fs = require('fs');
 var path = require('path');
 
 var _ = require('lodash-node');
@@ -66,7 +65,7 @@ function getConfig(env) {
 
     module: {
       loaders: [
-        {test: /\.js$/, loader: '6to5!jshint', exclude: /node_modules/}
+        {test: /\.js$/, loader: 'babel!jshint', exclude: /node_modules/}
       ]
     },
     jshint: {

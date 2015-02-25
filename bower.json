@@ -1,0 +1,29 @@
+{
+  "name": "apiCheck.js",
+  "version": "1.0.0",
+  "homepage": "https://github.com/kentcdodds/apiCheck.js",
+  "authors": [
+    "Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us)"
+  ],
+  "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
+  "main": "dist/apicheck.js",
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "javascript",
+    "validation",
+    "api",
+    "function"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "other",
+    ".editorconfig",
+    ".travis.yml",
+    "webpack.config.js",
+    "webpack.config.minify.js"
+  ]
+}

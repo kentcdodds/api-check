@@ -1,10 +1,10 @@
-var {each, arrayify, getCheckerDisplay, typeOf} = require('./apiCheckUtil');
-var checkers = require('./checkers');
-var disabled = false;
+let {each, arrayify, getCheckerDisplay, typeOf} = require('./apiCheckUtil');
+let checkers = require('./checkers');
+let disabled = false;
 
 module.exports = apiCheck;
 
-var additionalProperties = {
+let additionalProperties = {
   throw: getApiCheck(true),
   warn: getApiCheck(false),
   disable: () => disabled = true,
