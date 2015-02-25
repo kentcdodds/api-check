@@ -1,5 +1,6 @@
-let {each, arrayify, getCheckerDisplay, typeOf} = require('./apiCheckUtil');
-let checkers = require('./checkers');
+const apiCheckUtil = require('./apiCheckUtil');
+const {each, isError, t, arrayify, getCheckerDisplay, typeOf} = apiCheckUtil;
+const checkers = require('./checkers');
 let disabled = false;
 
 module.exports = apiCheck;
@@ -17,7 +18,8 @@ let additionalProperties = {
       suffix: '',
       docsBaseUrl: ''
     }
-  }
+  },
+  utils: apiCheckUtil
 };
 
 each(additionalProperties, (wrapper, name) => module.exports[name] = wrapper);
@@ -26,55 +28,83 @@ each(checkers, (checker, name) => module.exports[name] = checker);
 
 
 function apiCheck(api, args, output) {
-  /* jshint maxcomplexity:6 */
-  var success;
+  /* jshint maxcomplexity:8 */
   if (disabled) {
-    return null;
+    return '';
   }
-  if (!args) {
-    throw new Error('apiCheck failed: Must pass arguments to check');
-  }
+  checkApiCheckApi(arguments);
   args = Array.prototype.slice.call(args);
-  if (checkers.array(api)) {
-    success = checkEnoughArgs(api, args) && checkMultiArgApi(api, args);
-  } else if (checkers.func(api)) {
-    success = api(args[0]);
+  let messages;
+  api = arrayify(api);
+  let enoughArgs = checkEnoughArgs(api, args);
+  if (enoughArgs.length) {
+    messages = enoughArgs;
   } else {
-    throw new Error('apiCheck failed: Must pass an array or a function');
+    messages = checkApiWithArgs(api, args);
   }
-  return success ? null : module.exports.getErrorMessage(api, args, output);
+  return messages.length ? module.exports.getErrorMessage(api, args, messages, output) : '';
 }
 
-function checkMultiArgApi(api, args) {
-  var success = true;
-  var checkerIndex = 0;
-  var argIndex = 0;
-  var arg, checker, res;
+function checkApiCheckApi(args) {
+
+  const s = checkers.string;
+  const api = [ // dog fooding here
+    checkers.typeOrArrayOf(checkers.func),
+    checkers.args,
+    checkers.shape({prefix: s, suffix: s, url: s}).strict.optional
+  ];
+  let errors = checkEnoughArgs(api, args);
+  if (!errors.length) {
+    errors = checkApiWithArgs(api, args);
+  }
+  let message;
+  if (errors.length) {
+    message = module.exports.getErrorMessage(api, args, errors, {
+      prefix: 'apiCheck'
+    });
+    module.exports.handleErrorMessage(message, true);
+  }
+}
+
+function checkApiWithArgs(api, args) {
+  let messages = [];
+  let failed = false;
+  let checkerIndex = 0;
+  let argIndex = 0;
+  let arg, checker, res;
   /* jshint -W084 */
-  while(arg = args[argIndex++]) {
-    checker = api[checkerIndex++];
-    res = checker(arg);
-    if (!res && !checker.isOptional) {
-      return false;
-    } else if (!res) {
+  while(checker = api[checkerIndex++]) {
+    arg = args[argIndex++];
+    res = checker(arg, null, 'Argument ' + argIndex);
+    if (isError(res) && !checker.isOptional) {
+      failed = true;
+      messages.push(res.message);
+    } else if (checker.isOptional) {
       argIndex--;
+    } else {
+      messages.push(`${t('Argument ' + argIndex)} passed`);
     }
   }
-  return success;
+  if (failed) {
+    return messages;
+  } else {
+    return [];
+  }
 }
 
 function checkEnoughArgs(api, args) {
-  var requiredArgs = api.filter(a => !a.isOptional);
-  return args.length >= requiredArgs.length;
+  let requiredArgs = api.filter(a => !a.isOptional);
+  if (args.length < requiredArgs.length) {
+    return ['Not enough arguments specified. Requires `' + requiredArgs.length + '`, you passed `' + args.length + '`'];
+  } else {
+    return [];
+  }
 }
 
 
 function getApiCheck(shouldThrow) {
   return function apiCheckWrapper(api, args, output) {
-    if (disabled) {
-      return null;
-    }
-    var message = apiCheck(api, args, output);
+    let message = apiCheck(api, args, output);
     module.exports.handleErrorMessage(message, shouldThrow);
   };
 }
@@ -87,14 +117,17 @@ function handleErrorMessage(message, shouldThrow) {
   }
 }
 
-function getErrorMessage(api, args, output = {}) {
+function getErrorMessage(api, args, messages = [], output = {}) {
   /* jshint maxcomplexity:7 */
-  var gOut = module.exports.config.output || {};
-  var prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
-  var suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
-  var url = gOut.docsBaseUrl && output.url && `${gOut.docsBaseUrl}${output.url}`.trim();
-  return `${prefix} ${buildMessageFromApiAndArgs(api, args)} ${suffix} ${url || ''}`.trim();
+  let gOut = module.exports.config.output || {};
+  let prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
+  let suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
+  let url = gOut.docsBaseUrl && output.url && `${gOut.docsBaseUrl}${output.url}`.trim();
+  let message = `apiCheck failed! ${messages.join(', ')}`;
+  var passedAndShouldHavePassed = '\n\n' + buildMessageFromApiAndArgs(api, args);
+  return `${prefix} ${message} ${suffix} ${url || ''}${passedAndShouldHavePassed}`.trim();
 }
+
 
 function buildMessageFromApiAndArgs(api, args) {
   api = arrayify(api);
@@ -103,7 +136,7 @@ function buildMessageFromApiAndArgs(api, args) {
     return getCheckerDisplay(checker);
   }).join(', ');
   var passedTypes = args.length ? '`' + args.map(getArgDisplay).join(', ') + '`' : 'nothing';
-  return 'apiCheck failed! You passed: ' + passedTypes + ' and should have passed: `' + apiTypes + '`';
+  return 'You passed:\n' + passedTypes + '\n\nThe API calls for:\n`' + apiTypes + '`';
 }
 
 var stringifyable = {

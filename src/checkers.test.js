@@ -1,108 +1,123 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
 var _ = require('lodash-node');
-function coveredFunction() {
-  // this is only run so I can get 100% code coverage. I know right?
-}
-coveredFunction(); // yeah, code coverage. I'm OCD I guess...
+const {coveredFunction} = require('./test.utils');
 
 describe('checkers', () => {
   var checkers = require('./checkers');
   describe('typeOfs', () => {
     it('should check string', () => {
-      expect(checkers.string('string')).to.be.true;
-      expect(checkers.string(3)).to.be.false;
+      expect(checkers.string('string')).to.be.undefined;
+      expect(checkers.string(3)).to.be.an.instanceOf(Error);
     });
     it('should check bool', () => {
-      expect(checkers.bool(true)).to.be.true;
-      expect(checkers.bool('whatever')).to.be.false;
+      expect(checkers.bool(true)).to.be.undefined;
+      expect(checkers.bool('whatever')).to.be.an.instanceOf(Error);
     });
     it('should check number', () => {
-      expect(checkers.number(234)).to.be.true;
-      expect(checkers.number(234.42)).to.be.true;
-      expect(checkers.number(false)).to.be.false;
+      expect(checkers.number(234)).to.be.undefined;
+      expect(checkers.number(234.42)).to.be.undefined;
+      expect(checkers.number(false)).to.be.an.instanceOf(Error);
     });
     it('should check object', () => {
-      expect(checkers.object({})).to.be.true;
-      expect(checkers.object(null)).to.be.false;
-      expect(checkers.object([])).to.be.false;
+      expect(checkers.object({})).to.be.undefined;
+      expect(checkers.object(null)).to.be.an.instanceOf(Error);
+      expect(checkers.object([])).to.be.an.instanceOf(Error);
     });
     it('should check object.nullOk', () => {
-      expect(checkers.object.nullOk({})).to.be.true;
-      expect(checkers.object.nullOk(null)).to.be.true;
-      expect(checkers.object.nullOk([])).to.be.false;
+      expect(checkers.object.nullOk({})).to.be.undefined;
+      expect(checkers.object.nullOk(null)).to.be.undefined;
+      expect(checkers.object.nullOk([])).to.be.an.instanceOf(Error);
     });
     it('should check array', () => {
-      expect(checkers.array([])).to.be.true;
-      expect(checkers.array({})).to.be.false;
+      expect(checkers.array([])).to.be.undefined;
+      expect(checkers.array({})).to.be.an.instanceOf(Error);
     });
     it('should check function', () => {
-      expect(checkers.func(coveredFunction)).to.be.true;
-      expect(checkers.func(null)).to.be.false;
+      expect(checkers.func(coveredFunction)).to.be.undefined;
+      expect(checkers.func(null)).to.be.an.instanceOf(Error);
     });
   });
 
   describe('instanceof', () => {
     it('should check the instance of a class', () => {
-      expect(checkers.instanceOf(RegExp)(/regex/)).to.be.true;
-      expect(checkers.instanceOf(RegExp)({})).to.be.false;
+      expect(checkers.instanceOf(RegExp)(/regex/)).to.be.undefined;
+      expect(checkers.instanceOf(RegExp)({})).to.be.an.instanceOf(Error);
     });
   });
 
   describe('oneOf', () => {
     it('should pass when the value is one of the enums given', () => {
-      expect(checkers.oneOf(['--,--`--,{@', '┐( ˘_˘)┌'])('┐( ˘_˘)┌')).to.be.true;
-      expect(checkers.oneOf([null])(null)).to.be.true;
-      expect(checkers.oneOf([5, false])(false)).to.be.true;
+      expect(checkers.oneOf(['--,--`--,{@', '┐( ˘_˘)┌'])('┐( ˘_˘)┌')).to.be.undefined;
+      expect(checkers.oneOf([null])(null)).to.be.undefined;
+      expect(checkers.oneOf([5, false])(false)).to.be.undefined;
     });
 
     it('should fail when the value is not one of the enums given', () => {
-      expect(checkers.oneOf([{}, 3.2])({})).to.be.false;
-      expect(checkers.oneOf(['ᕙ(⇀‸↼‶)ᕗ', '┬┴┬┴┤(･_├┬┴┬┴'])('(=^ェ^=)')).to.be.false;
+      expect(checkers.oneOf([{}, 3.2])({})).to.be.an.instanceOf(Error);
+      expect(checkers.oneOf(['ᕙ(⇀‸↼‶)ᕗ', '┬┴┬┴┤(･_├┬┴┬┴'])('(=^ェ^=)')).to.be.an.instanceOf(Error);
     });
 
   });
 
   describe('oneOfType', () => {
     it('should pass when the value type is one of the given types', () => {
-      expect(checkers.oneOfType([checkers.bool, checkers.string])('hey')).to.be.true;
-      expect(checkers.oneOfType([checkers.bool, checkers.string])(false)).to.be.true;
-      expect(checkers.oneOfType([checkers.bool, checkers.instanceOf(RegExp)])(/regex/)).to.be.true;
-      expect(checkers.oneOfType([checkers.bool, checkers.oneOf(['sup', 'Hey'])])('Hey')).to.be.true;
+      expect(checkers.oneOfType([checkers.bool, checkers.string])('hey')).to.be.undefined;
+      expect(checkers.oneOfType([checkers.bool, checkers.string])(false)).to.be.undefined;
+      expect(checkers.oneOfType([checkers.bool, checkers.instanceOf(RegExp)])(/regex/)).to.be.undefined;
+      expect(checkers.oneOfType([checkers.bool, checkers.oneOf(['sup', 'Hey'])])('Hey')).to.be.undefined;
     });
 
     it('should fail when the value type is not one of the given types', () => {
-      expect(checkers.oneOfType([checkers.object, checkers.string])(undefined)).to.be.false;
-      expect(checkers.oneOfType([checkers.object, checkers.string])(54)).to.be.false;
+      expect(checkers.oneOfType([checkers.object, checkers.string])(undefined)).to.be.an.instanceOf(Error);
+      expect(checkers.oneOfType([checkers.object, checkers.string])(54)).to.be.an.instanceOf(Error);
     });
   });
 
   describe('arrayOf', () => {
     it('should pass when the array contains only elements of a type of the type given', () => {
-      expect(checkers.arrayOf(checkers.bool)([true, false, true])).to.be.true;
-      expect(checkers.arrayOf(checkers.arrayOf(checkers.number))([[1, 2, 3], [4, 5, 6]])).to.be.true;
+      expect(checkers.arrayOf(checkers.bool)([true, false, true])).to.be.undefined;
+      expect(checkers.arrayOf(checkers.arrayOf(checkers.number))([[1, 2, 3], [4, 5, 6]])).to.be.undefined;
     });
     it('should fail when the value is not an array', () => {
-      expect(checkers.arrayOf(checkers.func)(32)).to.be.false;
+      expect(checkers.arrayOf(checkers.func)(32)).to.be.an.instanceOf(Error);
     });
     it('should fail when one of the values does not match the type', () => {
-      expect(checkers.arrayOf(checkers.number)([1, 'string', 3])).to.be.false;
+      expect(checkers.arrayOf(checkers.number)([1, 'string', 3])).to.be.an.instanceOf(Error);
+    });
+  });
+
+  describe(`typeOrArrayOf`, () => {
+    it(`should allow passing a single type`, () => {
+      expect(checkers.typeOrArrayOf(checkers.bool)(false)).to.be.undefined;
+      expect(checkers.typeOrArrayOf(checkers.number)(3)).to.be.undefined;
+    });
+    it(`should allow passing an array of types`, () => {
+      expect(checkers.typeOrArrayOf(checkers.number)([3, 4])).to.be.undefined;
+      expect(checkers.typeOrArrayOf(checkers.string)(['hi', 'there'])).to.be.undefined;
+    });
+    it(`should fail if an item in the array is wrong type`, () => {
+      expect(checkers.typeOrArrayOf(checkers.string)(['hi', new Date()])).to.be.an.instanceOf(Error);
+    });
+    it(`should fail if the single item is the wrong type`, () => {
+      expect(checkers.typeOrArrayOf(checkers.object)(true)).to.be.an.instanceOf(Error);
+      expect(checkers.typeOrArrayOf(checkers.array)('not array')).to.be.an.instanceOf(Error);
     });
   });
 
   describe('objectOf', () => {
     it('should pass when the object contains only properties of a type of the type given', () => {
-      expect(checkers.objectOf(checkers.bool)({a: true, b: false, c: true})).to.be.true;
+      expect(checkers.objectOf(checkers.bool)({a: true, b: false, c: true})).to.be.undefined;
       expect(checkers.objectOf(checkers.objectOf(checkers.number))({
         a: {a: 1, b: 2, c: 3},
         b: {a: 4, b: 5, c: 6}
-      })).to.be.true;
+      })).to.be.undefined;
     });
     it('should fail when the value is not an object', () => {
-      expect(checkers.objectOf(checkers.func)(32)).to.be.false;
+      expect(checkers.objectOf(checkers.func)(32)).to.be.an.instanceOf(Error);
     });
     it('should fail when one of the properties does not match the type', () => {
-      expect(checkers.objectOf(checkers.number)({a: 1, b: 'string', c: 3})).to.be.false;
+      expect(checkers.objectOf(checkers.number)({a: 1, b: 'string', c: 3})).to.be.an.instanceOf(Error);
     });
   });
 
@@ -128,28 +143,28 @@ describe('checkers', () => {
         walk: coveredFunction,
         childrenNames: []
       };
-      expect(check(obj)).to.be.true;
+      expect(check(obj)).to.be.undefined;
     });
 
     it('should fail when the object is missing any of the properties specified', () => {
       var check = checkers.shape({
         scores: checkers.objectOf(checkers.number)
       });
-      expect(check({sports: ['soccer', 'baseball']})).to.be.false;
+      expect(check({sports: ['soccer', 'baseball']})).to.be.an.instanceOf(Error);
     });
 
     it('should have an optional function that does the same thing', () => {
       var check = checkers.shape({
         appliances: checkers.arrayOf(checkers.object)
       }).optional;
-      expect(check({appliances: [{name: 'refridgerator'}]})).to.be.true;
+      expect(check({appliances: [{name: 'refridgerator'}]})).to.be.undefined;
     });
 
     it('should be false when passed a non-object', () => {
       var check = checkers.shape({
         friends: checkers.arrayOf(checkers.object)
       });
-      expect(check([3])).to.be.false;
+      expect(check([3])).to.be.an.instanceOf(Error);
     });
 
     it('should fail when the given object is missing properties', () => {
@@ -157,7 +172,7 @@ describe('checkers', () => {
         mint: checkers.bool,
         chocolate: checkers.bool
       });
-      expect(check({mint: true})).to.be.false;
+      expect(check({mint: true})).to.be.an.instanceOf(Error);
     });
 
     it('should pass when the given object is missing properties that are optional', () => {
@@ -165,7 +180,7 @@ describe('checkers', () => {
         mint: checkers.bool,
         chocolate: checkers.bool.optional
       });
-      expect(check({mint: true})).to.be.true;
+      expect(check({mint: true})).to.be.undefined;
     });
 
     it('should pass when it is strict and the given object conforms to the shape exactly', () => {
@@ -173,9 +188,8 @@ describe('checkers', () => {
         mint: checkers.bool,
         chocolate: checkers.bool,
         milk: checkers.bool
-      });
-      check.strict = true;
-      expect(check({mint: true, chocolate: true, milk: true})).to.be.true;
+      }).strict;
+      expect(check({mint: true, chocolate: true, milk: true})).to.be.undefined;
     });
 
     it('should fail when it is strict and the given object has extra properties', () => {
@@ -183,9 +197,8 @@ describe('checkers', () => {
         mint: checkers.bool,
         chocolate: checkers.bool,
         milk: checkers.bool
-      });
-      check.strict = true;
-      expect(check({mint: true, chocolate: true, milk: true, cookies: true})).to.be.false;
+      }).strict;
+      expect(check({mint: true, chocolate: true, milk: true, cookies: true})).to.be.an.instanceOf(Error);
     });
 
     describe('ifNot', () => {
@@ -195,7 +208,7 @@ describe('checkers', () => {
           cookies: checkers.shape.ifNot('mint', checkers.bool),
           mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
-        expect(check({cookies: true})).to.be.true;
+        expect(check({cookies: true})).to.be.undefined;
       });
 
       it('should fail if neither of the ifNot properties exists', () => {
@@ -203,21 +216,21 @@ describe('checkers', () => {
           cookies: checkers.shape.ifNot('mint', checkers.bool),
           mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
-        expect(check({foo: true})).to.be.false;
+        expect(check({foo: true})).to.be.an.instanceOf(Error);
       });
 
       it('should pass if the specified array of properties do not exist', () => {
         var check = checkers.shape({
           cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)
         });
-        expect(check({cookies: true})).to.be.true;
+        expect(check({cookies: true})).to.be.undefined;
       });
 
       it('should fail if any of the specified array of properties exists', () => {
         var check = checkers.shape({
           cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)
         });
-        expect(check({cookies: true, chips: true})).to.be.false;
+        expect(check({cookies: true, chips: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail even if both ifNots are optional', () => {
@@ -225,7 +238,7 @@ describe('checkers', () => {
           cookies: checkers.shape.ifNot('mint', checkers.bool).optional,
           mint: checkers.shape.ifNot('cookies', checkers.bool).optional
         });
-        expect(check({cookies: true, mint: true})).to.be.false;
+        expect(check({cookies: true, mint: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if the specified property exists and the other does too', () => {
@@ -233,14 +246,14 @@ describe('checkers', () => {
           cookies: checkers.shape.ifNot('mint', checkers.bool),
           mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
-        expect(check({cookies: true, mint: true})).to.be.false;
+        expect(check({cookies: true, mint: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if it fails the specified checker', () => {
         var check = checkers.shape({
           cookies: checkers.shape.ifNot('mint', checkers.bool)
         });
-        expect(check({cookies: 43})).to.be.false;
+        expect(check({cookies: 43})).to.be.an.instanceOf(Error);
       });
 
     });
@@ -250,64 +263,85 @@ describe('checkers', () => {
         var check = checkers.shape({
           cookies: checkers.shape.onlyIf('mint', checkers.bool)
         });
-        expect(check({cookies: true, mint: true})).to.be.true;
+        expect(check({cookies: true, mint: true})).to.be.undefined;
       });
 
       it('should pass only if all specified properties are also present', () => {
         var check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
-        expect(check({cookies: true, mint: true, chip: true})).to.be.true;
+        expect(check({cookies: true, mint: true, chip: true})).to.be.undefined;
       });
 
       it('should fail if the specified property is not present', () => {
         var check = checkers.shape({
           cookies: checkers.shape.onlyIf('mint', checkers.bool)
         });
-        expect(check({cookies: true})).to.be.false;
+        expect(check({cookies: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if any specified properties are not present', () => {
         var check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
-        expect(check({cookies: true, chip: true})).to.be.false;
+        expect(check({cookies: true, chip: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if all specified properties are not present', () => {
         var check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
-        expect(check({cookies: true})).to.be.false;
+        expect(check({cookies: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if it fails the specified checker', () => {
         var check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
-        expect(check({cookies: 42, mint: true, chip: true})).to.be.false;
+        expect(check({cookies: 42, mint: true, chip: true})).to.be.an.instanceOf(Error);
       });
     });
   });
 
+  describe(`arguments`, () => {
+    it(`should pass when passing arguments or an arguments-like object`, () => {
+      function foo() {
+        expect(checkers.args(arguments)).to.be.undefined;
+      }
+      foo('hi');
+      expect(checkers.args({length: 0})).to.be.undefined;
+    });
+    it(`should fail when passing anything else`, () => {
+      expect(checkers.args('hey')).to.be.an.instanceOf(Error);
+      expect(checkers.args([])).to.be.an.instanceOf(Error);
+      expect(checkers.args({})).to.be.an.instanceOf(Error);
+      expect(checkers.args(true)).to.be.an.instanceOf(Error);
+      expect(checkers.args(null)).to.be.an.instanceOf(Error);
+      expect(checkers.args({length: 'not number'})).to.be.an.instanceOf(Error);
+    });
+  });
+
   describe('any', () => {
-    it('should always return true', () => {
-      expect(checkers.any()).to.be.true;
-      expect(checkers.any(false)).to.be.true;
-      expect(checkers.any({})).to.be.true;
-      expect(checkers.any(RegExp)).to.be.true;
+    it('should (almost) always pass', () => {
+      expect(checkers.any(false)).to.be.undefined;
+      expect(checkers.any({})).to.be.undefined;
+      expect(checkers.any(RegExp)).to.be.undefined;
+    });
+
+    it(`should fail when passed undefined and it's not optional`, () => {
+      expect(checkers.any()).to.be.an.instanceOf(Error);
+    });
+
+    it(`should pass when passed undefined and it's optional`, () => {
+      expect(checkers.any.optional()).to.be.undefined;
     });
   });
 
   describe('optional', () => {
-    it('should add the optional function to all of the checkers and it should have isOptional set to true', () => {
+    it('all built in checkers should be optional', () => {
       _.each(checkers, checker => {
-        var check = checker;
-        if (!check.optional) {
-          check = check([]);
-        }
-        expect(check).to.have.property('optional');
-        expect(check.optional.isOptional).to.be.true;
+        expect(checker).to.have.property('optional');
+        expect(checker.optional.isOptional).to.be.true;
       });
     });
   });

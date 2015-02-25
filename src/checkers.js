@@ -1,5 +1,9 @@
-var {typeOf, each, copy, getCheckerDisplay} = require('./apiCheckUtil');
-var checkers = module.exports = {
+const {
+  typeOf, each, copy, getCheckerDisplay, isError,
+  arrayify, list, getError, nAtL, t, checkerHelpers
+  } = require('./apiCheckUtil');
+
+let checkers = module.exports = {
   array: getTypeOfChecker('Array'),
   bool: getTypeOfChecker('Boolean'),
   func: getTypeOfChecker('Function'),
@@ -13,115 +17,152 @@ var checkers = module.exports = {
 
   arrayOf: arrayOfCheckGetter,
   objectOf: objectOfCheckGetter,
+  typeOrArrayOf: typeOrArrayOfCheckGetter,
 
   shape: getShapeCheckGetter(),
+  args: argumentsCheckerGetter(),
 
   any: anyCheckGetter()
 };
 
-each(checkers, checker => {
-  checker.displayName = `apiCheck \`${checker.type}\` type checker`;
-});
+each(checkers, checkerHelpers.setupChecker);
 
 
 function getTypeOfChecker(type) {
-  var lType = type.toLowerCase();
-  function typeOfChecker(val) {
-    return typeOf(val) === lType;
-  }
-
-  typeOfChecker.type = type;
-  makeOptional(typeOfChecker);
-  return typeOfChecker;
+  const lType = type.toLowerCase();
+  return checkerHelpers.wrapInSpecified(function typeOfCheckerDefinition(val, name, location) {
+    if (typeOf(val) !== lType) {
+      return getError(name, location, type);
+    }
+  }, type);
 }
 
 function getObjectChecker() {
-  function objectNullOkChecker(val) {
-    return typeOf(val) === 'object';
-  }
-  objectNullOkChecker.type = 'Object[null ok]';
-  makeOptional(objectNullOkChecker);
-  function objectChecker(val) {
-    return val !== null && objectNullOkChecker(val);
-  }
-  objectChecker.type = 'Object';
-  makeOptional(objectChecker);
+  const type = 'Object';
+  const nullType = 'Object[null ok]';
+  let objectNullOkChecker = checkerHelpers.wrapInSpecified(function objectNullOkCheckerDefinition(val, name, location) {
+    if (typeOf(val) !== 'object') {
+      return getError(name, location, nullType);
+    }
+  }, nullType);
+
+  let objectChecker = checkerHelpers.wrapInSpecified(function objectCheckerDefinition(val, name, location) {
+    if (val === null || isError(objectNullOkChecker(val, name, location))) {
+      return getError(name, location, objectChecker.type);
+    }
+  }, type);
+
   objectChecker.nullOk = objectNullOkChecker;
+  objectChecker.childrenCheckers = ['nullOk'];
 
   return objectChecker;
 }
 
 
 function instanceCheckGetter(classToCheck) {
-  function instanceChecker(val) {
-    return val instanceof classToCheck;
-  }
-
-  instanceChecker.type = classToCheck.name;
-  makeOptional(instanceChecker);
-  return instanceChecker;
+  return checkerHelpers.wrapInSpecified(function instanceCheckerDefinition(val, name, location) {
+    if (!(val instanceof classToCheck)) {
+      return getError(name, location, classToCheck.name);
+    }
+  }, classToCheck.name);
 }
 
 function oneOfCheckGetter(enums) {
-  function oneOfChecker(val) {
-    return enums.some(enm => enm === val);
-  }
-
-  oneOfChecker.type = `enum[${enums.join(', ')}]`;
-  makeOptional(oneOfChecker);
-  return oneOfChecker;
+  const type = `enum[${enums.join(', ')}]`;
+  return checkerHelpers.wrapInSpecified(function oneOfCheckerDefinition(val, name, location) {
+    if (!enums.some(enm => enm === val)) {
+      return getError(name, location, type);
+    }
+  }, type);
 }
 
 function oneOfTypeCheckGetter(checkers) {
-  function oneOfTypeChecker(val) {
-    return checkers.some(checker => checker(val));
-  }
-
-  oneOfTypeChecker.type = checkers.map(getCheckerDisplay).join(' or ');
-  makeOptional(oneOfTypeChecker);
-  return oneOfTypeChecker;
+  const type = `oneOf[${checkers.map(getCheckerDisplay).join(', ')}]`;
+  return checkerHelpers.wrapInSpecified(function oneOfTypeCheckerDefinition(val, name, location) {
+    if (!checkers.some(checker => !isError(checker(val, name, location)))) {
+      return getError(name, location, type);
+    }
+  }, type);
 }
 
 function arrayOfCheckGetter(checker) {
-  function arrayOfChecker(val) {
-    return checkers.array(val) && val.every(checker);
-  }
-
-  arrayOfChecker.type = `arrayOf[${getCheckerDisplay(checker)}]`;
-  makeOptional(arrayOfChecker);
-  return arrayOfChecker;
+  const type = `arrayOf[${getCheckerDisplay(checker)}]`;
+  return checkerHelpers.wrapInSpecified(function arrayOfCheckerDefinition(val, name, location) {
+    if (isError(checkers.array(val)) || !val.every((item) => !isError(checker(item)))) {
+      return getError(name, location, type);
+    }
+  }, type);
 }
 
 function objectOfCheckGetter(checker) {
-  function objectOfChecker(val) {
-    return checkers.object(val) && each(val, checker);
-  }
+  const type = `objectOf[${getCheckerDisplay(checker)}]`;
+  return checkerHelpers.wrapInSpecified(function objectOfCheckerDefinition(val, name, location) {
+    const isObject = checkers.object(val, name, location);
+    if (isError(isObject)) {
+      return isObject;
+    }
+    const allTypesSuccess = each(val, (item, key) => {
+      if (isError(checker(item, key, name))) {
+        return false;
+      }
+    });
+    if (!allTypesSuccess) {
+      return getError(name, location, type);
+    }
+  }, type);
+}
 
-  objectOfChecker.type = `objectOf[${getCheckerDisplay(checker)}]`;
-  makeOptional(objectOfChecker);
-  return objectOfChecker;
+function typeOrArrayOfCheckGetter(checker) {
+  const type = `typeOrArrayOf[${getCheckerDisplay(checker)}]`;
+  return checkerHelpers.wrapInSpecified(function typeOrArrayOfDefinition(val, name, location, obj) {
+    if (isError(checkers.oneOfType([checker, checkers.arrayOf(checker)])(val, name, location, obj))) {
+      return getError(name, location, type);
+    }
+  }, type);
 }
 
 function getShapeCheckGetter() {
   function shapeCheckGetter(shape) {
-    function shapeChecker(val) {
-      return checkers.object(val) && each(shape, (checker, prop) => {
-          if (!val.hasOwnProperty(prop) && checker.isOptional) {
-            return true;
-          } else {
-            return checker(val[prop], prop, val);
-          }
-        }) && (!shapeChecker.strict || each(val, (prop, name) => {
-          return shape.hasOwnProperty(name);
-        }));
-    }
-
-    var copiedShape = copy(shape);
+    let copiedShape = copy(shape);
     each(copiedShape, (val, prop) => {
       copiedShape[prop] = getCheckerDisplay(val);
     });
-    shapeChecker.type = `shape(${JSON.stringify(copiedShape)})`;
-    makeOptional(shapeChecker);
+    const type = `shape(${JSON.stringify(copiedShape)})`;
+    let shapeChecker = checkerHelpers.wrapInSpecified(function shapeCheckerDefinition(val, name, location) {
+      let isObject = checkers.object(val, name, location);
+      if (isError(isObject)) {
+        return isObject;
+      }
+      let shapePropError;
+      each(shape, (checker, prop) => {
+        if (val.hasOwnProperty(prop) || !checker.isOptional) {
+          shapePropError = checker(val[prop], prop, name, val);
+          return !isError(shapePropError);
+        }
+      });
+      if (isError(shapePropError)) {
+        return shapePropError;
+      }
+    }, type);
+
+    const strictType = `strict ${shapeChecker.type}`;
+    shapeChecker.strict = checkerHelpers.wrapInSpecified(function strictShapeCheckerDefinition(val, name, location) {
+      const shapeError = shapeChecker(val, name, location);
+      if (isError(shapeError)) {
+        return shapeError;
+      }
+      const allowedProperties = Object.keys(shape);
+      const extraProps = Object.keys(val).filter(prop => allowedProperties.indexOf(prop) === -1);
+      if (extraProps.length) {
+        return new Error(
+          `${nAtL(name, location)} cannot have extra properties: ${t(extraProps.join('`, `'))}.` +
+          `It is limited to ${t(allowedProperties.join('`, `'))}`
+        );
+      }
+    }, strictType);
+    shapeChecker.childrenCheckers = ['strict'];
+    checkerHelpers.setupChecker(shapeChecker);
+
     return shapeChecker;
   }
 
@@ -129,47 +170,64 @@ function getShapeCheckGetter() {
     if (!Array.isArray(otherProps)) {
       otherProps = [otherProps];
     }
-    function ifNotChecker(prop, propName, obj) {
-      var propExists = obj && obj.hasOwnProperty(propName);
-      var otherPropsExist = otherProps.some(otherProp => obj && obj.hasOwnProperty(otherProp));
-      return (propExists !== otherPropsExist) && (!propExists || propExists && propChecker(prop) && !otherPropsExist);
-
+    let type;
+    if (otherProps.length === 1) {
+      type = `specified only if ${otherProps[0]} is not specified`;
+    } else {
+      type = `specified only if none of the following are specified: [${list(otherProps, ', ', 'and ')}]`;
     }
-    ifNotChecker.type = `ifNot[${otherProps.join(', ')}]`;
-    makeOptional(ifNotChecker);
+    let ifNotChecker = function ifNotCheckerDefinition(prop, propName, location, obj) {
+      let propExists = obj && obj.hasOwnProperty(propName);
+      let otherPropsExist = otherProps.some(otherProp => obj && obj.hasOwnProperty(otherProp));
+      if (propExists === otherPropsExist) {
+        return getError(propName, location, ifNotChecker.type);
+      } else if (propExists) {
+        return propChecker(prop, propName, location, obj);
+      }
+    };
+
+
+    ifNotChecker.type = type;
+    checkerHelpers.setupChecker(ifNotChecker);
     return ifNotChecker;
   };
 
   shapeCheckGetter.onlyIf = function onlyIf(otherProps, propChecker) {
-    if (!Array.isArray(otherProps)) {
-      otherProps = [otherProps];
+    otherProps = arrayify(otherProps);
+    let type;
+    if (otherProps.length === 1) {
+      type = `specified only if ${otherProps[0]} is also specified`;
+    } else {
+      type = `specified only if all of the following are specified: [${list(otherProps, ', ', 'and ')}]`;
     }
-    function onlyIfChecker(prop, propName, obj) {
-      return otherProps.every(prop => obj.hasOwnProperty(prop)) && propChecker(prop);
-    }
-    onlyIfChecker.type = `onlyIf[${otherProps.join(', ')}]`;
-    makeOptional(onlyIfChecker);
+    let onlyIfChecker = function onlyIfCheckerDefinition(prop, propName, location, obj) {
+      const othersPresent = otherProps.every(prop => obj.hasOwnProperty(prop));
+      if (!othersPresent) {
+        return getError(propName, location, onlyIfChecker.type);
+      } else {
+        return propChecker(prop, propName, location, obj);
+      }
+    };
+
+    onlyIfChecker.type = type;
+    checkerHelpers.setupChecker(onlyIfChecker);
     return onlyIfChecker;
   };
 
   return shapeCheckGetter;
 }
 
-function anyCheckGetter() {
-  function anyChecker() {
-    return true;
-  }
-
-  anyChecker.type = 'any';
-  makeOptional(anyChecker);
-  return anyChecker;
+function argumentsCheckerGetter() {
+  const type = 'function arguments';
+  return checkerHelpers.wrapInSpecified(function argsCheckerDefinition(val, name, location) {
+    if (Array.isArray(val) || isError(checkers.object(val)) || isError(checkers.number(val.length))) {
+      return getError(name, location, type);
+    }
+  }, type);
 }
 
-function makeOptional(checker) {
-  checker.optional = function optionalCheck() {
-    return checker(...arguments);
-  };
-  checker.optional.isOptional = true;
-  checker.optional.type = checker.type;
-  checker.optional.displayName = checker.displayName;
+function anyCheckGetter() {
+  return checkerHelpers.wrapInSpecified(function anyCheckerDefinition() {
+    // don't do anything
+  }, 'any');
 }

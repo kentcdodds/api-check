@@ -1,50 +1,57 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
+const {coveredFunction} = require('./test.utils');
 describe('apiCheck', () => {
   var apiCheck = require('./index');
+  const {getError} = require('./apiCheckUtil');
 
   describe('#', () => {
     it('should handle a single argument type specification', () => {
       (function(a) {
         var result = apiCheck(apiCheck.string, arguments);
-        expect(result).to.be.null;
+        expect(result).to.have.length(0);
       })('hello');
     });
 
     it('should handle array with types', () => {
       (function(a, b, c) {
         var result = apiCheck([apiCheck.string, apiCheck.number, apiCheck.bool], arguments);
-        expect(result).to.be.null;
+        expect(result).to.have.length(0);
       })('a', 1, true);
     });
 
     it('should handle optional arguments', () => {
       (function(a, b, c) {
         var result = apiCheck([apiCheck.string, apiCheck.number.optional, apiCheck.bool], arguments);
-        expect(result).to.be.null;
+        expect(result).to.have.length(0);
       })('a', true);
     });
 
     it('should accept custom checkers', () => {
-      var ipAddressChecker = value => /(\d{1,3}\.){3}\d{1,3}/.test(value);
+      var ipAddressChecker = (val, name, location) => {
+        if (!/(\d{1,3}\.){3}\d{1,3}/.test(val)) {
+          return getError(name, location, ipAddressChecker.type);
+        }
+      };
       ipAddressChecker.type = 'ipAddressString';
       (function(a, b) {
         var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        expect(result).to.be.null;
+        expect(result).to.have.length(0);
       })('a', '127.0.0.1');
 
 
       (function(a, b) {
         var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        expect(result).to.match(/string.*number.*string.*ipAddressString/i);
+        console.log(result);
+        expect(result).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
       })('a', 32);
     });
 
     it('should handle when the api is an array and the arguments array is empty', () => {
+      const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?0/i;
       (function(a, b) {
         expect(
-          () => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(/you passed.*nothing.*string/i
-        );
+          () => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(error);
       })();
     });
   });
@@ -55,10 +62,11 @@ describe('apiCheck', () => {
         expect(apiCheck.throw(apiCheck.string, arguments)).to.not.throw;
       })('a');
     });
+
     it('should throw an error when the arguments are not correct', () => {
       (function(a) {
         var args = arguments;
-        expect(() => apiCheck.throw(apiCheck.number, args)).to.throw(/you passed.*should have passed.*/i);
+        expect(() => apiCheck.throw(apiCheck.number, args)).to.throw(/argument.*?1.*?must.*?be.*?number/i);
       })('a', 3);
     });
     it('should do nothing when disabled', () => {
@@ -85,7 +93,7 @@ describe('apiCheck', () => {
       (function(a) {
         apiCheck.warn(apiCheck.string, arguments);
       })('a');
-      expect(warnCalls).to.be.empty;
+      expect(warnCalls).to.have.length(0);
     });
 
     it('should warn when the arguments are not correct', () => {
@@ -111,6 +119,7 @@ describe('apiCheck', () => {
 
   describe('#disable/enable', () => {
     it('should disable apiCheck, and results will always be null', () => {
+      const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?1/i;
       apiCheck.disable();
       check(true);
       apiCheck.enable();
@@ -120,9 +129,9 @@ describe('apiCheck', () => {
         (function(a, b) {
           var results = apiCheck([apiCheck.instanceOf(RegExp), apiCheck.number], arguments);
           if (disabled) {
-            expect(results).to.be.null;
+            expect(results).to.have.length(0);
           } else {
-            expect(results).to.match(/string.*RegExp.*number/i);
+            expect(results).to.match(error);
           }
         })('hey');
       }
@@ -136,14 +145,23 @@ describe('apiCheck', () => {
   describe('apiCheck api', () => {
     it('should throw an error when no arguments are supplied', () => {
       (function(a) {
-        expect(() => apiCheck.throw(apiCheck.string)).to.throw(/must pass arguments/i);
+        expect(() => apiCheck.throw(apiCheck.string)).to.throw(/argument.*2.*must.*be.*function.*arguments/i);
       })('a');
     });
     it('should throw an error when no api is passed', () => {
       (function(a) {
         var args = arguments;
-        expect(() => apiCheck(null, args)).to.throw(/must pass.*array or.*function/i);
+        expect(() => apiCheck(null, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*function/i);
       })('a');
+    });
+    it(`should throw an error when the wrong types are passed`, () => {
+      (function(a) {
+        var args = arguments;
+        expect(() => apiCheck(true, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*function/i);
+      })('a');
+    });
+    it(`should throw an error when there are not enough arguments passed`, () => {
+      expect(() => apiCheck(coveredFunction)).to.throw(/not enough arguments specified.*?requires.*?2.*?passed.*?1/i);
     });
   });
 
@@ -182,12 +200,12 @@ describe('apiCheck', () => {
           apiCheck.config.output.suffix = gSuffix;
         });
         it('should suffix the error message', () => {
-          expect(getFailure()).to.match(new RegExp(`${gSuffix}$`));
+          expect(getFailure()).to.match(new RegExp(`${gSuffix}`));
         });
 
         it('should allow the specification of an additional suffix that comes after the global config suffix', () => {
           var suffix = 'secondary suffix';
-          expect(getFailure({suffix})).to.match(new RegExp(`${suffix} ${gSuffix}$`));
+          expect(getFailure({suffix})).to.match(new RegExp(`${suffix} ${gSuffix}`));
         });
 
         afterEach(() => {
@@ -236,7 +254,8 @@ describe('apiCheck', () => {
     });
 
     it('should show only one api when only no optional arguments are provided', () => {
-      expect(apiCheck.getErrorMessage([apiCheck.object])).to.match(/you passed.*should have passed.*object/i);
+      const result = apiCheck.getErrorMessage([apiCheck.object]);
+      expect(result).to.match(/you passed(.|\n)*?the api calls for(.|\n)*?object/i);
     });
 
     it('should show optional arguments', () => {
@@ -247,20 +266,21 @@ describe('apiCheck', () => {
         apiCheck.instanceOf(RegExp),
         apiCheck.bool.optional
       ])).to.match(
-        /you passed.*nothing.*should have passed.*object, array \(optional\), string, RegExp, boolean \(optional\)/i
+        /you passed(.|\n)*?the api calls for(.|\n)*?object, array \(optional\), string, RegExp, boolean \(optional\)/i
       );
     });
 
     it('should show the user\'s arguments nicely', () => {
-      expect(apiCheck.getErrorMessage([
+      const result = apiCheck.getErrorMessage([
         apiCheck.object,
         apiCheck.array.optional,
         apiCheck.string
       ], [
         {a: 'a', r: new RegExp(), b: undefined},
         [new Date(), 23, false, null]
-      ])).to.match(
-        /you passed.*a.*string.*r.*regexp.*b.*undefined.*date.*number.*boolean.*null.*?should.*?object.*array.*?optional.*?string/i
+      ]);
+      expect(result).to.match(
+        /you passed(.|\n)*?.*a.*string.*r.*regexp.*b.*undefined.*date.*number.*boolean.*null(.|\n)*?the api calls for(.|\n)*?object.*array.*?optional.*?string/i
       );
     });
 
@@ -268,22 +288,24 @@ describe('apiCheck', () => {
       expect(apiCheck.getErrorMessage(apiCheck.shape({
         name: apiCheck.string,
         cool: apiCheck.bool.optional
-      }))).to.match(/you passed.*nothing.*should have passed.*shape.*name.*string.*cool.*boolean.*?optional/i);
+      }))).to.match(/you passed(.|\n)*?nothing(.|\n)*?the api calls for(.|\n)*?shape.*name.*string.*cool.*boolean.*?optional/i);
     });
 
     it('should be overrideable', () => {
-      var originalGetErrorMessage = apiCheck.getErrorMessage;
-      var api = [apiCheck.string, apiCheck.shape({}), apiCheck.array];
-      var args = [1,2,3];
-      var output = {};
-      apiCheck.getErrorMessage = (_api, _args, _output) => {
+      let originalGetErrorMessage = apiCheck.getErrorMessage;
+      let api = [apiCheck.string, apiCheck.shape({}), apiCheck.array];
+      let args;
+      let output = {};
+      apiCheck.getErrorMessage = (_api, _args, _message, _output) => {
         expect(_api).to.equal(api);
-        expect(_args).to.eql(args); // only eql because the args are cloned
+        expect(_args).to.eql(Array.prototype.slice.call(args)); // only eql because the args are cloned
+        expect(_message).to.have.length(3);
         expect(_output).to.equal(output);
       };
-      (function(a) {
-        apiCheck(api, args, output);
-      })();
+      (function(a, b, c) {
+        args = arguments;
+        apiCheck(api, arguments, output);
+      })(1, 2, 3);
       apiCheck.getErrorMessage = originalGetErrorMessage;
     });
   });
@@ -307,7 +329,7 @@ describe('apiCheck', () => {
     it('should be overrideable', () => {
       var originalHandle = apiCheck.handleErrorMessage;
       apiCheck.handleErrorMessage = (message, shouldThrow) => {
-        expect(message).to.match(/nothing.*string/i);
+        expect(message).to.match(/nothing(.|\n)*?string/i);
         expect(shouldThrow).to.be.true;
       };
       (function(a) {

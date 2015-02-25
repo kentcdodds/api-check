@@ -130,29 +130,29 @@ array-like thing (like `arguments`).
 ### array
 
 ```javascript
-apiCheck.array([]); // <-- true
-apiCheck.array(23); // <-- false
+apiCheck.array([]); // <-- pass
+apiCheck.array(23); // <-- fail
 ```
 
 ### bool
 
 ```javascript
-apiCheck.bool(false); // <-- true
-apiCheck.bool('me bool too?'); // <-- false
+apiCheck.bool(false); // <-- pass
+apiCheck.bool('me bool too?'); // <-- fail
 ```
 
 ### func
 
 ```javascript
-apiCheck.func(function() {}); // <-- true
-apiCheck.func(new RegExp()); // <-- false
+apiCheck.func(function() {}); // <-- pass
+apiCheck.func(new RegExp()); // <-- fail
 ```
 
 ### number
 
 ```javascript
-apiCheck.number(423.32); // <-- true
-apiCheck.number({}); // <-- false
+apiCheck.number(423.32); // <-- pass
+apiCheck.number({}); // <-- fail
 ```
 
 ### object *
@@ -160,9 +160,9 @@ apiCheck.number({}); // <-- false
 `null` fails, use [`object.nullOk`](#objectnullok-) to allow null to pass
 
 ```javascript
-apiCheck.object({}); // <-- true
-apiCheck.object([]); // <-- false
-apiCheck.object(null); // <-- false
+apiCheck.object({}); // <-- pass
+apiCheck.object([]); // <-- fail
+apiCheck.object(null); // <-- fail
 ```
 
 #### object.nullOk *
@@ -170,58 +170,85 @@ apiCheck.object(null); // <-- false
 *Not available in React's `propTypes`*
 
 ``` javascript
-apiCheck.object.nullOk({}); // <-- true
+apiCheck.object.nullOk({}); // <-- pass
 apiCheck.object.nullOk([]); // <--- false
-apiCheck.object.nullOk(null); // <-- true
+apiCheck.object.nullOk(null); // <-- pass
 ```
 
 ### string
 
 ```javascript
-apiCheck.string('I am a string!'); // <-- true
-apiCheck.string([]); // <-- false
+apiCheck.string('I am a string!'); // <-- pass
+apiCheck.string([]); // <-- fail
 ```
 
 ### instanceOf
 
 ```javascript
-apiCheck.instanceOf(RegExp)(new RegExp); // <-- true
-apiCheck.instanceOf(Date)('wanna go on a date?'); // <-- false
+apiCheck.instanceOf(RegExp)(new RegExp); // <-- pass
+apiCheck.instanceOf(Date)('wanna go on a date?'); // <-- fail
 ```
 
 ### oneOf
 
 ```javascript
-apiCheck.oneOf(['Treek', ' Wicket Wystri Warrick'])('Treek'); // <-- true
-apiCheck.oneOf(['Chewbacca', 'Snoova'])('Snoova'); // <-- false
+apiCheck.oneOf(['Treek', ' Wicket Wystri Warrick'])('Treek'); // <-- pass
+apiCheck.oneOf(['Chewbacca', 'Snoova'])('Snoova'); // <-- fail
 ```
 
 ### oneOfType
 
 ```javascript
-apiCheck.oneOfType([apiCheck.string, apiCheck.object])({}); // <-- true
-apiCheck.oneOfType([apiCheck.array, apiCheck.bool])('Kess'); // <-- false
+apiCheck.oneOfType([apiCheck.string, apiCheck.object])({}); // <-- pass
+apiCheck.oneOfType([apiCheck.array, apiCheck.bool])('Kess'); // <-- fail
 ```
 
 ### arrayOf
 
 ```javascript
-apiCheck.arrayOf(apiCheck.string)(['Huraga', 'Japar', 'Kahless']); // <-- true
+apiCheck.arrayOf(apiCheck.string)(['Huraga', 'Japar', 'Kahless']); // <-- pass
 apiCheck.arrayOf(
   apiCheck.arrayOf(
     apiCheck.arrayOf(
       apiCheck.number
     )
   )
-)([[[1,2,3], [4,5,6], [7,8,9]], [[1,2,3], [4,5,6], [7,8,9]]]); // <-- true (for realz)
-apiCheck.arrayOf(apiCheck.bool)(['a', 'b', 'c']); // <-- false
+)([[[1,2,3], [4,5,6], [7,8,9]], [[1,2,3], [4,5,6], [7,8,9]]]); // <-- pass (for realz)
+apiCheck.arrayOf(apiCheck.bool)(['a', 'b', 'c']); // <-- fail
+```
+
+### typeOrArrayOfType *
+
+*Not available in React's `propTypes`*
+
+Convenience checker that combines `oneOfType` with `arrayOf` and whatever you specify. So you could take this:
+
+```javascript
+apiCheck.oneOfType([
+  apiCheck.string, apiCheck.arrayOf(apiCheck.string)
+]);
+```
+
+with
+
+```javascript
+apiCheck.typeOrArrayOfType(apiCheck.string);
+```
+
+which is a common enough use case to justify the checker.
+
+```javascript
+apiCheck.typeOrArrayOfType(apiCheck.string)('string'); // <-- pass
+apiCheck.typeOrArrayOfType(apiCheck.string)(['array', 'of strings']); // <-- pass
+apiCheck.typeOrArrayOfType(apiCheck.bool)(['array', false]); // <-- fail
+apiCheck.typeOrArrayOfType(apiCheck.object)(32); // <-- fail
 ```
 
 ### objectOf
 
 ```javascript
-apiCheck.objectOf(apiCheck.arrayOf(apiCheck.bool))({a: [true, false], b: [false, true]}); // <-- true
-apiCheck.objectOf(apiCheck.number)({a: 'not a number?', b: 'yeah, me neither (◞‸◟；)'}); // <-- false
+apiCheck.objectOf(apiCheck.arrayOf(apiCheck.bool))({a: [true, false], b: [false, true]}); // <-- pass
+apiCheck.objectOf(apiCheck.number)({a: 'not a number?', b: 'yeah, me neither (◞‸◟；)'}); // <-- fail
 ```
 
 ### shape *
@@ -250,11 +277,11 @@ apiCheck.shape({
   isOld: false,
   walk: function() {},
   childrenNames: []
-}); // <-- true
+}); // <-- pass
 apiCheck.shape({
   mint: checkers.bool,
   chocolate: checkers.bool
-})({mint: true}); // <-- false
+})({mint: true}); // <-- fail
 ```
 
 Example of `strict`
@@ -273,12 +300,12 @@ strictShape({
   milk: true,
   popcorn: true,
   candy: true
-}); // <-- false because the extra `candy` property
+}); // <-- fail because the extra `candy` property
 
 strictShape({
   cookies: true,
   milk: true
-}); // <-- true because it has no extra properties and `popcorn` is optional
+}); // <-- pass because it has no extra properties and `popcorn` is optional
 ```
 
 #### shape.onlyIf *
@@ -290,15 +317,15 @@ This can only be used in combination with `shape`
 ```javascript
 apiCheck.shape({
   cookies: apiCheck.shape.onlyIf(['mint', 'chips'], apiCheck.bool)
-})({cookies: true, mint: true, chips: true}); // <-- true
+})({cookies: true, mint: true, chips: true}); // <-- pass
 
 apiCheck.shape({
   cookies: apiCheck.shape.onlyIf(['mint', 'chips'], apiCheck.bool)
-})({chips: true}); // <-- true (cookies not specified)
+})({chips: true}); // <-- pass (cookies not specified)
 
 apiCheck.shape({
   cookies: apiCheck.shape.onlyIf('mint', apiCheck.bool)
-})({cookies: true}); // <-- false
+})({cookies: true}); // <-- fail
 ```
 
 #### shape.ifNot *
@@ -310,35 +337,89 @@ This can only be used in combination with `shape`
 ```javascript
 apiCheck.shape({
   cookies: apiCheck.shape.ifNot('mint', apiCheck.bool)
-})({cookies: true}); // <-- true
+})({cookies: true}); // <-- pass
 
 apiCheck.shape({
   cookies: apiCheck.shape.ifNot(['mint', 'chips'], apiCheck.bool)
-})({cookies: true, chips: true}); // <-- false
+})({cookies: true, chips: true}); // <-- fail
+```
+
+### args *
+
+*Not available in React's `propTypes`*
+
+This will check if the given item is an `arguments`-like object (non-array object that has a length property)
+
+```javascript
+function foo(bar) {
+  apiCheck.args(arguments); // <-- pass
+}
+apiCheck.args([]); // <-- fail
+apiCheck.args({}); // <-- fail
+apiCheck.args({length: 3}); // <-- pass
+apiCheck.args({length: 'not-number'}); // <-- fail
 ```
 
 ### any
 
 ```javascript
-apiCheck.any({}); // <-- true
-apiCheck.any([]); // <-- true
-apiCheck.any(true); // <-- true
-apiCheck.any(false); // <-- true
-apiCheck.any(/* seriously, anything */); // <-- true
-apiCheck.any(3); // <-- true
-apiCheck.any(3.1); // <-- true
-apiCheck.any(3.14); // <-- true
-apiCheck.any(3.141); // <-- true
-apiCheck.any(3.1415); // <-- true
-apiCheck.any(3.14159); // <-- true
-apiCheck.any(3.141592); // <-- true
-apiCheck.any(3.1415926); // <-- true
-apiCheck.any(3.14159265); // <-- true
-apiCheck.any(3.141592653); // <-- true
-apiCheck.any(3.1415926535); // <-- true
-apiCheck.any(3.14159265359); // <-- true
+apiCheck.any({}); // <-- pass
+apiCheck.any([]); // <-- pass
+apiCheck.any(true); // <-- pass
+apiCheck.any(false); // <-- pass
+apiCheck.any(/* seriously, anything, except undefined */); // <-- fail
+apiCheck.any.optional(/* unless you specify optional :-) */); // <-- pass
+apiCheck.any(3); // <-- pass
+apiCheck.any(3.1); // <-- pass
+apiCheck.any(3.14); // <-- pass
+apiCheck.any(3.141); // <-- pass
+apiCheck.any(3.1415); // <-- pass
+apiCheck.any(3.14159); // <-- pass
+apiCheck.any(3.141592); // <-- pass
+apiCheck.any(3.1415926); // <-- pass
+apiCheck.any(3.14159265); // <-- pass
+apiCheck.any(3.141592653); // <-- pass
+apiCheck.any(3.1415926535); // <-- pass
+apiCheck.any(3.14159265359); // <-- pass
 apiCheck.any(jfio,.jgo); // <-- Syntax error.... ಠ_ಠ
 ```
+
+## Custom Types
+
+You can specify your own type. You do so like so:
+
+```javascript
+function foo(string, ipAddress) {
+  apiCheck.warn([
+    apiCheck.string,
+    ipAddressChecker
+  ], arguments);
+
+  function ipAddressChecker(val, name, location) {
+    if (!/(\d{1,3}\.){3}\d{1,3}/.test(val)) {
+      return apiCheck.utils.getError(name, location, ipAddressChecker.type);
+    }
+  };
+  ipAddressChecker.type = 'ipAddressString';
+}
+```
+
+Then, if you invoked that function like this:
+
+```javascript
+foo('hello', 'not-an-ip-address');
+```
+
+It would result in a warning like this:
+
+> apiCheck failed! `Argument 1` passed, `value` at `Argument 2` must be `ipAddressString`
+>
+> You passed:
+> `String, String`
+>
+> The API calls for:
+> `String, ipAddressString`
+
 
 ## Customization
 
