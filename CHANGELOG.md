@@ -1,3 +1,7 @@
+# 3.0.2
+
+- Missed a console.log :-/ Should probably put in a checker for that...
+
 # 3.0.1
 
 - Quick breaking change, hopefully nobody will be impacted because it was literally minutes. Now returning an object instead of just a string message. This make things much more flexible.

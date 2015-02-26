@@ -150,8 +150,6 @@ function wrapInSpecified(fn, type, shortType) {
     if (u && !fn.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
       const type = getCheckerDisplay(fn, true);
-      console.log(type);
-      console.log(typeof type);
       const stringType = typeof type !== 'object' ? type : JSON.stringify(type);
       return new Error(`Required ${t(name)} not specified${tLocation}. Must be ${t(stringType)}`);
     } else {
