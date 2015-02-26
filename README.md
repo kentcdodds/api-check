@@ -107,23 +107,35 @@ These functions do the same thing, with minor differences. In both the `warn` an
 based on the arguments that the function was received and the api that was defined to describe what was wrong with the
 invocation.
 
-In the case of `apiCheck()`, an array is returned. Each element in the array is a boolean corresponding to whether the
-argument (at that position) was valid or not. For example:
+In all cases, an object is returned with the following properties:
 
-```javascript
-var result = apiCheck([apiCheck.string, apiCheck.number], [3, 4]);
-console.log(result); // <-- logs [false, true]
-```
+### argTypes (arrayOf[Object])
+
+This is an array of objects representing the types of the arguments passed.
+
+### apiTypes (arrayOf[Object])
+
+This is an object representing the types of the api. It's a whole language of its own that you'll hopefully get after
+looking at it for a while.
+
+### failed (boolean)
+
+This will only be present if there was a failure. Key off of this to know if the apiCheck failed.
+
+### message (string)
+
+If the check failed, this will be a useful message for display to the user
+
 
 Also note that if you only have one argument, then the first argument to the `apiCheck` function can simply be the
 checker function. For example:
 
 ```javascript
-apiCheck(apiCheck.bool, [false]);
+apiCheck(apiCheck.bool, arguments);
 ```
 
 (Note, the primary use case for `apiCheck` is for checking arguments, hence the second argument should always be an
-array-like thing (like `arguments`).
+arguments-like thing (must pass [`args`](#args-)).
 
 ## Supported types
 

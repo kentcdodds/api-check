@@ -1,3 +1,7 @@
+# 3.0.1
+
+- Quick breaking change, hopefully nobody will be impacted because it was literally minutes. Now returning an object instead of just a string message. This make things much more flexible.
+
 # 3.0.0
 
 - Seriously improved how the messages are formatted. There's a lot more there, but it's awesome.

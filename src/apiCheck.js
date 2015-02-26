@@ -42,7 +42,12 @@ function apiCheck(api, args, output) {
   } else {
     messages = checkApiWithArgs(api, args);
   }
-  return messages.length ? module.exports.getErrorMessage(api, args, messages, output) : '';
+  let returnObject = getTypes(api, args);
+  if (messages.length) {
+    returnObject.message = module.exports.getErrorMessage(api, args, messages, output);
+    returnObject.failed = true;
+  }
+  return returnObject;
 }
 
 function checkApiCheckApi(args) {
@@ -104,9 +109,9 @@ function checkEnoughArgs(api, args) {
 
 function getApiCheck(shouldThrow) {
   return function apiCheckWrapper(api, args, output) {
-    let message = apiCheck(api, args, output);
-    module.exports.handleErrorMessage(message, shouldThrow);
-    return message; // wont get here if an error is thrown
+    let result = apiCheck(api, args, output);
+    module.exports.handleErrorMessage(result.message, shouldThrow);
+    return result; // wont get here if an error is thrown
   };
 }
 
@@ -133,18 +138,25 @@ function getErrorMessage(api, args, messages = [], output = {}) {
 function buildMessageFromApiAndArgs(api, args) {
   api = arrayify(api);
   args = arrayify(args);
-  let apiTypes = api.map(checker => {
-    return getCheckerDisplay(checker);
-  });
-  const passedTypes = args.length ? JSON.stringify(args.map(getArgDisplay), null, 2) : 'nothing';
+  let {apiTypes, argTypes} = getTypes(api, args);
   const passedArgs = args.length ? JSON.stringify(args, null, 2) : 'nothing';
+  argTypes = args.length ? JSON.stringify(argTypes, null, 2) : 'nothing';
   apiTypes = apiTypes.length ? JSON.stringify(apiTypes, null, 2) : 'nothing';
   const n = '\n';
   return [
     `You passed:${n}${passedArgs}`,
-    `With the types of:${n}${passedTypes}`,
+    `With the types of:${n}${argTypes}`,
     `The API calls for:${n}${apiTypes}`
   ].join(n + n);
+}
+
+function getTypes(api, args) {
+  api = arrayify(api);
+  args = arrayify(args);
+  let apiTypes = api.map(checker => {
+    return getCheckerDisplay(checker);
+  });
+  return {argTypes: args.map(getArgDisplay), apiTypes};
 }
 
 var stringifyable = {

@@ -8,22 +8,22 @@ describe('apiCheck', () => {
   describe('#', () => {
     it('should handle a single argument type specification', () => {
       (function(a) {
-        var result = apiCheck(apiCheck.string, arguments);
-        expect(result).to.have.length(0);
+        const message = apiCheck(apiCheck.string, arguments).message;
+        expect(message).to.be.empty;
       })('hello');
     });
 
     it('should handle array with types', () => {
       (function(a, b, c) {
-        var result = apiCheck([apiCheck.string, apiCheck.number, apiCheck.bool], arguments);
-        expect(result).to.have.length(0);
+        var message = apiCheck([apiCheck.string, apiCheck.number, apiCheck.bool], arguments).message;
+        expect(message).to.be.empty;
       })('a', 1, true);
     });
 
     it('should handle optional arguments', () => {
       (function(a, b, c) {
-        var result = apiCheck([apiCheck.string, apiCheck.number.optional, apiCheck.bool], arguments);
-        expect(result).to.have.length(0);
+        var message = apiCheck([apiCheck.string, apiCheck.number.optional, apiCheck.bool], arguments).message;
+        expect(message).to.be.empty;
       })('a', true);
     });
 
@@ -35,14 +35,14 @@ describe('apiCheck', () => {
       };
       ipAddressChecker.type = 'ipAddressString';
       (function(a, b) {
-        var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        expect(result).to.have.length(0);
+        var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+        expect(message).to.be.empty;
       })('a', '127.0.0.1');
 
 
       (function(a, b) {
-        var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        expect(result).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
+        var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+        expect(message).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
       })('a', 32);
     });
 
@@ -114,8 +114,8 @@ describe('apiCheck', () => {
     it(`should return the results`, () => {
       (function(a) {
         const args = arguments;
-        let results = apiCheck.warn(apiCheck.number, args);
-        expect(results).to.match(makeSpacedRegex('you passed a 3 the api calls for number'));
+        let message = apiCheck.warn(apiCheck.number, args).message;
+        expect(message).to.match(makeSpacedRegex('you passed a 3 the api calls for number'));
       })('a', 3);
     });
 
@@ -134,11 +134,11 @@ describe('apiCheck', () => {
 
       function check(disabled) {
         (function(a, b) {
-          var results = apiCheck([apiCheck.instanceOf(RegExp), apiCheck.number], arguments);
+          var message = apiCheck([apiCheck.instanceOf(RegExp), apiCheck.number], arguments).message;
           if (disabled) {
-            expect(results).to.have.length(0);
+            expect(message).to.be.empty;
           } else {
-            expect(results).to.match(error);
+            expect(message).to.match(error);
           }
         })('hey');
       }
@@ -241,11 +241,11 @@ describe('apiCheck', () => {
       });
 
       function getFailure(output) {
-        var result;
+        var message;
         (function(a) {
-          result = apiCheck(apiCheck.string, arguments, output);
+          message = apiCheck(apiCheck.string, arguments, output).message;
         })();
-        return result;
+        return message;
       }
     });
   });
