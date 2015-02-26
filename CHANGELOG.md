@@ -1,3 +1,7 @@
+# 3.0.4
+
+- Fixing oneOfType's `type`
+
 # 3.0.3
 
 - Bug fix. The argTypes should be an object, not stringified ([#3](/../../issues/3))
