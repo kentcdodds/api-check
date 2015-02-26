@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>apiCheck.js</title>
+</head>
+<body>
+This page is for manual testing of apiCheck.js. Just to give a little human aspect to developing the library :-)
+<script src="dist/apiCheck.js"></script>
+<script>
+  // given we have a function like this:
+  function foo(bar, foobar) {
+    // we can define our api as the first argument to apiCheck.warn
+    apiCheck.warn([apiCheck.number, apiCheck.arrayOf(apiCheck.string)], arguments);
+    // do stuff
+  }
+  // the function above can be called like so:
+  foo(3, ['a','b','c']);
+
+  // if it were called like so, a descriptive warning would be logged to the console
+  foo('whatever', false);
+
+
+  // here's something a little more complex
+  function doSomething(person, options, callback) {
+    apiCheck.warn([ // you can also do apiCheck.throw to throw an exception
+      apiCheck.shape({
+        name: apiCheck.shape({
+          first: apiCheck.string,
+          last: apiCheck.string
+        }),
+        age: apiCheck.number,
+        isOld: apiCheck.bool,
+        walk: apiCheck.func,
+        childrenNames: apiCheck.arrayOf(apiCheck.string).optional
+      }),
+      apiCheck.any.optional,
+      apiCheck.func
+    ], arguments, {
+      prefix: 'doSomething'
+    });
+
+    // do stuff
+  }
+
+  // the function above can be called in the following ways:
+  var person = {
+    name: {
+      first: 'Matt',
+      last: 'Meese'
+    },
+    age: 27,
+    isOld: false,
+    walk: function() {}
+  };
+  function callback() {}
+  var options = 'whatever I want because it is an "any" type';
+  doSomething(person, options, callback);
+  doSomething(person, callback); // <-- options is optional
+  doSomething(callback); // <-- this would fail because person is not optional
+
+
+  // if you only wish to check the first argument to a function, you don't need to supply an array.
+  function bar(a) {
+    var errorMessage = apiCheck(apiCheck.string, arguments);
+    if (!errorMessage) {
+      // success
+    } else if (typeof errorMessage === 'string') {
+      // there was a problem and errorMessage would like to tell you about it
+    }
+  }
+  bar('hello!'); // <-- success!
+</script>
+</body>
+</html>

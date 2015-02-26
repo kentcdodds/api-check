@@ -156,10 +156,11 @@ function getTypes(api, args) {
   let apiTypes = api.map(checker => {
     return getCheckerDisplay(checker);
   });
-  return {argTypes: args.map(getArgDisplay), apiTypes};
+  let argTypes = args.map(getArgDisplay);
+  return {argTypes: argTypes, apiTypes};
 }
 
-var stringifyable = {
+var eachable = {
   Object: getDisplay,
   Array: getDisplay
 };
@@ -167,10 +168,10 @@ var stringifyable = {
 function getDisplay(obj) {
   var argDisplay = {};
   each(obj, (v,k) => argDisplay[k] = getArgDisplay(v));
-  return JSON.stringify(obj, (k, v) => argDisplay[k] || v);
+  return argDisplay;
 }
 
 function getArgDisplay(arg) {
   var cName = arg && arg.constructor && arg.constructor.name;
-  return cName ? stringifyable[cName] ? stringifyable[cName](arg) : cName : arg === null ? 'null' : typeOf(arg);
+  return cName ? eachable[cName] ? eachable[cName](arg) : cName : arg === null ? 'null' : typeOf(arg);
 }

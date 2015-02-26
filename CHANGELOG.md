@@ -1,3 +1,7 @@
+# 3.0.3
+
+- Bug fix. The argTypes should be an object, not stringified ([#3](/../../issues/3))
+
 # 3.0.2
 
 - Missed a console.log :-/ Should probably put in a checker for that...

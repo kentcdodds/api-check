@@ -68,7 +68,7 @@ var person = {
   isOld: false,
   walk: function() {}
 };
-function callback() {};
+function callback() {}
 var options = 'whatever I want because it is an "any" type';
 doSomething(person, options, callback);
 doSomething(person, callback); // <-- options is optional
