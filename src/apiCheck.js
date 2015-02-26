@@ -106,6 +106,7 @@ function getApiCheck(shouldThrow) {
   return function apiCheckWrapper(api, args, output) {
     let message = apiCheck(api, args, output);
     module.exports.handleErrorMessage(message, shouldThrow);
+    return message; // wont get here if an error is thrown
   };
 }
 

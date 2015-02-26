@@ -1,3 +1,7 @@
+# 2.0.1
+
+- Returning the message from apiCheck.warn/throw. Though, if an error is actually thrown, then any responding code to the returned message will not run...
+
 # 2.0.0
 
 - Major internal api changes. All checkers now return an error like React's `propTypes` and the messaging has been improved.

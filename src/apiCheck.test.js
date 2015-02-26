@@ -42,7 +42,6 @@ describe('apiCheck', () => {
 
       (function(a, b) {
         var result = apiCheck([apiCheck.string, ipAddressChecker], arguments);
-        console.log(result);
         expect(result).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
       })('a', 32);
     });
@@ -110,6 +109,14 @@ describe('apiCheck', () => {
       })();
       expect(warnCalls).to.have.length(0);
       apiCheck.enable();
+    });
+
+    it(`should return the results`, () => {
+      (function(a) {
+        const args = arguments;
+        let results = apiCheck.warn(apiCheck.number, args);
+        expect(results).to.match(/you passed(.|\n)*?string.*number(.|\n)*?the api calls for(.|\n)*?number/i);
+      })('a', 3);
     });
 
     afterEach(() => {
