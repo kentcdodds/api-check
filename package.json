@@ -1,6 +1,6 @@
 {
   "name": "api-check",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
   "main": "./dist/apiCheck.js",
   "dependencies": {},
@@ -34,7 +34,8 @@
     "coverage": "npm run only-check && ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- src/index.test.js --compilers js:babel/register",
     "check-coverage": "./node_modules/istanbul/lib/cli.js check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
     "coveralls": "cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "only-check": "node other/only-check.js"
+    "only-check": "node other/only-check.js",
+    "release": "git push && npm publish && git push --tags"
   },
   "repository": {
     "type": "git",

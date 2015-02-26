@@ -82,10 +82,10 @@ function oneOfCheckGetter(enums) {
 
 function oneOfTypeCheckGetter(checkers) {
   const type = {
-    __apiCheckData: {optional: false, type: 'oneOf'},
-    oneOf: checkers.map(getCheckerDisplay)
+    __apiCheckData: {optional: false, type: 'oneOfType'},
+    oneOfType: checkers.map((checker) => getCheckerDisplay(checker))
   };
-  const shortType = `oneOf[${checkers.map(getCheckerDisplay).join(', ')}]`;
+  const shortType = `oneOfType[${checkers.map((checker) => getCheckerDisplay(checker, true)).join(', ')}]`;
   return checkerHelpers.wrapInSpecified(function oneOfTypeCheckerDefinition(val, name, location) {
     if (!checkers.some(checker => !isError(checker(val, name, location)))) {
       return getError(name, location, shortType);
@@ -143,13 +143,13 @@ function typeOrArrayOfCheckGetter(checker) {
 
 function getShapeCheckGetter() {
   function shapeCheckGetter(shape) {
-    let copiedShape = copy(shape);
-    each(copiedShape, (val, prop) => {
-      copiedShape[prop] = getCheckerDisplay(val);
+    let shapeTypes = {};
+    each(shape, (val, prop) => {
+      shapeTypes[prop] = getCheckerDisplay(val);
     });
     const type = {
       __apiCheckData: {strict: false, optional: false, type: 'shape'},
-      shape: copiedShape
+      shape: shapeTypes
     };
     let shapeChecker = checkerHelpers.wrapInSpecified(function shapeCheckerDefinition(val, name, location) {
       let isObject = checkers.object(val, name, location);

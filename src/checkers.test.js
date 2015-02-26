@@ -72,6 +72,46 @@ describe('checkers', () => {
       expect(checkers.oneOfType([checkers.object, checkers.string])(undefined)).to.be.an.instanceOf(Error);
       expect(checkers.oneOfType([checkers.object, checkers.string])(54)).to.be.an.instanceOf(Error);
     });
+
+    it(`should have the full checker type of its children`, () => {
+      const checker = checkers.oneOfType([
+        checkers.shape({
+          name: checkers.string,
+          value: checkers.oneOfType([
+            checkers.string, checkers.arrayOf(checkers.number).optional
+          ]).optional
+        }),
+        checkers.func
+      ]);
+      expect(checker.type).to.eql({
+        __apiCheckData: {optional: false, type: 'oneOfType'},
+        oneOfType: [
+          {
+            __apiCheckData: {optional: false, type: 'shape', strict: false},
+            shape: {
+              name: 'String',
+              value: {
+                __apiCheckData: {
+                  optional: true,
+                  type: 'oneOfType'
+                },
+                oneOfType: [
+                  'String',
+                  {
+                    __apiCheckData: {
+                      optional: true,
+                      type: 'arrayOf'
+                    },
+                    arrayOf: 'Number'
+                  }
+                ]
+              }
+            }
+          },
+          'Function'
+        ]
+      });
+    });
   });
 
   describe('arrayOf', () => {
