@@ -58,6 +58,12 @@ describe('checkers', () => {
       expect(checkers.oneOf(['ᕙ(⇀‸↼‶)ᕗ', '┬┴┬┴┤(･_├┬┴┬┴'])('(=^ェ^=)')).to.be.an.instanceOf(Error);
     });
 
+    it(`should work with typeOrArrayOf and null`, () => {
+      expect((checkers.oneOfType([
+        checkers.oneOf([null, 'ehy', {a: 'b'}, undefined]), checkers.typeOrArrayOf(checkers.string)
+      ]))(null)).to.be.undefined;
+    });
+
   });
 
   describe('oneOfType', () => {

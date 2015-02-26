@@ -72,7 +72,7 @@ function oneOfCheckGetter(enums) {
     __apiCheckData: {optional: false, type: 'enum'},
     enum: enums
   };
-  const shortType = `enum[${enums.join(', ')}]`;
+  const shortType = `enum[${enums.map(enm => JSON.stringify(enm)).join(', ')}]`;
   return checkerHelpers.wrapInSpecified(function oneOfCheckerDefinition(val, name, location) {
     if (!enums.some(enm => enm === val)) {
       return getError(name, location, shortType);

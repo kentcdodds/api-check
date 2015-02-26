@@ -1,3 +1,7 @@
+# Latest
+
+- Fixing the way the `enums` shortType looks.
+
 # 3.0.4
 
 - Fixing oneOfType's `type`
