@@ -115,7 +115,7 @@ describe('apiCheck', () => {
       (function(a) {
         const args = arguments;
         let results = apiCheck.warn(apiCheck.number, args);
-        expect(results).to.match(/you passed(.|\n)*?string.*number(.|\n)*?the api calls for(.|\n)*?number/i);
+        expect(results).to.match(makeSpacedRegex('you passed a 3 the api calls for number'));
       })('a', 3);
     });
 
@@ -256,8 +256,9 @@ describe('apiCheck', () => {
       expect(apiCheck.getErrorMessage()).to.match(/nothing/i);
     });
 
-    it('should say the types of the values I passed', () => {
-      expect(apiCheck.getErrorMessage([], ['string', 3, true])).to.match(/string.*number.*boolean/i);
+    it('should say the values and types I passed', () => {
+      const regex = makeSpacedRegex('hey! 3 true string number boolean');
+      expect(apiCheck.getErrorMessage([], ['Hey!', 3, true])).to.match(regex);
     });
 
     it('should show only one api when only no optional arguments are provided', () => {
@@ -265,37 +266,21 @@ describe('apiCheck', () => {
       expect(result).to.match(/you passed(.|\n)*?the api calls for(.|\n)*?object/i);
     });
 
-    it('should show optional arguments', () => {
-      expect(apiCheck.getErrorMessage([
-        apiCheck.object,
-        apiCheck.array.optional,
-        apiCheck.string,
-        apiCheck.instanceOf(RegExp),
-        apiCheck.bool.optional
-      ])).to.match(
-        /you passed(.|\n)*?the api calls for(.|\n)*?object, array \(optional\), string, RegExp, boolean \(optional\)/i
-      );
-    });
-
-    it('should show the user\'s arguments nicely', () => {
+    it(`should show the user's arguments and types nicely`, () => {
       const result = apiCheck.getErrorMessage([
         apiCheck.object,
         apiCheck.array.optional,
         apiCheck.string
       ], [
         {a: 'a', r: new RegExp(), b: undefined},
-        [new Date(), 23, false, null]
+        [23, false, null]
       ]);
-      expect(result).to.match(
-        /you passed(.|\n)*?.*a.*string.*r.*regexp.*b.*undefined.*date.*number.*boolean.*null(.|\n)*?the api calls for(.|\n)*?object.*array.*?optional.*?string/i
+      /* jshint -W101 */
+      const regex = makeSpacedRegex(
+        'you passed a a r 23 false null with the types of a string r regexp b undefined number boolean null ' +
+        'the api calls for object array \\(optional\\) string'
       );
-    });
-
-    it('should show optional types in shapes', () => {
-      expect(apiCheck.getErrorMessage(apiCheck.shape({
-        name: apiCheck.string,
-        cool: apiCheck.bool.optional
-      }))).to.match(/you passed(.|\n)*?nothing(.|\n)*?the api calls for(.|\n)*?shape.*name.*string.*cool.*boolean.*?optional/i);
+      expect(result).to.match(regex);
     });
 
     it('should be overrideable', () => {
@@ -346,4 +331,7 @@ describe('apiCheck', () => {
     });
   });
 
+  function makeSpacedRegex(string) {
+    return new RegExp(string.replace(/ /g, '(.|\\n)*?'), 'i');
+  }
 });

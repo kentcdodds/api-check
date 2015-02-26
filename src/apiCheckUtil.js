@@ -7,8 +7,18 @@ module.exports = {
 };
 
 function copy(obj) {
-  var daCopy = Array.isArray(obj) ? [] : {};
-  each(obj, (val, key) => daCopy[key] = val);
+  let type = typeOf(obj);
+  let daCopy;
+  if (type === 'array') {
+    daCopy = [];
+  } else if (type === 'object') {
+    daCopy = {};
+  } else {
+    return obj;
+  }
+  each(obj, (val, key) => {
+    daCopy[key] = val; // cannot single-line this because we don't want to abort the each
+  });
   return daCopy;
 }
 
@@ -23,8 +33,15 @@ function typeOf(obj) {
   }
 }
 
-function getCheckerDisplay(checker) {
-  return (checker.type || checker.displayName || checker.name) + (checker.isOptional ? ' (optional)' : '');
+function getCheckerDisplay(checker, short) {
+  /* jshint maxcomplexity:7 */
+  if (short && checker.shortType) {
+    return checker.shortType;
+  } else if (!short && typeof checker.type === 'object') {
+    return checker.type;
+  } else {
+    return (checker.type || checker.displayName || checker.name) + (checker.isOptional ? ' (optional)' : '');
+  }
 }
 
 function arrayify(obj) {
@@ -88,7 +105,8 @@ function list(arry, join, finalJoin) {
 
 
 function getError(name, location, checkerType) {
-  return new Error(`${nAtL(name, location)} must be ${t(checkerType)}`);
+  const stringType = typeof checkerType !== 'object' ? checkerType : JSON.stringify(checkerType);
+  return new Error(`${nAtL(name, location)} must be ${t(stringType)}`);
 }
 
 function nAtL(name, location) {
@@ -116,21 +134,32 @@ function makeOptional(checker) {
   };
   checker.optional.isOptional = true;
   checker.optional.type = checker.type;
+  if (typeof checker.optional.type === 'object') {
+    checker.optional.type = copy(checker.optional.type); // make our own copy of this
+    checker.optional.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
+    checker.optional.type.__apiCheckData.optional = true;
+  }
   checker.optional.displayName = checker.displayName;
 }
 
-function wrapInSpecified(fn, type) {
+function wrapInSpecified(fn, type, shortType) {
   fn.type = type;
+  fn.shortType = shortType;
   function specifiedChecker(val, name, location, obj) {
     const u = undef(val);
     if (u && !fn.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
-      return new Error(`Required ${t(name)} not specified${tLocation}. Must be ${t(fn.type)}`);
+      const type = getCheckerDisplay(fn, true);
+      console.log(type);
+      console.log(typeof type);
+      const stringType = typeof type !== 'object' ? type : JSON.stringify(type);
+      return new Error(`Required ${t(name)} not specified${tLocation}. Must be ${t(stringType)}`);
     } else {
       return fn(val, name, location, obj);
     }
   }
-  specifiedChecker.type = type;
+  specifiedChecker.type = fn.type;
+  specifiedChecker.shortType = fn.shortType;
   specifiedChecker.notOptional = fn.notOptional;
   specifiedChecker.childrenCheckers = fn.childrenCheckers;
   setupChecker(specifiedChecker);

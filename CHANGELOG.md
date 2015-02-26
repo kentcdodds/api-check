@@ -1,3 +1,7 @@
+# 3.0.0
+
+- Seriously improved how the messages are formatted. There's a lot more there, but it's awesome.
+
 # 2.0.1
 
 - Returning the message from apiCheck.warn/throw. Though, if an error is actually thrown, then any responding code to the returned message will not run...

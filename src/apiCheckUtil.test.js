@@ -1,7 +1,10 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
 describe('apiCheckUtil', () => {
-  const {each, checkerHelpers, getCheckerDisplay, copy, list} = require('./apiCheckUtil');
+  const {
+    each, checkerHelpers, getCheckerDisplay, copy, list,
+    getError
+    } = require('./apiCheckUtil');
 
   describe('each', () => {
     it('should iterate over objects', () => {
@@ -78,6 +81,32 @@ describe('apiCheckUtil', () => {
         expect(myChecker).to.not.have.property('optional');
       });
     });
+
+
+    describe(`makeOptional`, () => {
+      it(`should make a function optional`, () => {
+        function foo() {
+        }
+        foo.type = {};
+        foo();
+        checkerHelpers.makeOptional(foo);
+        expect(foo.optional).to.be.a('function');
+      });
+    });
+
+    describe(`wrapInSpecified`, () => {
+      it(`should wrap a function in a specified checker`, () => {
+        let called = 0;
+        function foo() {
+          called++;
+        }
+        var wrapped = checkerHelpers.wrapInSpecified(foo, {a: 'Sweet type'}, {short: 'type'});
+        expect(wrapped('hello')).to.be.undefined;
+        expect(called).to.equal(1);
+        expect(wrapped()).to.be.instanceOf(Error);
+        expect(called).to.equal(1);
+      });
+    });
   });
 
   describe(`getCheckerDisplay`, () => {
@@ -129,6 +158,25 @@ describe('apiCheckUtil', () => {
       expect(list(['hi', 'hello', 'hey'], ', ', 'and ')).to.equal('hi, hello, and hey');
     });
   });
+
+  describe(`copy`, () => {
+    it(`should should copy a string`, () => {
+      expect(copy('hello')).to.equal('hello');
+    });
+    it(`should copy an object`, () => {
+      const original = {a: true, b: false, c: 32};
+      const daCopy = {a: true, b: false, c: 32};
+      expect(copy(original)).to.eql(daCopy);
+    });
+  });
+
+  describe(`getError`, () => {
+    it(`should return a nice error message`, () => {
+      const message = getError('name', 'location', {type: 'special type'});
+      expect(message).to.match(/name.*location.*special type/i);
+    });
+  });
+
 
 
 });

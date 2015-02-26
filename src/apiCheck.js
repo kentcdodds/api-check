@@ -133,11 +133,18 @@ function getErrorMessage(api, args, messages = [], output = {}) {
 function buildMessageFromApiAndArgs(api, args) {
   api = arrayify(api);
   args = arrayify(args);
-  var apiTypes = api.map(checker => {
+  let apiTypes = api.map(checker => {
     return getCheckerDisplay(checker);
-  }).join(', ');
-  var passedTypes = args.length ? '`' + args.map(getArgDisplay).join(', ') + '`' : 'nothing';
-  return 'You passed:\n' + passedTypes + '\n\nThe API calls for:\n`' + apiTypes + '`';
+  });
+  const passedTypes = args.length ? JSON.stringify(args.map(getArgDisplay), null, 2) : 'nothing';
+  const passedArgs = args.length ? JSON.stringify(args, null, 2) : 'nothing';
+  apiTypes = apiTypes.length ? JSON.stringify(apiTypes, null, 2) : 'nothing';
+  const n = '\n';
+  return [
+    `You passed:${n}${passedArgs}`,
+    `With the types of:${n}${passedTypes}`,
+    `The API calls for:${n}${apiTypes}`
+  ].join(n + n);
 }
 
 var stringifyable = {

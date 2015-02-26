@@ -38,14 +38,9 @@ foo(3, ['a','b','c']);
 foo('whatever', false);
 
 
-// the function below can be called in the following ways:
-doSomething(person, options, callback);
-doSomething(person, callback);
-
-// if it is called differently, or if the shape of person is wrong, then a descriptive error is thrown.
-
+// here's something a little more complex
 function doSomething(person, options, callback) {
-  apiCheck.throw([
+  apiCheck.warn([ // you can also do apiCheck.throw to throw an exception
     apiCheck.shape({
       name: apiCheck.shape({
         first: apiCheck.string,
@@ -63,8 +58,8 @@ function doSomething(person, options, callback) {
   // do stuff
 }
 
-// an example object that would pass the first apiCheck.shape is here:
-var obj = {
+// the function above can be called in the following ways:
+var person = {
   name: {
     first: 'Matt',
     last: 'Meese'
@@ -73,18 +68,23 @@ var obj = {
   isOld: false,
   walk: function() {}
 };
+function callback() {};
+var options = 'whatever I want because it is an "any" type';
+doSomething(person, options, callback);
+doSomething(person, callback); // <-- options is optional
+doSomething(callback); // <-- this would fail because person is not optional
+
 
 // if you only wish to check the first argument to a function, you don't need to supply an array.
 function bar(a) {
   var errorMessage = apiCheck(apiCheck.string, arguments);
-  if (errorMessage === null) {
+  if (!errorMessage) {
     // success
   } else if (typeof errorMessage === 'string') {
     // there was a problem and errorMessage would like to tell you about it
-  } else {
-    // this should never happen... if it does, log a bug :-)
   }
 }
+bar('hello!'); // <-- success!
 ```
 
 ## Differences from React's propTypes
@@ -412,13 +412,27 @@ foo('hello', 'not-an-ip-address');
 
 It would result in a warning like this:
 
-> apiCheck failed! `Argument 1` passed, `value` at `Argument 2` must be `ipAddressString`
->
-> You passed:
-> `String, String`
->
-> The API calls for:
-> `String, ipAddressString`
+```
+apiCheck failed! `Argument 1` passed, `value` at `Argument 2` must be `undefined`
+
+You passed:
+[
+  "hello",
+  "not-an-ip-address"
+]
+
+With the types of:
+[
+  "String",
+  "String"
+]
+
+The API calls for:
+[
+  "String",
+  "ipAddressChecker"
+]
+```
 
 
 ## Customization

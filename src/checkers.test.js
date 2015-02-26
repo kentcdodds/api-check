@@ -256,6 +256,60 @@ describe('checkers', () => {
         expect(check({cookies: 43})).to.be.an.instanceOf(Error);
       });
 
+      it(`should have a legible type`, () => {
+        var check = checkers.shape({
+          name: checkers.shape({
+            first: checkers.string,
+            last: checkers.string
+          }).strict,
+          age: checkers.number,
+          isOld: checkers.bool,
+          walk: checkers.func,
+          familyNames: checkers.objectOf(checkers.string),
+          childrenNames: checkers.arrayOf(checkers.string),
+          optionalStrictObject: checkers.shape({
+            somethingElse: checkers.objectOf(checkers.shape({
+              prop: checkers.func
+            }).optional)
+          }).strict.optional
+        });
+        expect(check.type).to.eql({
+          __apiCheckData: {strict: false, optional: false, type: 'shape'},
+          shape: {
+            name: {
+              __apiCheckData: {strict: true, optional: false, type: 'shape'},
+              shape: {
+                first: 'String',
+                last: 'String'
+              }
+            },
+            age: 'Number',
+            isOld: 'Boolean',
+            walk: 'Function',
+            childrenNames: {
+              __apiCheckData: {optional: false, type: 'arrayOf'},
+              arrayOf: 'String'
+            },
+            familyNames: {
+              __apiCheckData: {optional: false, type: 'objectOf'},
+              objectOf: 'String'
+            },
+            optionalStrictObject: {
+              __apiCheckData: {strict: true, optional: true, type: 'shape'},
+              shape: {
+                somethingElse: {
+                  __apiCheckData: {optional: false, type: 'objectOf'},
+                  objectOf: {
+                    __apiCheckData: {optional: true, strict: false, type: 'shape'},
+                    shape: {prop: 'Function'}
+                  }
+                }
+              }
+            }
+          }
+        });
+      });
+
     });
 
     describe('onlyIf', () => {
@@ -308,6 +362,7 @@ describe('checkers', () => {
       function foo() {
         expect(checkers.args(arguments)).to.be.undefined;
       }
+
       foo('hi');
       expect(checkers.args({length: 0})).to.be.undefined;
     });
