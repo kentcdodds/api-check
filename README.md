@@ -463,6 +463,9 @@ The API calls for:
 ]
 ```
 
+There's actually quite a bit of cool stuff you can do with custom types checkers. If you want to know what they are,
+look at the tests or file an issue for me to go document them. :-)
+
 
 ## Customization
 

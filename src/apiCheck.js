@@ -17,14 +17,14 @@ let additionalProperties = {
       prefix: '',
       suffix: '',
       docsBaseUrl: ''
-    }
+    },
+    verbose: false
   },
   utils: apiCheckUtil
 };
 
 each(additionalProperties, (wrapper, name) => module.exports[name] = wrapper);
 each(checkers, (checker, name) => module.exports[name] = checker);
-
 
 
 function apiCheck(api, args, output) {
@@ -55,7 +55,10 @@ function checkApiCheckApi(args) {
   const api = [ // dog fooding here
     checkers.typeOrArrayOf(checkers.func.withProperties({
       type: checkers.oneOfType([checkers.string, checkerTypeType]),
-      shortType: checkers.string.optional
+      displayName: checkers.string.optional,
+      shortType: checkers.string.optional,
+      notOptional: checkers.bool.optional,
+      childrenCheckers: checkers.arrayOf(checkers.string).optional
     })),
     checkers.args,
     checkers.shape({prefix: s, suffix: s, url: s}).strict.optional
@@ -74,17 +77,20 @@ function checkApiCheckApi(args) {
 }
 
 checkerTypeType.type = 'object with __apiCheckData property and `${function.type}` property';
-function checkerTypeType(val, name, location) {
-  const wrongShape = checkers.shape({
-    __apiCheckData: checkers.shape({
-      type: checkers.string,
-      optional: checkers.bool
-    })
-  })(val, name, location);
+function checkerTypeType(checkerType, name, location) {
+  const apiCheckDataChecker = checkers.shape({
+    type: checkers.string,
+    optional: checkers.bool
+  });
+  const asFunc = checkers.func.withProperties({__apiCheckData: apiCheckDataChecker});
+  const asShape = checkers.shape({__apiCheckData: apiCheckDataChecker});
+  const wrongShape = checkers.oneOfType([
+    asFunc, asShape
+  ])(checkerType, name, location);
   if (isError(wrongShape)) {
     return wrongShape;
   }
-  if (!val.hasOwnProperty(val.__apiCheckData.type)) {
+  if (typeof checkerType !== 'function' && !checkerType.hasOwnProperty(checkerType.__apiCheckData.type)) {
     return getError(name, location, checkerTypeType.type);
   }
 }
@@ -96,7 +102,7 @@ function checkApiWithArgs(api, args) {
   let argIndex = 0;
   let arg, checker, res;
   /* jshint -W084 */
-  while(checker = api[checkerIndex++]) {
+  while (checker = api[checkerIndex++]) {
     arg = args[argIndex++];
     res = checker(arg, null, 'Argument ' + argIndex);
     if (isError(res) && !checker.isOptional) {
@@ -187,8 +193,8 @@ function buildMessageFromApiAndArgs(api, args) {
 function getTypes(api, args) {
   api = arrayify(api);
   args = arrayify(args);
-  let apiTypes = api.map(checker => {
-    return getCheckerDisplay(checker);
+  let apiTypes = api.map((checker, index) => {
+    return getCheckerDisplay(checker, {terse: !module.exports.config.verbose, obj: args[index], addHelpers: true});
   });
   let argTypes = args.map(getArgDisplay);
   return {argTypes: argTypes, apiTypes};
@@ -201,7 +207,7 @@ var eachable = {
 
 function getDisplay(obj) {
   var argDisplay = {};
-  each(obj, (v,k) => argDisplay[k] = getArgDisplay(v));
+  each(obj, (v, k) => argDisplay[k] = getArgDisplay(v));
   return argDisplay;
 }
 
@@ -209,3 +215,4 @@ function getArgDisplay(arg) {
   var cName = arg && arg.constructor && arg.constructor.name;
   return cName ? eachable[cName] ? eachable[cName](arg) : cName : arg === null ? 'null' : typeOf(arg);
 }
+

@@ -33,15 +33,30 @@ function typeOf(obj) {
   }
 }
 
-function getCheckerDisplay(checker, short) {
-  /* jshint maxcomplexity:7 */
+function getCheckerDisplay(checker, options) {
+  /* jshint maxcomplexity:17 */
+  let display;
+  let short = options && options.short;
   if (short && checker.shortType) {
-    return checker.shortType;
-  } else if (!short && typeof checker.type === 'object') {
-    return checker.type;
+    display = checker.shortType;
+  } else if (!short && typeof checker.type === 'object' || checker.type === 'function') {
+    display = getCheckerType(checker, options);
   } else {
-    return (checker.type || checker.displayName || checker.name) + (checker.isOptional ? ' (optional)' : '');
+    display = getCheckerType(checker, options) || checker.displayName || checker.name;
   }
+  return display;
+}
+
+function getCheckerType({type}, options) {
+  if (typeof type === 'function') {
+    let __apiCheckData = type.__apiCheckData;
+    let typeTypes = type(options);
+    type = {
+      __apiCheckData,
+      [__apiCheckData.type]: typeTypes
+    };
+  }
+  return type;
 }
 
 function arrayify(obj) {
@@ -111,7 +126,7 @@ function getError(name, location, checkerType) {
 
 function nAtL(name, location) {
   const tName = t(name || 'value');
-  let tLocation = undef(location) ? '' : ' at ' + t(location);
+  let tLocation = !location ? '' : ' at ' + t(location);
   return `${tName}${tLocation}`;
 }
 
@@ -134,13 +149,21 @@ function makeOptional(checker) {
   };
   checker.optional.isOptional = true;
   checker.optional.type = checker.type;
+  checker.optional.displayName = checker.displayName;
   if (typeof checker.optional.type === 'object') {
     checker.optional.type = copy(checker.optional.type); // make our own copy of this
-    checker.optional.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
-    checker.optional.type.__apiCheckData.optional = true;
+  } else if (typeof checker.optional.type === 'function') {
+    checker.optional.type = function() {
+      return checker.type(...arguments);
+    };
+  } else {
+    checker.optional.type += ' (optional)';
+    return;
   }
-  checker.optional.displayName = checker.displayName;
+  checker.optional.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
+  checker.optional.type.__apiCheckData.optional = true;
 }
+
 
 function wrapInSpecified(fn, type, shortType) {
   fn.type = type;
@@ -149,7 +172,7 @@ function wrapInSpecified(fn, type, shortType) {
     const u = undef(val);
     if (u && !fn.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
-      const type = getCheckerDisplay(fn, true);
+      const type = getCheckerDisplay(fn, {short: true});
       const stringType = typeof type !== 'object' ? type : JSON.stringify(type);
       return new Error(`Required ${t(name)} not specified${tLocation}. Must be ${t(stringType)}`);
     } else {
@@ -166,7 +189,7 @@ function wrapInSpecified(fn, type, shortType) {
 }
 
 function setupChecker(checker) {
-  checker.displayName = `apiCheck ${t(checker.type || checker.name)} type checker`;
+  checker.displayName = `apiCheck ${t(checker.shortType || checker.type || checker.name)} type checker`;
   if (!checker.notOptional) {
     makeOptional(checker);
   }

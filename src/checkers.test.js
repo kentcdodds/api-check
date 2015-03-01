@@ -40,33 +40,45 @@ describe('checkers', () => {
         expect(checkers.func(null)).to.be.an.instanceOf(Error);
       });
 
-      it(`should check for properties on a function`, () => {
-        function myFuncWithProps() {
-        }
+      describe(`.withProperties`, () => {
+        it(`should check for properties on a function`, () => {
+          function myFuncWithProps() {
+          }
 
-        myFuncWithProps.someProp = 'As a string';
-        myFuncWithProps.anotherProp = {
-          anotherFunction: anotherFunctionWithProps
-        };
-        function anotherFunctionWithProps() {
-        }
+          myFuncWithProps.someProp = 'As a string';
+          myFuncWithProps.anotherProp = {
+            anotherFunction: anotherFunctionWithProps
+          };
+          function anotherFunctionWithProps() {
+          }
 
-        anotherFunctionWithProps.aNumber = 32;
-        // OCD about coverage... even in tests...
-        anotherFunctionWithProps();
-        myFuncWithProps();
+          anotherFunctionWithProps.aNumber = 32;
+          // OCD about coverage... even in tests...
+          anotherFunctionWithProps();
+          myFuncWithProps();
 
-        const checker = checkers.func.withProperties({
-          someProp: checkers.string,
-          anotherProp: checkers.shape({
-            anotherFunction: checkers.func.withProperties({
-              aNumber: checkers.number
+          const checker = checkers.func.withProperties({
+            someProp: checkers.string,
+            anotherProp: checkers.shape({
+              anotherFunction: checkers.func.withProperties({
+                aNumber: checkers.number
+              })
             })
-          })
-        });
-        expect(checker(myFuncWithProps)).to.be.undefined;
+          });
+          expect(checker(myFuncWithProps)).to.be.undefined;
 
-        expect(checker(coveredFunction)).to.be.an.instanceOf(Error);
+          expect(checker(coveredFunction)).to.be.an.instanceOf(Error);
+        });
+
+        it(`should throw an error when the specified properties is not an object of functions`, () => {
+          expect(() => {
+            checkers.func.withProperties({
+              thing1: checkers.bool,
+              thing2: true
+            });
+          }).to.throw();
+        });
+
       });
     });
   });
@@ -301,6 +313,36 @@ describe('checkers', () => {
       expect(check(obj).message).to.match(/street.*?at.*?person\/home\/location.*?must be.*?string/i);
     });
 
+    it(`should add a helper when getting the type with addHelpers`, () => {
+      const check = checkers.shape({
+        mint: checkers.bool.optional,
+        chocolate: checkers.bool,
+        candy: checkers.shape({
+          good: checkers.bool,
+          bad: checkers.bool.optional
+        })
+      });
+      const obj = {
+        mint: false,
+        candy: {}
+      };
+      const typeTypes = check.type({terse: true, obj, addHelpers: true});
+      console.log(typeTypes);
+      expect(typeTypes).to.eql({
+        chocolate: 'Boolean <-- YOU ARE MISSING THIS',
+        mint: 'Boolean (optional)',
+        candy: {
+          __apiCheckData: {
+            strict: false, optional: false, type: 'shape',
+            error: 'THIS IS THE PROBLEM: Required `good` not specified. Must be `Boolean`'
+          },
+          shape: {
+            good: 'Boolean <-- YOU ARE MISSING THIS'
+          }
+        }
+      });
+    });
+
     describe('ifNot', () => {
 
       it('should pass if the specified property exists but the other does not', () => {
@@ -373,36 +415,36 @@ describe('checkers', () => {
             }).optional)
           }).strict.optional
         });
-        expect(check.type).to.eql({
-          __apiCheckData: {strict: false, optional: false, type: 'shape'},
-          shape: {
-            name: {
-              __apiCheckData: {strict: true, optional: false, type: 'shape'},
-              shape: {
-                first: 'String',
-                last: 'String'
-              }
-            },
-            age: 'Number',
-            isOld: 'Boolean',
-            walk: 'Function',
-            childrenNames: {
-              __apiCheckData: {optional: false, type: 'arrayOf'},
-              arrayOf: 'String'
-            },
-            familyNames: {
-              __apiCheckData: {optional: false, type: 'objectOf'},
-              objectOf: 'String'
-            },
-            optionalStrictObject: {
-              __apiCheckData: {strict: true, optional: true, type: 'shape'},
-              shape: {
-                somethingElse: {
-                  __apiCheckData: {optional: false, type: 'objectOf'},
-                  objectOf: {
-                    __apiCheckData: {optional: true, strict: false, type: 'shape'},
-                    shape: {prop: 'Function'}
-                  }
+        expect(check.type.__apiCheckData).to.eql({
+          strict: false, optional: false, type: 'shape'
+        });
+        expect(check.type()).to.eql({
+          name: {
+            __apiCheckData: {strict: true, optional: false, type: 'shape'},
+            shape: {
+              first: 'String',
+              last: 'String'
+            }
+          },
+          age: 'Number',
+          isOld: 'Boolean',
+          walk: 'Function',
+          childrenNames: {
+            __apiCheckData: {optional: false, type: 'arrayOf'},
+            arrayOf: 'String'
+          },
+          familyNames: {
+            __apiCheckData: {optional: false, type: 'objectOf'},
+            objectOf: 'String'
+          },
+          optionalStrictObject: {
+            __apiCheckData: {strict: true, optional: true, type: 'shape'},
+            shape: {
+              somethingElse: {
+                __apiCheckData: {optional: false, type: 'objectOf'},
+                objectOf: {
+                  __apiCheckData: {optional: true, strict: false, type: 'shape'},
+                  shape: {prop: 'Function'}
                 }
               }
             }

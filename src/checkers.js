@@ -1,6 +1,7 @@
 const {
   typeOf, each, copy, getCheckerDisplay, isError,
-  arrayify, list, getError, nAtL, t, checkerHelpers
+  arrayify, list, getError, nAtL, t, checkerHelpers,
+  undef
   } = require('./apiCheckUtil');
 
 let checkers = module.exports = {
@@ -50,22 +51,16 @@ function getFunctionChecker() {
     if (isError(apiError)) {
       throw apiError;
     }
-    let props = {};
-    each(properties, (val, prop) => {
-      props[prop] = getCheckerDisplay(val);
-    });
-    const withPropsType = {
-      __apiCheckData: {strict: false, optional: false, type: 'func.withProperties'},
-      'func.withProperties': props
-    };
+    let shapeChecker = checkers.shape(properties, true);
+    shapeChecker.type.__apiCheckData.type = 'func.withProperties';
 
     return checkerHelpers.wrapInSpecified(function functionWithPropertiesChecker(val, name, location) {
       const notFunction = checkers.func(val, name, location);
       if (isError(notFunction)) {
         return notFunction;
       }
-      return checkShape(properties, val, name, location);
-    }, withPropsType, 'func.withProperties');
+      return shapeChecker(val, name, location);
+    }, shapeChecker.type, 'func.withProperties');
   };
 
   functionChecker.childrenCheckers = ['withProperties'];
@@ -120,7 +115,8 @@ function oneOfTypeCheckGetter(checkers) {
     __apiCheckData: {optional: false, type: 'oneOfType'},
     oneOfType: checkers.map((checker) => getCheckerDisplay(checker))
   };
-  const shortType = `oneOfType[${checkers.map((checker) => getCheckerDisplay(checker, true)).join(', ')}]`;
+  const checkersDisplay = checkers.map((checker) => getCheckerDisplay(checker, {short: true}));
+  const shortType = `oneOfType[${checkersDisplay.join(', ')}]`;
   return checkerHelpers.wrapInSpecified(function oneOfTypeCheckerDefinition(val, name, location) {
     if (!checkers.some(checker => !isError(checker(val, name, location)))) {
       return getError(name, location, shortType);
@@ -133,7 +129,8 @@ function arrayOfCheckGetter(checker) {
     __apiCheckData: {optional: false, type: 'arrayOf'},
     arrayOf: getCheckerDisplay(checker)
   };
-  const shortType = `arrayOf[${getCheckerDisplay(checker, true)}]`;
+  const checkerDisplay = getCheckerDisplay(checker, {short: true});
+  const shortType = `arrayOf[${checkerDisplay}]`;
   return checkerHelpers.wrapInSpecified(function arrayOfCheckerDefinition(val, name, location) {
     if (isError(checkers.array(val)) || !val.every((item) => !isError(checker(item)))) {
       return getError(name, location, shortType);
@@ -146,7 +143,8 @@ function objectOfCheckGetter(checker) {
     __apiCheckData: {optional: false, type: 'objectOf'},
     objectOf: getCheckerDisplay(checker)
   };
-  const shortType = `objectOf[${getCheckerDisplay(checker, true)}]`;
+  const checkerDisplay = getCheckerDisplay(checker, {short: true});
+  const shortType = `objectOf[${checkerDisplay}]`;
   return checkerHelpers.wrapInSpecified(function objectOfCheckerDefinition(val, name, location) {
     const notObject = checkers.object(val, name, location);
     if (isError(notObject)) {
@@ -168,7 +166,8 @@ function typeOrArrayOfCheckGetter(checker) {
     __apiCheckData: {optional: false, type: 'typeOrArrayOf'},
     typeOrArrayOf: getCheckerDisplay(checker)
   };
-  const shortType = `typeOrArrayOf[${getCheckerDisplay(checker, true)}]`;
+  const checkerDisplay = getCheckerDisplay(checker, {short: true});
+  const shortType = `typeOrArrayOf[${checkerDisplay}]`;
   return checkerHelpers.wrapInSpecified(function typeOrArrayOfDefinition(val, name, location, obj) {
     if (isError(checkers.oneOfType([checker, checkers.arrayOf(checker)])(val, name, location, obj))) {
       return getError(name, location, shortType);
@@ -177,24 +176,79 @@ function typeOrArrayOfCheckGetter(checker) {
 }
 
 function getShapeCheckGetter() {
-  function shapeCheckGetter(shape) {
+  function shapeCheckGetter(shape, nonObject) {
     let shapeTypes = {};
-    each(shape, (val, prop) => {
-      shapeTypes[prop] = getCheckerDisplay(val);
+    each(shape, (checker, prop) => {
+      shapeTypes[prop] = getCheckerDisplay(checker);
     });
-    const type = {
-      __apiCheckData: {strict: false, optional: false, type: 'shape'},
-      shape: shapeTypes
-    };
+    function type(options = {}) {
+      let ret = {};
+      const {terse, obj, addHelpers} = options;
+      const parentRequired = options.required;
+      each(shape, (checker, prop) => {
+        /* jshint maxcomplexity:6 */
+        const specified = obj && obj.hasOwnProperty(prop);
+        const required = undef(parentRequired) ? !checker.isOptional : parentRequired;
+        if (!terse || (specified || !checker.isOptional)) {
+          ret[prop] = getCheckerDisplay(checker, {terse, obj: obj && obj[prop], required, addHelpers});
+        }
+        if (addHelpers) {
+          modifyTypeDisplayToHelpOut(ret, prop, specified, checker, required);
+        }
+      });
+      return ret;
+
+      function modifyTypeDisplayToHelpOut(ret, prop, specified, checker, required) {
+        if (!specified && required && !checker.isOptional) {
+          let item = 'ITEM';
+          if (checker.type.__apiCheckData) {
+            item = checker.type.__apiCheckData.type.toUpperCase();
+          }
+          addHelper(
+            'missing', 'MISSING THIS ' + item, ' <-- YOU ARE MISSING THIS'
+          );
+        } else if (specified) {
+          let error = checker(obj[prop]);
+          if (isError(error)) {
+            addHelper('error', 'THIS IS THE PROBLEM: ' + error.message, ' <-- THIS IS THE PROBLEM: ' + error.message);
+          }
+        }
+
+        function addHelper(property, objectMessage, stringMessage) {
+          if (typeof ret[prop] === 'string') {
+            ret[prop] += stringMessage;
+          } else {
+            ret[prop].__apiCheckData[property] = objectMessage;
+          }
+        }
+      }
+    }
+
+    type.__apiCheckData = {strict: false, optional: false, type: 'shape'};
     let shapeChecker = checkerHelpers.wrapInSpecified(function shapeCheckerDefinition(val, name, location) {
-      let isObject = checkers.object(val, name, location);
+      /* jshint maxcomplexity:6 */
+      let isObject = !nonObject && checkers.object(val, name, location);
       if (isError(isObject)) {
         return isObject;
       }
-      return checkShape(shape, val, name, location);
+      let shapePropError;
+      location = location ? location + (name ? '/' : '') : '';
+      name = name || '';
+      each(shape, (checker, prop) => {
+        if (val.hasOwnProperty(prop) || !checker.isOptional) {
+          shapePropError = checker(val[prop], prop, `${location}${name}`, val);
+          return !isError(shapePropError);
+        }
+      });
+      if (isError(shapePropError)) {
+        return shapePropError;
+      }
     }, type, 'shape');
 
-    let strictType = copy(shapeChecker.type);
+    function strictType(terse) {
+      return shapeTypes;
+    }
+
     strictType.__apiCheckData = copy(shapeChecker.type.__apiCheckData);
     strictType.__apiCheckData.strict = true;
     shapeChecker.strict = checkerHelpers.wrapInSpecified(function strictShapeCheckerDefinition(val, name, location) {
@@ -284,17 +338,3 @@ function anyCheckGetter() {
   }, 'any');
 }
 
-function checkShape(shape, val, name, location) {
-  let shapePropError;
-  location = location ? location + (name ? '/' : '') : '';
-  name = name || '';
-  each(shape, (checker, prop) => {
-    if (val.hasOwnProperty(prop) || !checker.isOptional) {
-      shapePropError = checker(val[prop], prop, `${location}${name}`, val);
-      return !isError(shapePropError);
-    }
-  });
-  if (isError(shapePropError)) {
-    return shapePropError;
-  }
-}

@@ -8,6 +8,33 @@
 This page is for manual testing of apiCheck.js. Just to give a little human aspect to developing the library :-)
 <script src="dist/apiCheck.js"></script>
 <script>
+
+  apiCheck.config.verbose = true;
+  var optionsCheck = apiCheck.shape({
+    foo: apiCheck.shape({
+      foo1: apiCheck.string.optional,
+      foo2: apiCheck.number
+    }),
+    bar: apiCheck.func.withProperties({
+      bar1: apiCheck.string.optional,
+      bar2: apiCheck.bool
+    }),
+    foobar: apiCheck.shape({
+      foobar1: apiCheck.string.optional,
+      foobar2: apiCheck.instanceOf(Date)
+    }).optional
+  });
+  var myOptions = {
+    foo: {
+      foo1: 'specified',
+      foo2: 'something'
+    }
+  };
+  (function(a) {
+    var apiTypes = apiCheck(optionsCheck, arguments).apiTypes;
+    console.log(JSON.stringify(apiTypes, null, 2));
+  })(myOptions);
+  /*
   // given we have a function like this:
   function foo(bar, foobar) {
     // we can define our api as the first argument to apiCheck.warn
@@ -70,6 +97,7 @@ This page is for manual testing of apiCheck.js. Just to give a little human aspe
     }
   }
   bar('hello!'); // <-- success!
+  */
 </script>
 </body>
 </html>

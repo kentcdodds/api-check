@@ -375,6 +375,91 @@ describe('apiCheck', () => {
       })(1, 2, 3);
       apiCheck.getErrorMessage = originalGetErrorMessage;
     });
+
+    it(`should return a terse message by default`, () => {
+      testApiTypes({
+        __apiCheckData: {strict: false, optional: false, type: 'shape'},
+        shape: {
+          foo: {
+            __apiCheckData: {strict: false, optional: false, type: 'shape'},
+            shape: {
+              foo1: 'String (optional)',
+              foo2: 'Number'
+            }
+          },
+          bar: {
+            __apiCheckData: {
+              strict: false, optional: false, type: 'func.withProperties', missing: 'MISSING THIS FUNC.WITHPROPERTIES'
+            },
+            'func.withProperties': {
+              bar2: 'Boolean <-- YOU ARE MISSING THIS'
+            }
+          }
+        }
+      });
+    });
+
+    it(`should log verbose information when verbose mode is enabled`, () => {
+      apiCheck.config.verbose = true;
+      testApiTypes({
+        __apiCheckData: {strict: false, optional: false, type: 'shape'},
+        shape: {
+          foo: {
+            __apiCheckData: {strict: false, optional: false, type: 'shape'},
+            shape: {
+              foo1: 'String (optional)',
+              foo2: 'Number'
+            }
+          },
+          bar: {
+            __apiCheckData: {
+              strict: false, optional: false, type: 'func.withProperties', missing: 'MISSING THIS FUNC.WITHPROPERTIES'
+            },
+            'func.withProperties': {
+              bar1: 'String (optional)',
+              bar2: 'Boolean <-- YOU ARE MISSING THIS'
+            }
+          },
+          foobar: {
+            __apiCheckData: {
+              strict: false, optional: true, type: 'shape'
+            },
+            shape: {
+              foobar1: 'String (optional)',
+              foobar2: 'Date'
+            }
+          }
+        }
+      });
+      apiCheck.config.verbose = false;
+    });
+
+    function testApiTypes(resultApiTypes) {
+      const optionsCheck = apiCheck.shape({
+        foo: apiCheck.shape({
+          foo1: apiCheck.string.optional,
+          foo2: apiCheck.number
+        }),
+        bar: apiCheck.func.withProperties({
+          bar1: apiCheck.string.optional,
+          bar2: apiCheck.bool
+        }),
+        foobar: apiCheck.shape({
+          foobar1: apiCheck.string.optional,
+          foobar2: apiCheck.instanceOf(Date)
+        }).optional
+      });
+      const myOptions = {
+        foo: {
+          foo1: 'specified',
+          foo2: 3
+        }
+      };
+      (function(a) {
+        const {apiTypes} = apiCheck(optionsCheck, arguments);
+        expect(apiTypes).to.eql([resultApiTypes]);
+      })(myOptions);
+    }
   });
 
   describe('#handleErrorMessage', () => {
