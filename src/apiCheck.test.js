@@ -6,6 +6,17 @@ describe('apiCheck', () => {
   const {getError} = require('./apiCheckUtil');
 
   describe('#', () => {
+    let ipAddressChecker;
+    const ipAddressRegex = /(\d{1,3}\.){3}\d{1,3}/;
+    beforeEach(() => {
+      ipAddressChecker = (val, name, location) => {
+        if (!ipAddressRegex.test(val)) {
+          return getError(name, location, ipAddressChecker.type);
+        }
+      };
+      ipAddressChecker.type = 'ipAddressString';
+      ipAddressChecker.shortType = 'ipAddressString';
+    });
     it('should handle a single argument type specification', () => {
       (function(a) {
         const message = apiCheck(apiCheck.string, arguments).message;
@@ -28,12 +39,6 @@ describe('apiCheck', () => {
     });
 
     it('should accept custom checkers', () => {
-      var ipAddressChecker = (val, name, location) => {
-        if (!/(\d{1,3}\.){3}\d{1,3}/.test(val)) {
-          return getError(name, location, ipAddressChecker.type);
-        }
-      };
-      ipAddressChecker.type = 'ipAddressString';
       (function(a, b) {
         var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
         expect(message).to.be.empty;
@@ -52,6 +57,76 @@ describe('apiCheck', () => {
         expect(
           () => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(error);
       })();
+    });
+
+    describe(`api checking`, () => {
+      const args = {length: 1, 0: '127.0.0.1'};
+      it(`should throw an error when a checker is specified with an incorrect type property`, () => {
+        ipAddressChecker.type = 32;
+        expect(() => apiCheck(ipAddressChecker, args)).to.throw();
+      });
+
+      it(`should not throw an error when a checker is specified with a string type property`, () => {
+        ipAddressChecker.type = 'hey!';
+        expect(() => apiCheck(ipAddressChecker, args)).to.not.throw();
+      });
+
+      it(`should not throw an error when a checker is specified with the correct shape`, () => {
+        ipAddressChecker.type = {
+          __apiCheckData: {
+            type: 'ipAddress',
+            optional: false
+          },
+          ipAddress: ipAddressRegex.toString()
+        };
+        expect(() => apiCheck(ipAddressChecker, args)).to.not.throw();
+      });
+
+      it(`should throw an error when a checker is specified with the incorrect shape`, () => {
+        ipAddressChecker.type = {
+          __apiCheckData: {
+            type: 'ipAddress',
+            optional: false
+          }
+        };
+        expect(() => apiCheck(ipAddressChecker, args)).to.throw();
+
+        ipAddressChecker.type = {
+          __apiCheckData: {
+            type: 'ipAddress',
+            optional: false
+          },
+          ipAddressChecker: 43
+        };
+        expect(() => apiCheck(ipAddressChecker, args)).to.throw();
+
+      });
+
+    });
+
+    describe(`helper text of a checker`, () => {
+      describe(`as a string`, () => {
+        it(`should be printed as is as part of the message`, () => {
+          ipAddressChecker.help = 'This needs to be a valid IP address. Like 127.0.0.1';
+          (function(a, b) {
+            var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+            expect(message).to.contain(ipAddressChecker.help);
+          })('a', 32);
+        });
+      });
+
+      describe(`as a function`, () => {
+        it(`should be invoked and the result added as part of the message`, () => {
+          const suffix = ' is not a valid IP address. Like 127.0.0.1';
+          ipAddressChecker.help = function(val) {
+            return val + suffix;
+          };
+          (function(a, b) {
+            var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+            expect(message).to.contain(suffix);
+          })('a', 32);
+        });
+      });
     });
   });
 
@@ -158,13 +233,13 @@ describe('apiCheck', () => {
     it('should throw an error when no api is passed', () => {
       (function(a) {
         var args = arguments;
-        expect(() => apiCheck(null, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*function/i);
+        expect(() => apiCheck(null, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
       })('a');
     });
     it(`should throw an error when the wrong types are passed`, () => {
       (function(a) {
         var args = arguments;
-        expect(() => apiCheck(true, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*function/i);
+        expect(() => apiCheck(true, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
       })('a');
     });
     it(`should throw an error when there are not enough arguments passed`, () => {

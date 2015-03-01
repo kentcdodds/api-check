@@ -65,7 +65,7 @@ function getFunctionChecker() {
         return notFunction;
       }
       return checkShape(properties, val, name, location);
-    }, withPropsType);
+    }, withPropsType, 'func.withProperties');
   };
 
   functionChecker.childrenCheckers = ['withProperties'];
@@ -133,7 +133,7 @@ function arrayOfCheckGetter(checker) {
     __apiCheckData: {optional: false, type: 'arrayOf'},
     arrayOf: getCheckerDisplay(checker)
   };
-  const shortType = `arrayOf[${getCheckerDisplay(checker)}]`;
+  const shortType = `arrayOf[${getCheckerDisplay(checker, true)}]`;
   return checkerHelpers.wrapInSpecified(function arrayOfCheckerDefinition(val, name, location) {
     if (isError(checkers.array(val)) || !val.every((item) => !isError(checker(item)))) {
       return getError(name, location, shortType);
@@ -146,7 +146,7 @@ function objectOfCheckGetter(checker) {
     __apiCheckData: {optional: false, type: 'objectOf'},
     objectOf: getCheckerDisplay(checker)
   };
-  const shortType = `objectOf[${getCheckerDisplay(checker)}]`;
+  const shortType = `objectOf[${getCheckerDisplay(checker, true)}]`;
   return checkerHelpers.wrapInSpecified(function objectOfCheckerDefinition(val, name, location) {
     const notObject = checkers.object(val, name, location);
     if (isError(notObject)) {
@@ -168,7 +168,7 @@ function typeOrArrayOfCheckGetter(checker) {
     __apiCheckData: {optional: false, type: 'typeOrArrayOf'},
     typeOrArrayOf: getCheckerDisplay(checker)
   };
-  const shortType = `typeOrArrayOf[${getCheckerDisplay(checker)}]`;
+  const shortType = `typeOrArrayOf[${getCheckerDisplay(checker, true)}]`;
   return checkerHelpers.wrapInSpecified(function typeOrArrayOfDefinition(val, name, location, obj) {
     if (isError(checkers.oneOfType([checker, checkers.arrayOf(checker)])(val, name, location, obj))) {
       return getError(name, location, shortType);
@@ -286,7 +286,7 @@ function anyCheckGetter() {
 
 function checkShape(shape, val, name, location) {
   let shapePropError;
-  location = location ? location + '/' : '';
+  location = location ? location + (name ? '/' : '') : '';
   name = name || '';
   each(shape, (checker, prop) => {
     if (val.hasOwnProperty(prop) || !checker.isOptional) {

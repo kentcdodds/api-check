@@ -1,5 +1,5 @@
 const apiCheckUtil = require('./apiCheckUtil');
-const {each, isError, t, arrayify, getCheckerDisplay, typeOf} = apiCheckUtil;
+const {each, isError, t, arrayify, getCheckerDisplay, typeOf, getError} = apiCheckUtil;
 const checkers = require('./checkers');
 let disabled = false;
 
@@ -51,10 +51,12 @@ function apiCheck(api, args, output) {
 }
 
 function checkApiCheckApi(args) {
-
   const s = checkers.string;
   const api = [ // dog fooding here
-    checkers.typeOrArrayOf(checkers.func),
+    checkers.typeOrArrayOf(checkers.func.withProperties({
+      type: checkers.oneOfType([checkers.string, checkerTypeType]),
+      shortType: checkers.string.optional
+    })),
     checkers.args,
     checkers.shape({prefix: s, suffix: s, url: s}).strict.optional
   ];
@@ -71,6 +73,22 @@ function checkApiCheckApi(args) {
   }
 }
 
+checkerTypeType.type = 'object with __apiCheckData property and `${function.type}` property';
+function checkerTypeType(val, name, location) {
+  const wrongShape = checkers.shape({
+    __apiCheckData: checkers.shape({
+      type: checkers.string,
+      optional: checkers.bool
+    })
+  })(val, name, location);
+  if (isError(wrongShape)) {
+    return wrongShape;
+  }
+  if (!val.hasOwnProperty(val.__apiCheckData.type)) {
+    return getError(name, location, checkerTypeType.type);
+  }
+}
+
 function checkApiWithArgs(api, args) {
   let messages = [];
   let failed = false;
@@ -83,7 +101,7 @@ function checkApiWithArgs(api, args) {
     res = checker(arg, null, 'Argument ' + argIndex);
     if (isError(res) && !checker.isOptional) {
       failed = true;
-      messages.push(res.message);
+      messages.push(getCheckerErrorMessage(res, checker, arg));
     } else if (checker.isOptional) {
       argIndex--;
     } else {
@@ -95,6 +113,22 @@ function checkApiWithArgs(api, args) {
   } else {
     return [];
   }
+}
+
+function getCheckerErrorMessage(res, checker, val) {
+  let checkerHelp = getCheckerHelp(checker, val);
+  checkerHelp = checkerHelp ? ' - ' + checkerHelp : '';
+  return res.message + checkerHelp;
+}
+
+function getCheckerHelp({help}, val) {
+  if (!help) {
+    return '';
+  }
+  if (typeof help === 'function') {
+    help = help(val);
+  }
+  return help;
 }
 
 function checkEnoughArgs(api, args) {

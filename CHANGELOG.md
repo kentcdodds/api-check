@@ -3,6 +3,8 @@
 - Fixing the way the `enums` shortType looks.
 - Adding child checker to `func` called `withProperties` which is basically just a `shape` on a function.
 - Making an adjustment to how `location` works in `shape`. This makes it more readable.
+- Adding the ability to specify a `help` property string/function(val) on custom checkers. This (or the result of the invoked function) will be appended to the error message.
+- Adding more strict type checking for custom checkers.
 
 # 3.0.4
 
