@@ -6,9 +6,9 @@ const {
 let checkers = module.exports = {
   array: getTypeOfChecker('Array'),
   bool: getTypeOfChecker('Boolean'),
-  func: getTypeOfChecker('Function'),
   number: getTypeOfChecker('Number'),
   string: getTypeOfChecker('String'),
+  func: getFunctionChecker(),
   object: getObjectChecker(),
 
   instanceOf: instanceCheckGetter,
@@ -35,6 +35,41 @@ function getTypeOfChecker(type) {
       return getError(name, location, type);
     }
   }, type);
+}
+
+function getFunctionChecker() {
+  const type = 'Function';
+  let functionChecker = checkerHelpers.wrapInSpecified(function functionCheckerDefinition(val, name, location) {
+    if (typeOf(val) !== 'function') {
+      return getError(name, location, type);
+    }
+  }, type);
+
+  functionChecker.withProperties = function getWithPropertiesChecker(properties) {
+    const apiError = checkers.objectOf(checkers.func)(properties, 'properties', 'apiCheck.func.withProperties');
+    if (isError(apiError)) {
+      throw apiError;
+    }
+    let props = {};
+    each(properties, (val, prop) => {
+      props[prop] = getCheckerDisplay(val);
+    });
+    const withPropsType = {
+      __apiCheckData: {strict: false, optional: false, type: 'func.withProperties'},
+      'func.withProperties': props
+    };
+
+    return checkerHelpers.wrapInSpecified(function functionWithPropertiesChecker(val, name, location) {
+      const notFunction = checkers.func(val, name, location);
+      if (isError(notFunction)) {
+        return notFunction;
+      }
+      return checkShape(properties, val, name, location);
+    }, withPropsType);
+  };
+
+  functionChecker.childrenCheckers = ['withProperties'];
+  return functionChecker;
 }
 
 function getObjectChecker() {
@@ -113,9 +148,9 @@ function objectOfCheckGetter(checker) {
   };
   const shortType = `objectOf[${getCheckerDisplay(checker)}]`;
   return checkerHelpers.wrapInSpecified(function objectOfCheckerDefinition(val, name, location) {
-    const isObject = checkers.object(val, name, location);
-    if (isError(isObject)) {
-      return isObject;
+    const notObject = checkers.object(val, name, location);
+    if (isError(notObject)) {
+      return notObject;
     }
     const allTypesSuccess = each(val, (item, key) => {
       if (isError(checker(item, key, name))) {
@@ -156,16 +191,7 @@ function getShapeCheckGetter() {
       if (isError(isObject)) {
         return isObject;
       }
-      let shapePropError;
-      each(shape, (checker, prop) => {
-        if (val.hasOwnProperty(prop) || !checker.isOptional) {
-          shapePropError = checker(val[prop], prop, name, val);
-          return !isError(shapePropError);
-        }
-      });
-      if (isError(shapePropError)) {
-        return shapePropError;
-      }
+      return checkShape(shape, val, name, location);
     }, type, 'shape');
 
     let strictType = copy(shapeChecker.type);
@@ -256,4 +282,19 @@ function anyCheckGetter() {
   return checkerHelpers.wrapInSpecified(function anyCheckerDefinition() {
     // don't do anything
   }, 'any');
+}
+
+function checkShape(shape, val, name, location) {
+  let shapePropError;
+  location = location ? location + '/' : '';
+  name = name || '';
+  each(shape, (checker, prop) => {
+    if (val.hasOwnProperty(prop) || !checker.isOptional) {
+      shapePropError = checker(val[prop], prop, `${location}${name}`, val);
+      return !isError(shapePropError);
+    }
+  });
+  if (isError(shapePropError)) {
+    return shapePropError;
+  }
 }

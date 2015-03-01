@@ -178,7 +178,7 @@ describe('apiCheck', () => {
       it('should fallback to an empty object is output is removed', () => {
         var original = apiCheck.config.output;
         apiCheck.config.output = null;
-        expect(getFailure).to.not.throw();
+        expect(getFailureMessage).to.not.throw();
         apiCheck.config.output = original;
       });
 
@@ -188,12 +188,12 @@ describe('apiCheck', () => {
           apiCheck.config.output.prefix = gPrefix;
         });
         it('should prefix the error message', () => {
-          expect(getFailure()).to.match(new RegExp(`^${gPrefix}`));
+          expect(getFailureMessage()).to.match(new RegExp(`^${gPrefix}`));
         });
 
         it('should allow the specification of an additional prefix that comes after the global config prefix', () => {
           var prefix = 'secondary prefix';
-          expect(getFailure({prefix})).to.match(new RegExp(`^${gPrefix} ${prefix}`));
+          expect(getFailureMessage({prefix})).to.match(new RegExp(`^${gPrefix} ${prefix}`));
         });
 
         afterEach(() => {
@@ -207,12 +207,12 @@ describe('apiCheck', () => {
           apiCheck.config.output.suffix = gSuffix;
         });
         it('should suffix the error message', () => {
-          expect(getFailure()).to.match(new RegExp(`${gSuffix}`));
+          expect(getFailureMessage()).to.match(new RegExp(`${gSuffix}`));
         });
 
         it('should allow the specification of an additional suffix that comes after the global config suffix', () => {
           var suffix = 'secondary suffix';
-          expect(getFailure({suffix})).to.match(new RegExp(`${suffix} ${gSuffix}`));
+          expect(getFailureMessage({suffix})).to.match(new RegExp(`${suffix} ${gSuffix}`));
         });
 
         afterEach(() => {
@@ -226,13 +226,13 @@ describe('apiCheck', () => {
           apiCheck.config.output.docsBaseUrl = urlBase;
         });
         it('should not be in the message if a url is not specified', () => {
-          expect(getFailure()).to.not.contain(urlBase);
-          expect(getFailure()).to.not.contain('undefined');
+          expect(getFailureMessage()).to.not.contain(urlBase);
+          expect(getFailureMessage()).to.not.contain('undefined');
         });
 
         it('should be added to the message if a url is specified', () => {
           var url = 'some-error-message';
-          expect(getFailure({url})).to.contain(`${urlBase}${url}`);
+          expect(getFailureMessage({url})).to.contain(`${urlBase}${url}`);
         });
 
         afterEach(() => {
@@ -240,7 +240,7 @@ describe('apiCheck', () => {
         });
       });
 
-      function getFailure(output) {
+      function getFailureMessage(output) {
         var message;
         (function(a) {
           message = apiCheck(apiCheck.string, arguments, output).message;

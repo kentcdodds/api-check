@@ -160,6 +160,23 @@ apiCheck.func(function() {}); // <-- pass
 apiCheck.func(new RegExp()); // <-- fail
 ```
 
+### func.withProperties *
+
+*Not available in React's `propTypes`*
+
+```javascript
+var checker = apiCheck.func.withProperties({
+  type: apiCheck.oneOfType([apiCheck.object, apiCheck.string]),
+  help: apiCheck.string.optional
+});
+function winning(){}
+winning.type = 'awesomeness';
+checker(winning); // <--pass
+
+function losing(){}
+checker(losing); // <-- fail
+```
+
 ### number
 
 ```javascript

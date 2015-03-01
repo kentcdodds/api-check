@@ -33,9 +33,41 @@ describe('checkers', () => {
       expect(checkers.array([])).to.be.undefined;
       expect(checkers.array({})).to.be.an.instanceOf(Error);
     });
-    it('should check function', () => {
-      expect(checkers.func(coveredFunction)).to.be.undefined;
-      expect(checkers.func(null)).to.be.an.instanceOf(Error);
+
+    describe(`function`, () => {
+      it('should check function', () => {
+        expect(checkers.func(coveredFunction)).to.be.undefined;
+        expect(checkers.func(null)).to.be.an.instanceOf(Error);
+      });
+
+      it(`should check for properties on a function`, () => {
+        function myFuncWithProps() {
+        }
+
+        myFuncWithProps.someProp = 'As a string';
+        myFuncWithProps.anotherProp = {
+          anotherFunction: anotherFunctionWithProps
+        };
+        function anotherFunctionWithProps() {
+        }
+
+        anotherFunctionWithProps.aNumber = 32;
+        // OCD about coverage... even in tests...
+        anotherFunctionWithProps();
+        myFuncWithProps();
+
+        const checker = checkers.func.withProperties({
+          someProp: checkers.string,
+          anotherProp: checkers.shape({
+            anotherFunction: checkers.func.withProperties({
+              aNumber: checkers.number
+            })
+          })
+        });
+        expect(checker(myFuncWithProps)).to.be.undefined;
+
+        expect(checker(coveredFunction)).to.be.an.instanceOf(Error);
+      });
     });
   });
 
@@ -245,6 +277,28 @@ describe('checkers', () => {
         milk: checkers.bool
       }).strict;
       expect(check({mint: true, chocolate: true, milk: true, cookies: true})).to.be.an.instanceOf(Error);
+    });
+
+    it(`should display the location of sub-children well`, () => {
+      var obj = {
+        person: {
+          home: {
+            location: {
+              street: 324
+            }
+          }
+        }
+      };
+      const check = checkers.shape({
+        person: checkers.shape({
+          home: checkers.shape({
+            location: checkers.shape({
+              street: checkers.string
+            })
+          })
+        })
+      });
+      expect(check(obj).message).to.match(/street.*?at.*?person\/home\/location.*?must be.*?string/i);
     });
 
     describe('ifNot', () => {

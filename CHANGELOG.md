@@ -1,6 +1,8 @@
 # Latest
 
 - Fixing the way the `enums` shortType looks.
+- Adding child checker to `func` called `withProperties` which is basically just a `shape` on a function.
+- Making an adjustment to how `location` works in `shape`. This makes it more readable.
 
 # 3.0.4
 
