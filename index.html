@@ -9,6 +9,8 @@ This page is for manual testing of apiCheck.js. Just to give a little human aspe
 <script src="dist/apiCheck.js"></script>
 <script>
 
+
+  /*
   apiCheck.config.verbose = true;
   var optionsCheck = apiCheck.shape({
     foo: apiCheck.shape({
@@ -34,7 +36,6 @@ This page is for manual testing of apiCheck.js. Just to give a little human aspe
     var apiTypes = apiCheck(optionsCheck, arguments).apiTypes;
     console.log(JSON.stringify(apiTypes, null, 2));
   })(myOptions);
-  /*
   // given we have a function like this:
   function foo(bar, foobar) {
     // we can define our api as the first argument to apiCheck.warn

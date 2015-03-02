@@ -51,17 +51,20 @@ function apiCheck(api, args, output) {
 }
 
 function checkApiCheckApi(args) {
-  const s = checkers.string;
+  const os = checkers.string.optional;
   const api = [ // dog fooding here
     checkers.typeOrArrayOf(checkers.func.withProperties({
       type: checkers.oneOfType([checkers.string, checkerTypeType]).optional,
-      displayName: checkers.string.optional,
-      shortType: checkers.string.optional,
+      displayName: os,
+      shortType: os,
       notOptional: checkers.bool.optional,
       childrenCheckers: checkers.arrayOf(checkers.string).optional
     })),
     checkers.args,
-    checkers.shape({prefix: s, suffix: s, url: s}).strict.optional
+    checkers.shape({
+      prefix: os, suffix: os, urlSuffix: os, // appended case
+      onlyPrefix: os, onlySuffix: os, url: os // override case
+    }).strict.optional
   ];
   let errors = checkEnoughArgs(api, args);
   if (!errors.length) {
@@ -96,16 +99,18 @@ function checkerTypeType(checkerType, name, location) {
 }
 
 function checkApiWithArgs(api, args) {
+  /* jshint maxcomplexity:6 */
   let messages = [];
   let failed = false;
   let checkerIndex = 0;
   let argIndex = 0;
-  let arg, checker, res;
+  let arg, checker, res, lastChecker;
   /* jshint -W084 */
   while (checker = api[checkerIndex++]) {
     arg = args[argIndex++];
     res = checker(arg, null, 'Argument ' + argIndex);
-    if (isError(res) && !checker.isOptional) {
+    lastChecker = checkerIndex >= api.length;
+    if (isError(res) && (!checker.isOptional || lastChecker)) {
       failed = true;
       messages.push(getCheckerErrorMessage(res, checker, arg));
     } else if (checker.isOptional) {
@@ -164,14 +169,37 @@ function handleErrorMessage(message, shouldThrow) {
 }
 
 function getErrorMessage(api, args, messages = [], output = {}) {
-  /* jshint maxcomplexity:7 */
   let gOut = module.exports.config.output || {};
-  let prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
-  let suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
-  let url = gOut.docsBaseUrl && output.url && `${gOut.docsBaseUrl}${output.url}`.trim();
+  let prefix = getPrefix();
+  let suffix = getSuffix();
+  let url = getUrl();
   let message = `apiCheck failed! ${messages.join(', ')}`;
   var passedAndShouldHavePassed = '\n\n' + buildMessageFromApiAndArgs(api, args);
   return `${prefix} ${message} ${suffix} ${url || ''}${passedAndShouldHavePassed}`.trim();
+
+  function getPrefix() {
+    let prefix = output.onlyPrefix;
+    if (!prefix) {
+      prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
+    }
+    return prefix;
+  }
+
+  function getSuffix() {
+    let suffix = output.onlySuffix;
+    if (!suffix) {
+      suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
+    }
+    return suffix;
+  }
+
+  function getUrl() {
+    let url = output.url;
+    if (!url) {
+      url = gOut.docsBaseUrl && output.urlSuffix && `${gOut.docsBaseUrl}${output.urlSuffix}`.trim();
+    }
+    return url;
+  }
 }
 
 

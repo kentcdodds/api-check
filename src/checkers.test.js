@@ -291,6 +291,15 @@ describe('checkers', () => {
       expect(check({mint: true, chocolate: true, milk: true, cookies: true})).to.be.an.instanceOf(Error);
     });
 
+    it(`should fail when it is strict and it is an invalid shape`, () => {
+      var check = checkers.shape({
+        mint: checkers.bool,
+        chocolate: checkers.bool,
+        milk: checkers.bool
+      }).strict;
+      expect(check({mint: true, chocolate: true, milk: 42})).to.be.an.instanceOf(Error);
+    });
+
     it(`should display the location of sub-children well`, () => {
       var obj = {
         person: {

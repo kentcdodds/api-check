@@ -60,9 +60,15 @@ describe('apiCheck', () => {
     it('should handle when the api is an array and the arguments array is empty', () => {
       const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?0/i;
       (function(a, b) {
-        expect(
-          () => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(error);
+        expect(() => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(error);
       })();
+    });
+
+    it(`should return an error even when a checker is optional and the last argument`, () => {
+      (function(a, b) {
+        const result = apiCheck([apiCheck.string, apiCheck.bool.optional], arguments);
+        expect(result.message).to.match(/argument 2.*must be.*boolean/i);
+      })('hi', 32);
     });
 
 
@@ -278,6 +284,13 @@ describe('apiCheck', () => {
           expect(getFailureMessage({prefix})).to.match(new RegExp(`^${gPrefix} ${prefix}`));
         });
 
+        it(`should be overrideable by the specific call`, () => {
+          const onlyPrefix = 'overriding prefix';
+          const message = getFailureMessage({onlyPrefix});
+          expect(message).to.match(new RegExp(`^${onlyPrefix}`));
+          expect(message).to.not.contains(gPrefix);
+        });
+
         afterEach(() => {
           apiCheck.config.output.prefix = '';
         });
@@ -289,12 +302,19 @@ describe('apiCheck', () => {
           apiCheck.config.output.suffix = gSuffix;
         });
         it('should suffix the error message', () => {
-          expect(getFailureMessage()).to.match(new RegExp(`${gSuffix}`));
+          expect(getFailureMessage()).to.contain(`${gSuffix}`);
         });
 
         it('should allow the specification of an additional suffix that comes after the global config suffix', () => {
           var suffix = 'secondary suffix';
-          expect(getFailureMessage({suffix})).to.match(new RegExp(`${suffix} ${gSuffix}`));
+          expect(getFailureMessage({suffix})).to.contain(`${suffix} ${gSuffix}`);
+        });
+
+        it(`should be overrideable by the specific call`, () => {
+          const onlySuffix = 'overriding suffix';
+          const message = getFailureMessage({onlySuffix});
+          expect(message).to.contain(onlySuffix);
+          expect(message).to.not.contain(gSuffix);
         });
 
         afterEach(() => {
@@ -303,23 +323,34 @@ describe('apiCheck', () => {
       });
 
       describe('url', () => {
-        var urlBase = 'http://www.example.com/errors#';
+        var docsBaseUrl = 'http://www.example.com/errors#';
         beforeEach(() => {
-          apiCheck.config.output.docsBaseUrl = urlBase;
+          apiCheck.config.output.docsBaseUrl = docsBaseUrl;
         });
         it('should not be in the message if a url is not specified', () => {
-          expect(getFailureMessage()).to.not.contain(urlBase);
+          expect(getFailureMessage()).to.not.contain(docsBaseUrl);
           expect(getFailureMessage()).to.not.contain('undefined');
         });
 
         it('should be added to the message if a url is specified', () => {
-          var url = 'some-error-message';
-          expect(getFailureMessage({url})).to.contain(`${urlBase}${url}`);
+          var urlSuffix = 'some-error-message';
+          expect(getFailureMessage({urlSuffix})).to.contain(`${docsBaseUrl}${urlSuffix}`);
+        });
+
+        it(`should be overrideable by the specific call`, () => {
+          const url = 'http://www.example.com/otherErrors#some-other-url';
+          const message = getFailureMessage({url});
+          expect(message).to.contain(url);
+          expect(message).to.not.contain(docsBaseUrl);
         });
 
         afterEach(() => {
           apiCheck.config.output.docsBaseUrl = '';
         });
+      });
+
+      it(`should throw an error if you include extra properties`, () => {
+        expect(() => getFailureMessage({myProp: true})).to.throw(/argument 3.*?cannot have extra properties.*?myProp/i);
       });
 
       function getFailureMessage(output) {
@@ -329,7 +360,9 @@ describe('apiCheck', () => {
         })();
         return message;
       }
+
     });
+
   });
 
 

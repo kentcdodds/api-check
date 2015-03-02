@@ -1,7 +1,13 @@
+# 5.0.0
+
+- Adding extra output options to override the global ones on a per call basis.
+- Changing `output.url` to `output.urlSuffix` in favor of `output.url` overriding the rest of the url
+- Fixing bug with ending optional arguments
+
 # 4.0.1
 
 - Forgot to give the same love to `shape.strict` that I gave to `shape`.
-- Relaxing the requirements of a
+- Relaxing the requirements of a type checker
 
 # 4.0.0
 
