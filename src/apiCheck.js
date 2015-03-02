@@ -23,6 +23,7 @@ const getApiCheckInstanceCheckers = [
 
 module.exports = getApiCheckInstance;
 module.exports.internalChecker = apiCheckApiCheck;
+module.exports.utils = apiCheckUtil;
 
 each(checkers, (checker, name) => module.exports[name] = checker);
 

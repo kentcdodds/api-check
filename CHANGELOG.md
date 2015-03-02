@@ -1,3 +1,7 @@
+# 6.0.2
+
+- Adding `utils` to the main export.
+
 # 6.0.1
 
 - Somehow I forgot to run the build for 6.0.0
