@@ -1,3 +1,8 @@
+# 4.0.1
+
+- Forgot to give the same love to `shape.strict` that I gave to `shape`.
+- Relaxing the requirements of a
+
 # 4.0.0
 
 - Fixing the way the `enums` shortType looks.

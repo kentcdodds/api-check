@@ -245,8 +245,8 @@ function getShapeCheckGetter() {
       }
     }, type, 'shape');
 
-    function strictType(terse) {
-      return shapeTypes;
+    function strictType() {
+      return type(...arguments);
     }
 
     strictType.__apiCheckData = copy(shapeChecker.type.__apiCheckData);

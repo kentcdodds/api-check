@@ -38,17 +38,23 @@ describe('apiCheck', () => {
       })('a', true);
     });
 
-    it('should accept custom checkers', () => {
-      (function(a, b) {
-        var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
-        expect(message).to.be.empty;
-      })('a', '127.0.0.1');
+    describe(`custom checkers`, () => {
+      it('should be accepted', () => {
+        (function(a, b) {
+          var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+          expect(message).to.be.empty;
+        })('a', '127.0.0.1');
 
 
-      (function(a, b) {
-        var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
-        expect(message).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
-      })('a', 32);
+        (function(a, b) {
+          var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+          expect(message).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
+        })('a', 32);
+      });
+
+      it(`be accepted even if the function has no properties`, () => {
+        expect(() => apiCheck([() => ''], {length: 1, 0: ''})).to.not.throw();
+      });
     });
 
     it('should handle when the api is an array and the arguments array is empty', () => {
@@ -58,6 +64,7 @@ describe('apiCheck', () => {
           () => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(error);
       })();
     });
+
 
     describe(`api checking`, () => {
       const args = {length: 1, 0: '127.0.0.1'};

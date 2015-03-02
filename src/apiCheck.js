@@ -54,7 +54,7 @@ function checkApiCheckApi(args) {
   const s = checkers.string;
   const api = [ // dog fooding here
     checkers.typeOrArrayOf(checkers.func.withProperties({
-      type: checkers.oneOfType([checkers.string, checkerTypeType]),
+      type: checkers.oneOfType([checkers.string, checkerTypeType]).optional,
       displayName: checkers.string.optional,
       shortType: checkers.string.optional,
       notOptional: checkers.bool.optional,

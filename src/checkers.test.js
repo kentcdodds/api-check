@@ -327,7 +327,6 @@ describe('checkers', () => {
         candy: {}
       };
       const typeTypes = check.type({terse: true, obj, addHelpers: true});
-      console.log(typeTypes);
       expect(typeTypes).to.eql({
         chocolate: 'Boolean <-- YOU ARE MISSING THIS',
         mint: 'Boolean (optional)',
@@ -338,6 +337,28 @@ describe('checkers', () => {
           },
           shape: {
             good: 'Boolean <-- YOU ARE MISSING THIS'
+          }
+        }
+      });
+    });
+
+    it(`should handle a checker with no type and still look ok`, () => {
+      const check = checkers.shape({
+        voyager: checkers.shape({
+          seasons: coveredFunction
+        })
+      });
+      const obj = {
+        voyager: {
+          seasons: 7
+        }
+      };
+      const typeTypes = check.type({terse: true, obj, addHelpers: true});
+      expect(typeTypes).to.eql({
+        voyager: {
+          __apiCheckData: {type: 'shape', strict: false, optional: false},
+          shape: {
+            seasons: 'coveredFunction'
           }
         }
       });
