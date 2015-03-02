@@ -1,3 +1,7 @@
+# 6.0.0
+
+- You must now create an instance of `apiCheck` by invoking `apiCheck`. This allows multiple instances on a single page so many libraries can use their own instance and not conflict with the application's instance. Specifically useful for the global config options. ([#7](/../../issues/7))
+
 # 5.0.0
 
 - Adding extra output options to override the global ones on a per call basis.

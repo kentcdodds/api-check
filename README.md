@@ -18,7 +18,7 @@ Components.
 
 apiCheck.js utilizes [UMD](https://github.com/umdjs/umd), so you can:
 
-`var apiCheck = require('api-check');` (also available as AMD module or global)
+`var apiCheck = require('api-check')(/* your custom options and checkers*/);` (also available as AMD module or global)
 
 ## Example
 

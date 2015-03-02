@@ -1,5 +1,6 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
+const {coveredFunction} = require('./test.utils');
 describe('apiCheckUtil', () => {
   const {
     each, checkerHelpers, getCheckerDisplay, copy, list,
@@ -66,10 +67,8 @@ describe('apiCheckUtil', () => {
     describe(`setupChecker`, () => {
       let myChecker;
       beforeEach(() => {
-        myChecker = function myChecker() {
-        };
+        myChecker = coveredFunction();
         myChecker.type = 'Custom type';
-        myChecker(); // full coverage
       });
       it(`should have optional added`, () => {
         checkerHelpers.setupChecker(myChecker);

@@ -3,5 +3,9 @@ module.exports = {
 };
 
 function coveredFunction() {
+  function manipulateableCoveredFunction() {
+  }
+  manipulateableCoveredFunction();
+  return manipulateableCoveredFunction;
 }
 coveredFunction();

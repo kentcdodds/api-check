@@ -2,8 +2,63 @@
 var expect = require('chai').expect;
 const {coveredFunction} = require('./test.utils');
 describe('apiCheck', () => {
-  var apiCheck = require('./index');
+  var apiCheck = require('./index')();
   const {getError} = require('./apiCheckUtil');
+
+  describe(`main export`, () => {
+    const getApiCheck = require('./index');
+    it(`should allow you to create instances of apiCheck that do not conflict`, () => {
+      const apiCheck1 = getApiCheck({
+        output: {
+          prefix: 'apiCheck1'
+        }
+      });
+      const apiCheck2 = getApiCheck({
+        output: {
+          prefix: 'apiCheck2'
+        }
+      });
+      const args = {length: 1, 0: 23};
+      expect(apiCheck1(apiCheck1.string, args).message).to.contain('apiCheck1');
+      expect(apiCheck1(apiCheck1.string, args).message).to.not.contain('apiCheck2');
+
+      expect(apiCheck2(apiCheck2.string, args).message).to.contain('apiCheck2');
+      expect(apiCheck2(apiCheck2.string, args).message).to.not.contain('apiCheck1');
+    });
+
+    it(`should throw an error when the config passed is improperly shaped`, () => {
+      expect(() => getApiCheck({prefix: 'apiCheck1'})).to.throw(
+        /creating an instance of apiCheck apiCheck failed(.|\n)*?prefix.*?apiCheck1/i
+      );
+    });
+
+    it(`should throw an error when the checkers passed are improperly shaped`, () => {
+      const myImproperChecker = coveredFunction();
+      myImproperChecker.type = false; // must be string or object
+      expect(() => getApiCheck(null, {myChecker: myImproperChecker})).to.throw(
+        /creating an instance of apiCheck apiCheck failed(.|\n)*?myChecker/i
+      );
+    });
+
+    it(`should allow for specifying only default config`, () => {
+      const url = 'http://my.example.com';
+      const apiCheck1 = getApiCheck({
+        output: {url}
+      });
+      expect(apiCheck1.config.output.url).to.equal(url);
+    });
+
+    it(`should allow for specifying both extra checkers and default config`, () => {
+      const url = 'http://my.example.com';
+      const apiCheck1 = getApiCheck({
+        output: {url}
+      }, {
+        myChecker: coveredFunction
+      });
+      expect(apiCheck1.config.output.url).to.equal(url);
+      expect(apiCheck1.myChecker).to.equal(coveredFunction);
+    });
+  });
 
   describe('#', () => {
     let ipAddressChecker;

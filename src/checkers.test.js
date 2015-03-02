@@ -42,20 +42,15 @@ describe('checkers', () => {
 
       describe(`.withProperties`, () => {
         it(`should check for properties on a function`, () => {
-          function myFuncWithProps() {
-          }
+          const myFuncWithProps = coveredFunction();
+
+          const anotherFunctionWithProps = coveredFunction();
+          anotherFunctionWithProps.aNumber = 32;
 
           myFuncWithProps.someProp = 'As a string';
           myFuncWithProps.anotherProp = {
             anotherFunction: anotherFunctionWithProps
           };
-          function anotherFunctionWithProps() {
-          }
-
-          anotherFunctionWithProps.aNumber = 32;
-          // OCD about coverage... even in tests...
-          anotherFunctionWithProps();
-          myFuncWithProps();
 
           const checker = checkers.func.withProperties({
             someProp: checkers.string,
