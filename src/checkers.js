@@ -208,7 +208,7 @@ function getShapeCheckGetter() {
             'missing', 'MISSING THIS ' + item, ' <-- YOU ARE MISSING THIS'
           );
         } else if (specified) {
-          let error = checker(obj[prop]);
+          let error = checker(obj[prop], prop, null, obj);
           if (isError(error)) {
             addHelper('error', 'THIS IS THE PROBLEM: ' + error.message, ' <-- THIS IS THE PROBLEM: ' + error.message);
           }

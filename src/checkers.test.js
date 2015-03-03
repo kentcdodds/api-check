@@ -337,7 +337,7 @@ describe('checkers', () => {
         candy: {
           __apiCheckData: {
             strict: false, optional: false, type: 'shape',
-            error: 'THIS IS THE PROBLEM: Required `good` not specified. Must be `Boolean`'
+            error: 'THIS IS THE PROBLEM: Required `good` not specified in `candy`. Must be `Boolean`'
           },
           shape: {
             good: 'Boolean <-- YOU ARE MISSING THIS'
@@ -520,6 +520,35 @@ describe('checkers', () => {
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
         expect(check({cookies: 42, mint: true, chip: true})).to.be.an.instanceOf(Error);
+      });
+
+      it(`should not throw an error if you specify onlyIf with a checker`, () => {
+        const __apiCheckDataChecker = checkers.shape({
+          type: checkers.oneOf(['shape']),
+          strict: checkers.oneOf([false])
+        });
+        const shapeChecker = checkers.func.withProperties({
+          type: checkers.oneOfType([
+            checkers.func.withProperties({
+              __apiCheckData: __apiCheckDataChecker
+            }),
+            checkers.shape({
+              __apiCheckData: __apiCheckDataChecker
+            })
+          ])
+        });
+        const check = checkers.shape({
+          oneChecker: checkers.shape.onlyIf('otherChecker', shapeChecker).optional,
+          otherChecker: shapeChecker.optional
+        });
+        const invalidValue = {
+          oneChecker: checkers.shape({})
+        };
+        expect(() => {
+          const result = check(invalidValue);
+          expect(result).to.be.an.instanceOf(Error);
+          check.type({addHelpers: true, obj: invalidValue}); // this throws the error. Bug. reproduced. ᕙ(⇀‸↼‶)ᕗ
+        }).to.not.throw();
       });
     });
   });

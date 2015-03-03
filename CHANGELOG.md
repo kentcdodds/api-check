@@ -1,3 +1,7 @@
+# 6.0.4
+
+- Fixing bug with `onlyIf` when getting the type for a `shape`.
+
 # 6.0.3
 
 - Adding .npmignore
