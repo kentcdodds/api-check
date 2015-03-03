@@ -206,17 +206,18 @@ function checkApiWithArgs(api, args) {
   let failed = false;
   let checkerIndex = 0;
   let argIndex = 0;
-  let arg, checker, res, lastChecker, argName;
+  let arg, checker, res, lastChecker, argName, argFailed;
   /* jshint -W084 */
   while (checker = api[checkerIndex++]) {
     arg = args[argIndex++];
     argName = 'Argument ' + argIndex + (checker.isOptional ? ' (optional)' : '');
     res = checker(arg, null, argName);
+    argFailed = isError(res);
     lastChecker = checkerIndex >= api.length;
-    if (isError(res) && (!checker.isOptional || lastChecker)) {
+    if (argFailed && (!checker.isOptional || lastChecker)) {
       failed = true;
       messages.push(getCheckerErrorMessage(res, checker, arg));
-    } else if (checker.isOptional) {
+    } else if (argFailed && checker.isOptional) {
       argIndex--;
     } else {
       messages.push(`${t(argName)} passed`);

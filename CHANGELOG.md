@@ -1,3 +1,7 @@
+# 6.0.5
+
+- Fixing bug where optional arguments were being tested against the wrong checkers.
+
 # 6.0.4
 
 - Fixing bug with `onlyIf` when getting the type for a `shape`.

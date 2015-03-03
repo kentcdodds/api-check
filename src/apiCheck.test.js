@@ -93,6 +93,19 @@ describe('apiCheck', () => {
       })('a', true);
     });
 
+    it(`should handle a final two optional arguments`, () => {
+      (function(a, b, c) {
+        var message = apiCheck([apiCheck.string, apiCheck.oneOfType([
+          apiCheck.arrayOf(apiCheck.string),
+          apiCheck.shape({name: apiCheck.string})
+        ]).optional, apiCheck.shape({
+          prop1: apiCheck.shape.onlyIf('prop2', apiCheck.string).optional,
+          prop2: apiCheck.shape.onlyIf('prop1', apiCheck.string).optional
+        }).optional], arguments).message;
+        expect(message).to.be.empty;
+      })('a', ['1', '2', 'hey!']);
+    });
+
     describe(`custom checkers`, () => {
       it('should be accepted', () => {
         (function(a, b) {
