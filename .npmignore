@@ -1,0 +1,12 @@
+coverage
+node_modules
+other
+.editorconfig
+.gitignore
+.jshintrc
+.travis.yml
+bower.json
+index.html
+npm-debug.log
+webpack.config.js
+webpack.config.minify.js

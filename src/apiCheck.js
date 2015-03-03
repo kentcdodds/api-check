@@ -70,7 +70,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
   function apiCheck(api, args, output) {
     /* jshint maxcomplexity:8 */
     if (disabled) {
-      return '';
+      return {apiTypes: {}, argTypes: {}}; // empty version of what is normally returned
     }
     checkApiCheckApi(arguments);
     const arrayArgs = Array.prototype.slice.call(args);

@@ -1,3 +1,8 @@
+# 6.0.3
+
+- Adding .npmignore
+- correctly returning what should be returned when it's disabled
+
 # 6.0.2
 
 - Adding `utils` to the main export.
