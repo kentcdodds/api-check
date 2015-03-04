@@ -1,3 +1,7 @@
+# 6.0.8
+
+- Fixing bug when specifying custom functions that don't have a `type` property.
+
 # 6.0.7
 
 - Removing `.idea` folder from npm and bower. (－‸ლ)

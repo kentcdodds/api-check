@@ -201,7 +201,7 @@ function getShapeCheckGetter() {
       function modifyTypeDisplayToHelpOut(ret, prop, specified, checker, required) {
         if (!specified && required && !checker.isOptional) {
           let item = 'ITEM';
-          if (checker.type.__apiCheckData) {
+          if (checker.type && checker.type.__apiCheckData) {
             item = checker.type.__apiCheckData.type.toUpperCase();
           }
           addHelper(

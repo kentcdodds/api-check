@@ -368,6 +368,26 @@ describe('checkers', () => {
       });
     });
 
+    it(`should handle a checker with no type and not break when there's a failure`, () => {
+      const check = checkers.shape({
+        voyager: checkers.shape({
+          seasons: coveredFunction
+        })
+      });
+      const obj = {
+        voyager: 'failure!?'
+      };
+      const typeTypes = check.type({terse: true, obj, addHelpers: true});
+      expect(typeTypes).to.eql({
+        voyager: {
+          __apiCheckData: {type: 'shape', strict: false, optional: false, error: 'THIS IS THE PROBLEM: `voyager` must be `Object`'},
+          shape: {
+            seasons: 'coveredFunction <-- YOU ARE MISSING THIS'
+          }
+        }
+      });
+    });
+
     describe('ifNot', () => {
 
       it('should pass if the specified property exists but the other does not', () => {
