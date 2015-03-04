@@ -1,6 +1,6 @@
 /*jshint expr: true*/
 var expect = require('chai').expect;
-const {coveredFunction} = require('./test.utils');
+const {coveredFunction, anonymousFn} = require('./test.utils');
 describe('apiCheck', () => {
   var apiCheck = require('./index')();
   const {getError} = require('./apiCheckUtil');
@@ -164,6 +164,16 @@ describe('apiCheck', () => {
         const result = apiCheck([apiCheck.string, apiCheck.bool.optional], arguments);
         expect(result.message).to.match(/argument 2.*must be.*boolean/i);
       })('hi', 32);
+    });
+
+    it(`should show the user what they provided in a good way`, () => {
+      (function(a, b, c) {
+        c(); // test coverage...
+        const result = apiCheck([apiCheck.string, apiCheck.func], arguments);
+        expect(result.message).to.match(
+          makeSpacedRegex('you passed coveredFunction false anonymous function types of function boolean function')
+        );
+      })(coveredFunction, false, function() {});
     });
 
 

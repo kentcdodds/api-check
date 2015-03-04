@@ -1,3 +1,7 @@
+# 6.0.10
+
+- Making output of user's arguments easier to read by replacing `null` with the function name.
+
 # 6.0.9
 
 - Fixing bug with optional arguments.

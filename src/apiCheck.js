@@ -179,7 +179,10 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     api = arrayify(api);
     args = arrayify(args);
     let {apiTypes, argTypes} = getTypes(api, args);
-    const passedArgs = args.length ? JSON.stringify(args, null, 2) : 'nothing';
+    let copy = args.slice();
+    let replacedItems = [];
+    replaceFunctionWithName(copy);
+    const passedArgs = copy.length ? JSON.stringify(copy, null, 2) : 'nothing';
     argTypes = args.length ? JSON.stringify(argTypes, null, 2) : 'nothing';
     apiTypes = apiTypes.length ? JSON.stringify(apiTypes, null, 2) : 'nothing';
     const n = '\n';
@@ -188,6 +191,20 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
       `With the types of:${n}${argTypes}`,
       `The API calls for:${n}${apiTypes}`
     ].join(n + n);
+
+    function replaceFunctionWithName(obj) {
+      each(obj, (val, name) => {
+        /* jshint maxcomplexity:6 */
+        if (replacedItems.indexOf(val) === -1) { // avoid recursive problems
+          replacedItems.push(val);
+          if (typeof val === 'object') {
+            replaceFunctionWithName(obj);
+          } else if (typeof val === 'function') {
+            obj[name] = val.displayName || val.name || 'anonymous function';
+          }
+        }
+      });
+    }
   }
 
   function getTypes(api, args) {
