@@ -1,3 +1,7 @@
+# 6.0.7
+
+- Removing `.idea` folder from npm and bower. (－‸ლ)
+
 # 6.0.6
 
 - Adding `passed`, `failed`, and `message` to what is returned when apiCheck passes (or when it's disabled).
