@@ -100,6 +100,20 @@ describe('apiCheck', () => {
       })('a', true);
     });
 
+    it(`should handle the crazy optional specifications`, () => {
+      function crazyFunction() {
+        var message = apiCheck([
+          apiCheck.string.optional, apiCheck.number.optional, apiCheck.bool,
+          apiCheck.object.optional, apiCheck.func.optional, apiCheck.array,
+          apiCheck.string.optional, apiCheck.func
+        ], arguments).message;
+        expect(message).to.be.empty;
+      }
+      crazyFunction('string', true, coveredFunction, [], coveredFunction);
+      crazyFunction(32, false, {}, [], 'hey!', coveredFunction);
+      crazyFunction(false, {}, [], coveredFunction);
+    });
+
     it(`should handle a final two optional arguments`, () => {
       (function(a, b, c) {
         var message = apiCheck([apiCheck.string, apiCheck.oneOfType([
