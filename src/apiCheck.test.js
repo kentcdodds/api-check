@@ -106,6 +106,12 @@ describe('apiCheck', () => {
       })('a', ['1', '2', 'hey!']);
     });
 
+    it(`should handle specifying an array instead of arguments`, () => {
+      const result = apiCheck([apiCheck.string, apiCheck.bool], ['hi', true]);
+      expect(result.passed).to.be.true;
+      expect(result.message).to.be.empty;
+    });
+
     describe(`custom checkers`, () => {
       it('should be accepted', () => {
         (function(a, b) {

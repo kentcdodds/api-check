@@ -70,7 +70,11 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
   function apiCheck(api, args, output) {
     /* jshint maxcomplexity:8 */
     if (disabled) {
-      return {apiTypes: {}, argTypes: {}}; // empty version of what is normally returned
+      return {
+        apiTypes: {}, argTypes: {},
+        passed: true, message: '',
+        failed: false
+      }; // empty version of what is normally returned
     }
     checkApiCheckApi(arguments);
     const arrayArgs = Array.prototype.slice.call(args);
@@ -86,6 +90,11 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     if (messages.length) {
       returnObject.message = apiCheck.getErrorMessage(api, arrayArgs, messages, output);
       returnObject.failed = true;
+      returnObject.passed = false;
+    } else {
+      returnObject.message = '';
+      returnObject.passed = true;
+      returnObject.failed = false;
     }
     return returnObject;
   }
@@ -94,7 +103,9 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     const os = checkers.string.optional;
     const api = [ // dog fooding here
       checkers.typeOrArrayOf(checkerFnChecker),
-      checkers.args,
+      checkers.oneOfType([
+        checkers.args, checkers.array
+      ]),
       checkers.shape({
         prefix: os, suffix: os, urlSuffix: os, // appended case
         onlyPrefix: os, onlySuffix: os, url: os // override case

@@ -120,12 +120,15 @@ looking at it for a while.
 
 ### failed (boolean)
 
-This will only be present if there was a failure. Key off of this to know if the apiCheck failed.
+Will be false when the check passes, and true when it fails
+
+### passed (boolean)
+
+Will be true when the check passes, and false when it fails
 
 ### message (string)
 
-If the check failed, this will be a useful message for display to the user
-
+If the check failed, this will be a useful message for display to the user. If it passed, this will be an empty string
 
 Also note that if you only have one argument, then the first argument to the `apiCheck` function can simply be the
 checker function. For example:
@@ -134,8 +137,7 @@ checker function. For example:
 apiCheck(apiCheck.bool, arguments);
 ```
 
-(Note, the primary use case for `apiCheck` is for checking arguments, hence the second argument should always be an
-arguments-like thing (must pass [`args`](#args-)).
+The second argument can either be an arguments-like object or an array.
 
 ## Supported types
 

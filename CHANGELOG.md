@@ -1,3 +1,8 @@
+# 6.0.6
+
+- Adding `passed`, `failed`, and `message` to what is returned when apiCheck passes (or when it's disabled).
+- Loosening the api to `apiCheck`. You now can pass an array instead of an arguments-like object. It's much easier to deal with if you're not actually passing arguments.
+
 # 6.0.5
 
 - Fixing bug where optional arguments were being tested against the wrong checkers.
