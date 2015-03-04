@@ -10,7 +10,7 @@ It's like [ReactJS `propTypes`](http://facebook.github.io/react/docs/reusable-co
 it's very heavily inspired by this concept. It's purpose is for normal JavaScript functions rather than just React
 Components.
 
-![Demo Screenshot](other/screenshot.png)
+[![Demo Screenshot](other/screenshot.png)](http://jsbin.com/hibocu/edit?js,console,output)
 
 ## Installation
 
