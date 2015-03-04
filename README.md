@@ -25,6 +25,18 @@ apiCheck.js utilizes [UMD](https://github.com/umdjs/umd), so you can:
 Note, there are a bunch of tests. Those should be instructive as well.
 
 ```javascript
+var apiCheck = require('api-check)({
+  /* config options */
+  output: {
+    prefix: 'app/lib Name',
+    suffix: 'Good luck!',
+    docsBaseUrl: 'http://www.example.com/error-docs#'
+  },
+  verbose: false
+}, {
+  /* custom checkers if you wanna */
+});
+
 // given we have a function like this:
 function foo(bar, foobar) {
   // we can define our api as the first argument to apiCheck.warn
@@ -38,27 +50,42 @@ foo(3, ['a','b','c']);
 foo('whatever', false);
 
 
-// here's something a little more complex
+// here's something a little more complex (this is what's in the screenshot and [the demo](http://jsbin.com/hibocu/edit?js,console,output))
+var myCheck = apiCheck({
+  output: {
+    prefix: 'myApp',
+    suffix: 'see docs -->',
+    docsBaseUrl: 'http://example.com/error-descriptions#'
+  }
+});
 function doSomething(person, options, callback) {
-  apiCheck.warn([ // you can also do apiCheck.throw to throw an exception
-    apiCheck.shape({
-      name: apiCheck.shape({
-        first: apiCheck.string,
-        last: apiCheck.string
+  myCheck.warn([ // you can also do myCheck.throw to throw an exception
+    myCheck.shape({
+      name: myCheck.shape({
+        first: myCheck.string,
+        last: myCheck.string
       }),
-      age: apiCheck.number,
-      isOld: apiCheck.bool,
-      walk: apiCheck.func,
-      childrenNames: apiCheck.arrayOf(apiCheck.string).optional
+      age: myCheck.number,
+      isOld: myCheck.bool,
+      walk: myCheck.func,
+      ipAddress: function(val, name, location) {
+        if (!/(\d{1,3}\.){3}\d{1,3}/.test(val)) {
+          return myCheck.utils.getError(name, location, 'ipAddress');
+        }
+      },
+      childrenNames: myCheck.arrayOf(myCheck.string).optional
     }),
-    apiCheck.any.optional,
-    apiCheck.func
-  ], arguments);
+    myCheck.any.optional,
+    myCheck.func
+  ], arguments, {
+    prefix: 'doSomething',
+    suffix: 'Good luck!',
+    urlSuffix: 'dosomething-api-check-failure'
+  });
 
   // do stuff
 }
 
-// the function above can be called in the following ways:
 var person = {
   name: {
     first: 'Matt',
@@ -66,14 +93,25 @@ var person = {
   },
   age: 27,
   isOld: false,
+  ipAddress: '127.0.0.1',
   walk: function() {}
 };
 function callback() {}
 var options = 'whatever I want because it is an "any" type';
+
+console.log('Successful call');
 doSomething(person, options, callback);
+
+console.log('Successful call (without options)');
 doSomething(person, callback); // <-- options is optional
+
+console.log('Failed call (without person)');
 doSomething(callback); // <-- this would fail because person is not optional
 
+person.ipAddress = 'Invalid IP Address!!!';
+
+console.log('Failed call (invalid ip address)');
+doSomething(person, options, callback); // <-- this would fail because the ipAddress checker would fail
 
 // if you only wish to check the first argument to a function, you don't need to supply an array.
 function bar(a) {
@@ -420,18 +458,22 @@ apiCheck.any(jfio,.jgo); // <-- Syntax error.... ಠ_ಠ
 You can specify your own type. You do so like so:
 
 ```javascript
+var myCheck = apiCheck({
+  output: {prefix: 'myCheck'}
+});
+
+function ipAddressChecker(val, name, location) {
+  if (!/(\d{1,3}\.){3}\d{1,3}/.test(val)) {
+    return apiCheck.utils.getError(name, location, ipAddressChecker.type);
+  }
+};
+ipAddressChecker.type = 'ipAddressString';
+
 function foo(string, ipAddress) {
-  apiCheck.warn([
-    apiCheck.string,
+  myCheck.warn([
+    myCheck.string,
     ipAddressChecker
   ], arguments);
-
-  function ipAddressChecker(val, name, location) {
-    if (!/(\d{1,3}\.){3}\d{1,3}/.test(val)) {
-      return apiCheck.utils.getError(name, location, ipAddressChecker.type);
-    }
-  };
-  ipAddressChecker.type = 'ipAddressString';
 }
 ```
 
@@ -444,7 +486,7 @@ foo('hello', 'not-an-ip-address');
 It would result in a warning like this:
 
 ```
-apiCheck failed! `Argument 1` passed, `value` at `Argument 2` must be `undefined`
+myCheck apiCheck failed! `Argument 1` passed, `value` at `Argument 2` must be `ipAddressString`
 
 You passed:
 [
@@ -461,7 +503,7 @@ With the types of:
 The API calls for:
 [
   "String",
-  "ipAddressChecker"
+  "ipAddressString"
 ]
 ```
 
