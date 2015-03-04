@@ -1,3 +1,7 @@
+# 6.0.9
+
+- Fixing bug with optional arguments.
+
 # 6.0.8
 
 - Fixing bug when specifying custom functions that don't have a `type` property.

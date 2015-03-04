@@ -217,15 +217,16 @@ function checkApiWithArgs(api, args) {
   let failed = false;
   let checkerIndex = 0;
   let argIndex = 0;
-  let arg, checker, res, lastChecker, argName, argFailed;
+  let arg, checker, res, lastChecker, argName, argFailed, skipPreviousChecker;
   /* jshint -W084 */
-  while (checker = api[checkerIndex++]) {
+  while ((checker = api[checkerIndex++]) && (argIndex < args.length)) {
     arg = args[argIndex++];
     argName = 'Argument ' + argIndex + (checker.isOptional ? ' (optional)' : '');
     res = checker(arg, null, argName);
     argFailed = isError(res);
     lastChecker = checkerIndex >= api.length;
-    if (argFailed && (!checker.isOptional || lastChecker)) {
+    skipPreviousChecker = checkerIndex > 1 && api[checkerIndex - 1].isOptional;
+    if ((argFailed && lastChecker) || (argFailed && !lastChecker && !checker.isOptional && !skipPreviousChecker)) {
       failed = true;
       messages.push(getCheckerErrorMessage(res, checker, arg));
     } else if (argFailed && checker.isOptional) {
@@ -234,11 +235,7 @@ function checkApiWithArgs(api, args) {
       messages.push(`${t(argName)} passed`);
     }
   }
-  if (failed) {
-    return messages;
-  } else {
-    return [];
-  }
+  return failed ? messages : [];
 }
 
 

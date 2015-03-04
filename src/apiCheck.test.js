@@ -93,6 +93,13 @@ describe('apiCheck', () => {
       })('a', true);
     });
 
+    it(`should handle an any.optional that's in the middle of the arg list`, () => {
+      (function(a, b, c) {
+        var message = apiCheck([apiCheck.string, apiCheck.any.optional, apiCheck.bool], arguments).message;
+        expect(message).to.be.empty;
+      })('a', true);
+    });
+
     it(`should handle a final two optional arguments`, () => {
       (function(a, b, c) {
         var message = apiCheck([apiCheck.string, apiCheck.oneOfType([
