@@ -1,4 +1,4 @@
-// apiCheck.js v6.0.10 built with ♥ by Kent C. Dodds (ó ì_í)=óò=(ì_í ò)
+// apiCheck.js v6.0.11 built with ♥ by Kent C. Dodds (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
