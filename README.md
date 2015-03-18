@@ -1,5 +1,7 @@
 # apiCheck.js
 
+[![Join the chat at https://gitter.im/kentcdodds/apiCheck.js](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/apiCheck.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/kentcdodds/apiCheck.js.svg)](https://travis-ci.org/kentcdodds/apiCheck.js)
 [![Coverage Status](https://coveralls.io/repos/kentcdodds/apiCheck.js/badge.svg?branch=master)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
 *<-- if that build is ever red or that number is ever less than 100% then I want you to
