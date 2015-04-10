@@ -1,9 +1,11 @@
 const checkerHelpers = {
-  makeOptional, wrapInSpecified, setupChecker
+  addOptional, getRequiredVersion, setupChecker
 };
 
 module.exports = {
-  each, copy, typeOf, arrayify, getCheckerDisplay, isError, list, getError, nAtL, t, undef, checkerHelpers
+  each, copy, typeOf, arrayify, getCheckerDisplay,
+  isError, list, getError, nAtL, t, undef, checkerHelpers,
+  noop
 };
 
 function copy(obj) {
@@ -34,7 +36,7 @@ function typeOf(obj) {
 }
 
 function getCheckerDisplay(checker, options) {
-  /* jshint maxcomplexity:17 */
+  /* jshint maxcomplexity:7 */
   let display;
   let short = options && options.short;
   if (short && checker.shortType) {
@@ -141,15 +143,27 @@ function undef(thing) {
 
 
 
-function makeOptional(checker) {
-  checker.optional = function optionalCheck(val, name, location, obj) {
+function addOptional(checker) {
+  function optionalCheck(val, name, location, obj) {
     if (!undef(val)) {
       return checker(val, name, location, obj);
     }
-  };
-  checker.optional.isOptional = true;
-  checker.optional.type = checker.type;
-  checker.optional.displayName = checker.displayName;
+  }
+  // inherit all properties on the original checker
+  copyProps(checker, optionalCheck);
+  each(Object.keys(checker), key => optionalCheck[key] = checker[key]);
+
+
+  optionalCheck.isOptional = true;
+  optionalCheck.displayName = checker.displayName + ' (optional)';
+
+
+  // the magic line that allows you to add .optional to the end of the checkers
+  checker.optional = optionalCheck;
+
+  // fix type, because it's not a straight copy...
+  // the reason is we need to specify type.__apiCheckData.optional as true for the terse/verbose option.
+  // we also want to add "(optional)" to the types with a string
   if (typeof checker.optional.type === 'object') {
     checker.optional.type = copy(checker.optional.type); // make our own copy of this
   } else if (typeof checker.optional.type === 'function') {
@@ -164,36 +178,54 @@ function makeOptional(checker) {
   checker.optional.type.__apiCheckData.optional = true;
 }
 
+/**
+ * This will set up the checker with all of the defaults that most checkers want like required by default and an
+ * optional version
+ * @param checker
+ * @param properties properties to add to the checker
+ */
+function setupChecker(checker, properties) {
+  /* jshint maxcomplexity:7 */
+  checker.noop = noop; // do this first, so it can be overwritten.
+  if (typeof checker.type === 'string') {
+    checker.shortType = checker.type;
+  }
 
-function wrapInSpecified(fn, type, shortType) {
-  fn.type = type;
-  fn.shortType = shortType;
-  function specifiedChecker(val, name, location, obj) {
-    const u = undef(val);
-    if (u && !fn.isOptional) {
+  // assign all properties given
+  each(properties, (prop, name) => checker[name] = prop);
+
+  if (!checker.displayName) {
+    checker.displayName = `apiCheck ${t(checker.shortType || checker.type || checker.name)} type checker`;
+  }
+
+  if (!checker.notRequired) {
+    checker = getRequiredVersion(checker);
+  }
+
+  if (!checker.notOptional) {
+    addOptional(checker);
+  }
+  return checker;
+}
+
+function getRequiredVersion(checker) {
+  function requiredChecker(val, name, location, obj) {
+    if (undef(val) && !checker.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
-      const type = getCheckerDisplay(fn, {short: true});
+      const type = getCheckerDisplay(checker, {short: true});
       const stringType = typeof type !== 'object' ? type : JSON.stringify(type);
       return new Error(`Required ${t(name)} not specified${tLocation}. Must be ${t(stringType)}`);
     } else {
-      return fn(val, name, location, obj);
+      return checker(val, name, location, obj);
     }
   }
-  specifiedChecker.type = fn.type;
-  specifiedChecker.shortType = fn.shortType;
-  specifiedChecker.notOptional = fn.notOptional;
-  specifiedChecker.childrenCheckers = fn.childrenCheckers;
-  setupChecker(specifiedChecker);
-  setupChecker(fn);
-  return specifiedChecker;
+  copyProps(checker, requiredChecker);
+  return requiredChecker;
 }
 
-function setupChecker(checker) {
-  checker.displayName = `apiCheck ${t(checker.shortType || checker.type || checker.name)} type checker`;
-  if (!checker.notOptional) {
-    makeOptional(checker);
-  }
-  each(checker.childrenCheckers, childName => {
-    setupChecker(checker[childName]);
-  });
+function copyProps(src, dest) {
+  each(Object.keys(src), key => dest[key] = src[key]);
+}
+
+function noop() {
 }

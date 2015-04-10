@@ -1,4 +1,5 @@
 /*jshint expr: true*/
+/* jshint maxlen:false */
 var expect = require('chai').expect;
 const {coveredFunction} = require('./test.utils');
 describe('apiCheckUtil', () => {
@@ -71,38 +72,55 @@ describe('apiCheckUtil', () => {
         myChecker.type = 'Custom type';
       });
       it(`should have optional added`, () => {
-        checkerHelpers.setupChecker(myChecker);
+        myChecker = checkerHelpers.setupChecker(myChecker);
         expect(myChecker.optional).to.be.a('function');
       });
       it(`should not have optional added if notOption is specified`, () => {
         myChecker.notOptional = true;
-        checkerHelpers.setupChecker(myChecker);
+        myChecker = checkerHelpers.setupChecker(myChecker);
         expect(myChecker).to.not.have.property('optional');
+      });
+
+      it(`should default the displayName to the name of the function`, () => {
+        const anotherChecker = coveredFunction();
+        const checker = checkerHelpers.setupChecker(anotherChecker);
+        expect(checker.displayName).to.contain(anotherChecker.name);
+      });
+
+      it(`should not override the displayName if specified`, () => {
+        myChecker.displayName = 'Nephi';
+        myChecker = checkerHelpers.setupChecker(myChecker);
+        expect(myChecker.displayName).to.eq('Nephi');
       });
     });
 
 
-    describe(`makeOptional`, () => {
+    describe(`addOptional`, () => {
       it(`should make a function optional`, () => {
         function foo() {
         }
         foo.type = {};
         foo();
-        checkerHelpers.makeOptional(foo);
+        checkerHelpers.addOptional(foo);
         expect(foo.optional).to.be.a('function');
       });
     });
 
-    describe(`wrapInSpecified`, () => {
+    describe(`getRequiredVersion`, () => {
       it(`should wrap a function in a specified checker`, () => {
         let called = 0;
         function foo() {
           called++;
         }
-        var wrapped = checkerHelpers.wrapInSpecified(foo, {a: 'Sweet type'}, {short: 'type'});
+        foo.shortType = {
+          foo: 'bar'
+        };
+        const wrapped = checkerHelpers.getRequiredVersion(foo);
         expect(wrapped('hello')).to.be.undefined;
         expect(called).to.equal(1);
-        expect(wrapped()).to.be.instanceOf(Error);
+        const result = wrapped();
+        expect(result).to.be.instanceOf(Error);
+        expect(result.message).to.contain(JSON.stringify(foo.shortType));
         expect(called).to.equal(1);
       });
     });

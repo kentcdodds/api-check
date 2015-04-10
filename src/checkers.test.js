@@ -388,6 +388,24 @@ describe('checkers', () => {
       });
     });
 
+    it(`should add location/name if a location and name is provided`, () => {
+      const check = checkers.shape({string: checkers.string});
+      const result = check({string: 2}, 'name', 'location');
+      expect(result.message).to.match(/`location\/name`/);
+    });
+
+    it(`should add the name if only a name is provided`, () => {
+      const check = checkers.shape({string: checkers.string});
+      const result = check({string: 2}, 'name');
+      expect(result.message).to.match(/`name`/);
+    });
+
+    it(`should add the location if only a location is provided`, () => {
+      const check = checkers.shape({string: checkers.string});
+      const result = check({string: 2}, null, 'location');
+      expect(result.message).to.match(/`location`/);
+    });
+
     describe('ifNot', () => {
 
       it('should pass if the specified property exists but the other does not', () => {
@@ -610,7 +628,24 @@ describe('checkers', () => {
 
   describe('optional', () => {
     it('all built in checkers should be optional', () => {
-      _.each(checkers, checker => {
+      const builtInCheckers = [
+        checkers.array,
+        checkers.bool,
+        checkers.number,
+        checkers.string,
+        checkers.func,
+        checkers.object,
+        checkers.instanceOf(Date),
+        checkers.oneOf([null]),
+        checkers.oneOfType([checkers.bool]),
+        checkers.arrayOf(checkers.string),
+        checkers.objectOf(checkers.func),
+        checkers.typeOrArrayOf(checkers.number),
+        checkers.shape({}),
+        checkers.args,
+        checkers.any
+      ];
+      _.each(builtInCheckers, checker => {
         expect(checker).to.have.property('optional');
         expect(checker.optional.isOptional).to.be.true;
       });

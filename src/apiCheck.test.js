@@ -1,9 +1,11 @@
 /*jshint expr: true*/
+/* jshint maxlen: 180 */
 var expect = require('chai').expect;
-const {coveredFunction, anonymousFn} = require('./test.utils');
+const {coveredFunction} = require('./test.utils');
 describe('apiCheck', () => {
-  var apiCheck = require('./index')();
-  const {getError} = require('./apiCheckUtil');
+  const apiCheck = require('./index');
+  const apiCheckInstance = apiCheck();
+  const {getError, noop} = require('./apiCheckUtil');
 
   describe(`main export`, () => {
     const getApiCheck = require('./index');
@@ -18,17 +20,16 @@ describe('apiCheck', () => {
           prefix: 'apiCheck2'
         }
       });
-      const args = {length: 1, 0: 23};
-      expect(apiCheck1(apiCheck1.string, args).message).to.contain('apiCheck1');
-      expect(apiCheck1(apiCheck1.string, args).message).to.not.contain('apiCheck2');
+      expect(apiCheck1(apiCheck1.string, 23).message).to.contain('apiCheck1');
+      expect(apiCheck1(apiCheck1.string, 23).message).to.not.contain('apiCheck2');
 
-      expect(apiCheck2(apiCheck2.string, args).message).to.contain('apiCheck2');
-      expect(apiCheck2(apiCheck2.string, args).message).to.not.contain('apiCheck1');
+      expect(apiCheck2(apiCheck2.string, 23).message).to.contain('apiCheck2');
+      expect(apiCheck2(apiCheck2.string, 23).message).to.not.contain('apiCheck1');
     });
 
     it(`should throw an error when the config passed is improperly shaped`, () => {
       expect(() => getApiCheck({prefix: 'apiCheck1'})).to.throw(
-        /creating an instance of apiCheck apiCheck failed(.|\n)*?prefix.*?apiCheck1/i
+        makeSpacedRegex('creating an apiCheck instance apiCheck failed! prefix apiCheck1')
       );
     });
 
@@ -36,26 +37,26 @@ describe('apiCheck', () => {
       const myImproperChecker = coveredFunction();
       myImproperChecker.type = false; // must be string or object
       expect(() => getApiCheck(null, {myChecker: myImproperChecker})).to.throw(
-        /creating an instance of apiCheck apiCheck failed(.|\n)*?myChecker/i
+        makeSpacedRegex('creating an apiCheck instance apiCheck failed! myChecker')
       );
     });
 
     it(`should allow for specifying only default config`, () => {
-      const url = 'http://my.example.com';
+      const docsBaseUrl = 'http://my.example.com';
       const apiCheck1 = getApiCheck({
-        output: {url}
+        output: {docsBaseUrl}
       });
-      expect(apiCheck1.config.output.url).to.equal(url);
+      expect(apiCheck1.config.output.docsBaseUrl).to.equal(docsBaseUrl);
     });
 
     it(`should allow for specifying both extra checkers and default config`, () => {
-      const url = 'http://my.example.com';
+      const docsBaseUrl = 'http://my.example.com';
       const apiCheck1 = getApiCheck({
-        output: {url}
+        output: {docsBaseUrl}
       }, {
         myChecker: coveredFunction
       });
-      expect(apiCheck1.config.output.url).to.equal(url);
+      expect(apiCheck1.config.output.docsBaseUrl).to.equal(docsBaseUrl);
       expect(apiCheck1.myChecker).to.equal(coveredFunction);
     });
   });
@@ -74,38 +75,38 @@ describe('apiCheck', () => {
     });
     it('should handle a single argument type specification', () => {
       (function(a) {
-        const message = apiCheck(apiCheck.string, arguments).message;
+        const message = apiCheckInstance(apiCheckInstance.string, a).message;
         expect(message).to.be.empty;
       })('hello');
     });
 
     it('should handle array with types', () => {
       (function(a, b, c) {
-        var message = apiCheck([apiCheck.string, apiCheck.number, apiCheck.bool], arguments).message;
+        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.number, apiCheckInstance.bool], arguments).message;
         expect(message).to.be.empty;
       })('a', 1, true);
     });
 
     it('should handle optional arguments', () => {
       (function(a, b, c) {
-        var message = apiCheck([apiCheck.string, apiCheck.number.optional, apiCheck.bool], arguments).message;
+        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.number.optional, apiCheckInstance.bool], arguments).message;
         expect(message).to.be.empty;
       })('a', true);
     });
 
     it(`should handle an any.optional that's in the middle of the arg list`, () => {
       (function(a, b, c) {
-        var message = apiCheck([apiCheck.string, apiCheck.any.optional, apiCheck.bool], arguments).message;
+        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.any.optional, apiCheckInstance.bool], arguments).message;
         expect(message).to.be.empty;
       })('a', true);
     });
 
     it(`should handle the crazy optional specifications`, () => {
       function crazyFunction() {
-        var message = apiCheck([
-          apiCheck.string.optional, apiCheck.number.optional, apiCheck.bool,
-          apiCheck.object.optional, apiCheck.func.optional, apiCheck.array,
-          apiCheck.string.optional, apiCheck.func
+        var message = apiCheckInstance([
+          apiCheckInstance.string.optional, apiCheckInstance.number.optional, apiCheckInstance.bool,
+          apiCheckInstance.object.optional, apiCheckInstance.func.optional, apiCheckInstance.array,
+          apiCheckInstance.string.optional, apiCheckInstance.func
         ], arguments).message;
         expect(message).to.be.empty;
       }
@@ -116,52 +117,97 @@ describe('apiCheck', () => {
 
     it(`should handle a final two optional arguments`, () => {
       (function(a, b, c) {
-        var message = apiCheck([apiCheck.string, apiCheck.oneOfType([
-          apiCheck.arrayOf(apiCheck.string),
-          apiCheck.shape({name: apiCheck.string})
-        ]).optional, apiCheck.shape({
-          prop1: apiCheck.shape.onlyIf('prop2', apiCheck.string).optional,
-          prop2: apiCheck.shape.onlyIf('prop1', apiCheck.string).optional
+        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.oneOfType([
+          apiCheckInstance.arrayOf(apiCheckInstance.string),
+          apiCheckInstance.shape({name: apiCheckInstance.string})
+        ]).optional, apiCheckInstance.shape({
+          prop1: apiCheckInstance.shape.onlyIf('prop2', apiCheckInstance.string).optional,
+          prop2: apiCheckInstance.shape.onlyIf('prop1', apiCheckInstance.string).optional
         }).optional], arguments).message;
         expect(message).to.be.empty;
       })('a', ['1', '2', 'hey!']);
     });
 
     it(`should handle specifying an array instead of arguments`, () => {
-      const result = apiCheck([apiCheck.string, apiCheck.bool], ['hi', true]);
+      const result = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.bool], ['hi', true]);
       expect(result.passed).to.be.true;
       expect(result.message).to.be.empty;
+    });
+
+    it(`should output a good message for a custom object`, () => {
+      function Foo() {
+        this.bar = 'baz';
+        this.baz = 123;
+        this.foobar = new Date();
+      }
+      const foo = new Foo();
+
+      (function(a) {
+        var message = apiCheckInstance(apiCheckInstance.number, a).message;
+        expect(message).to.match(makeSpacedRegex('you passed bar "baz" baz 123 foobar with types string number date'));
+      })(foo);
+    });
+
+    it(`should output the custom object's name if it has no properties`, () => {
+      function Foo() {
+      }
+      const foo = new Foo();
+
+      (function(a) {
+        var message = apiCheckInstance(apiCheckInstance.number, a).message;
+        expect(message).to.match(makeSpacedRegex('you passed {} with type Foo'));
+      })(foo);
+    });
+
+    it(`should output a function with properties`, () => {
+      const func = coveredFunction();
+      func.foo = 'bar';
+
+      (function(a) {
+        var message = apiCheckInstance(apiCheckInstance.number, a).message;
+        expect(message).to.match(makeSpacedRegex(`you passed ${func.name} with the type: Function with properties foo string`));
+      })(func);
+    });
+
+    it(`should output an empty object`, () => {
+      var message = apiCheckInstance(apiCheckInstance.number, {}).message;
+      expect(message).to.match(makeSpacedRegex(`you passed {} with the type: object`));
+    });
+
+    it(`should output an empty array`, () => {
+      var message = apiCheckInstance(apiCheckInstance.number, []).message;
+      expect(message).to.match(makeSpacedRegex(`you passed \\[\\] with the type: array`));
     });
 
     describe(`custom checkers`, () => {
       it('should be accepted', () => {
         (function(a, b) {
-          var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+          var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
           expect(message).to.be.empty;
         })('a', '127.0.0.1');
 
 
         (function(a, b) {
-          var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+          var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
           expect(message).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
         })('a', 32);
       });
 
       it(`be accepted even if the function has no properties`, () => {
-        expect(() => apiCheck([() => ''], {length: 1, 0: ''})).to.not.throw();
+        expect(() => apiCheckInstance([() => ''], {length: 1, 0: ''})).to.not.throw();
       });
     });
 
     it('should handle when the api is an array and the arguments array is empty', () => {
       const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?0/i;
       (function(a, b) {
-        expect(() => apiCheck.throw([apiCheck.string, apiCheck.bool], arguments)).to.throw(error);
+        expect(() => apiCheckInstance.throw([apiCheckInstance.string, apiCheckInstance.bool], arguments)).to.throw(error);
       })();
     });
 
     it(`should return an error even when a checker is optional and the last argument`, () => {
       (function(a, b) {
-        const result = apiCheck([apiCheck.string, apiCheck.bool.optional], arguments);
+        const result = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.bool.optional], arguments);
         expect(result.message).to.match(/argument 2.*must be.*boolean/i);
       })('hi', 32);
     });
@@ -169,9 +215,9 @@ describe('apiCheck', () => {
     it(`should show the user what they provided in a good way`, () => {
       (function(a, b, c) {
         c(); // test coverage...
-        const result = apiCheck([apiCheck.string, apiCheck.func], arguments);
+        const result = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.func], arguments);
         expect(result.message).to.match(
-          makeSpacedRegex('you passed coveredFunction false anonymous function types of function boolean function')
+          makeSpacedRegex('you passed coveredFunction false anonymous function types function boolean function')
         );
       })(coveredFunction, false, function() {});
     });
@@ -181,12 +227,12 @@ describe('apiCheck', () => {
       const args = {length: 1, 0: '127.0.0.1'};
       it(`should throw an error when a checker is specified with an incorrect type property`, () => {
         ipAddressChecker.type = 32;
-        expect(() => apiCheck(ipAddressChecker, args)).to.throw();
+        expect(() => apiCheckInstance(ipAddressChecker, args)).to.throw();
       });
 
       it(`should not throw an error when a checker is specified with a string type property`, () => {
         ipAddressChecker.type = 'hey!';
-        expect(() => apiCheck(ipAddressChecker, args)).to.not.throw();
+        expect(() => apiCheckInstance(ipAddressChecker, args)).to.not.throw();
       });
 
       it(`should not throw an error when a checker is specified with the correct shape`, () => {
@@ -197,7 +243,7 @@ describe('apiCheck', () => {
           },
           ipAddress: ipAddressRegex.toString()
         };
-        expect(() => apiCheck(ipAddressChecker, args)).to.not.throw();
+        expect(() => apiCheckInstance(ipAddressChecker, args)).to.not.throw();
       });
 
       it(`should throw an error when a checker is specified with the incorrect shape`, () => {
@@ -207,7 +253,7 @@ describe('apiCheck', () => {
             optional: false
           }
         };
-        expect(() => apiCheck(ipAddressChecker, args)).to.throw();
+        expect(() => apiCheckInstance(ipAddressChecker, args)).to.throw();
 
         ipAddressChecker.type = {
           __apiCheckData: {
@@ -216,8 +262,19 @@ describe('apiCheck', () => {
           },
           ipAddressChecker: 43
         };
-        expect(() => apiCheck(ipAddressChecker, args)).to.throw();
+        expect(() => apiCheckInstance(ipAddressChecker, args)).to.throw();
 
+      });
+
+      it(`should throw an error when specifying the api as an array, but the args is not an array`, () => {
+        const api = [
+          apiCheckInstance.string,
+          apiCheckInstance.number
+        ];
+
+        expect(() => apiCheckInstance(api, 'foo')).to.throw(makeSpacedRegex(
+          'if array api array args you passed "foo" with the type: string'
+        ));
       });
 
     });
@@ -227,7 +284,7 @@ describe('apiCheck', () => {
         it(`should be printed as is as part of the message`, () => {
           ipAddressChecker.help = 'This needs to be a valid IP address. Like 127.0.0.1';
           (function(a, b) {
-            var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+            var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
             expect(message).to.contain(ipAddressChecker.help);
           })('a', 32);
         });
@@ -240,7 +297,7 @@ describe('apiCheck', () => {
             return val + suffix;
           };
           (function(a, b) {
-            var message = apiCheck([apiCheck.string, ipAddressChecker], arguments).message;
+            var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
             expect(message).to.contain(suffix);
           })('a', 32);
         });
@@ -251,22 +308,21 @@ describe('apiCheck', () => {
   describe('#throw', () => {
     it('should not throw an error when the arguments are correct', () => {
       (function(a) {
-        expect(apiCheck.throw(apiCheck.string, arguments)).to.not.throw;
+        expect(apiCheckInstance.throw(apiCheckInstance.string, a)).to.not.throw;
       })('a');
     });
 
     it('should throw an error when the arguments are not correct', () => {
       (function(a) {
-        var args = arguments;
-        expect(() => apiCheck.throw(apiCheck.number, args)).to.throw(/argument.*?1.*?must.*?be.*?number/i);
+        expect(() => apiCheckInstance.throw(apiCheckInstance.number, a)).to.throw(/argument.*?1.*?must.*?be.*?number/i);
       })('a', 3);
     });
     it('should do nothing when disabled', () => {
-      apiCheck.disable();
+      apiCheckInstance.config.disabled = true;
       (function(a) {
-        expect(apiCheck.throw(apiCheck.number, arguments)).to.not.throw;
+        expect(apiCheckInstance.throw(apiCheckInstance.number, a)).to.not.throw;
       })('a', 3);
-      apiCheck.enable();
+      apiCheckInstance.config.disabled = false;
     });
   });
 
@@ -283,32 +339,31 @@ describe('apiCheck', () => {
 
     it('should not warn when the arguments are correct', () => {
       (function(a) {
-        apiCheck.warn(apiCheck.string, arguments);
+        apiCheckInstance.warn(apiCheckInstance.string, a);
       })('a');
       expect(warnCalls).to.have.length(0);
     });
 
     it('should warn when the arguments are not correct', () => {
       (function(a) {
-        apiCheck.warn(apiCheck.string, arguments);
+        apiCheckInstance.warn(apiCheckInstance.string, a);
       })();
       expect(warnCalls).to.have.length(1);
       expect(warnCalls[0].join(' ')).to.match(/failed/i);
     });
     it('should do nothing when disabled', () => {
-      apiCheck.disable();
+      apiCheckInstance.config.disabled = true;
       (function(a) {
-        apiCheck.warn(apiCheck.string, arguments);
+        apiCheckInstance.warn(apiCheckInstance.string, a);
       })();
       expect(warnCalls).to.have.length(0);
-      apiCheck.enable();
+      apiCheckInstance.config.disabled = false;
     });
 
     it(`should return the results`, () => {
       (function(a) {
-        const args = arguments;
-        let message = apiCheck.warn(apiCheck.number, args).message;
-        expect(message).to.match(makeSpacedRegex('you passed a 3 the api calls for number'));
+        let message = apiCheckInstance.warn(apiCheckInstance.number, a).message;
+        expect(message).to.match(makeSpacedRegex('you passed a the api calls for number'));
       })('a', 3);
     });
 
@@ -319,49 +374,62 @@ describe('apiCheck', () => {
 
   describe('#disable/enable', () => {
     it('should disable apiCheck, and results will always be null', () => {
-      const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?1/i;
-      apiCheck.disable();
-      check(true);
-      apiCheck.enable();
-      check(false);
-
-      function check(disabled) {
-        (function(a, b) {
-          var message = apiCheck([apiCheck.instanceOf(RegExp), apiCheck.number], arguments).message;
-          if (disabled) {
-            expect(message).to.be.empty;
-          } else {
-            expect(message).to.match(error);
-          }
-        })('hey');
-      }
+      apiCheckInstance.config.disabled = true;
+      check(apiCheckInstance, true);
+      apiCheckInstance.config.disabled = false;
+      check(apiCheckInstance, false);
     });
 
-    after(function() {
-      apiCheck.enable();
+    it(`should not effect other instances of apiCheck`, () => {
+      const anotherInstance = apiCheck();
+      apiCheckInstance.config.disabled = true;
+      check(apiCheckInstance, true);
+      check(anotherInstance, false);
+    });
+
+    it(`should be able to disable and enable apiCheck globally`, () => {
+      apiCheck.globalConfig.disabled = true;
+      check(apiCheckInstance, true);
+      apiCheck.globalConfig.disabled = false;
+      check(apiCheckInstance, false);
+    });
+
+    it(`should use the noop version of checkers when initializing a new instance if globally disabled`, () => {
+      apiCheck.globalConfig.disabled = true;
+      const customInstance = apiCheck();
+      check(customInstance, true);
+      expect(customInstance.string.name).to.eq('noop');
+    });
+
+    function check(instance, disabled) {
+      const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?1/i;
+      (function(a, b) {
+        var message = instance([instance.instanceOf(RegExp), instance.number], arguments).message;
+        if (disabled) {
+          expect(message).to.be.empty;
+        } else {
+          expect(message).to.match(error);
+        }
+      })('hey');
+    }
+
+    afterEach(function() {
+      apiCheck.globalConfig.disabled = false;
+      apiCheckInstance.config.disabled = false;
     });
   });
 
   describe('apiCheck api', () => {
-    it('should throw an error when no arguments are supplied', () => {
-      (function(a) {
-        expect(() => apiCheck.throw(apiCheck.string)).to.throw(/argument.*2.*must.*be.*function.*arguments/i);
-      })('a');
-    });
     it('should throw an error when no api is passed', () => {
       (function(a) {
-        var args = arguments;
-        expect(() => apiCheck(null, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
+        expect(() => apiCheckInstance(null, arguments)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
       })('a');
     });
     it(`should throw an error when the wrong types are passed`, () => {
       (function(a) {
         var args = arguments;
-        expect(() => apiCheck(true, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
+        expect(() => apiCheckInstance(true, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
       })('a');
-    });
-    it(`should throw an error when there are not enough arguments passed`, () => {
-      expect(() => apiCheck(coveredFunction)).to.throw(/not enough arguments specified.*?requires.*?2.*?passed.*?1/i);
     });
   });
 
@@ -369,16 +437,16 @@ describe('apiCheck', () => {
     describe('output', () => {
 
       it('should fallback to an empty object is output is removed', () => {
-        var original = apiCheck.config.output;
-        apiCheck.config.output = null;
+        var original = apiCheckInstance.config.output;
+        apiCheckInstance.config.output = null;
         expect(getFailureMessage).to.not.throw();
-        apiCheck.config.output = original;
+        apiCheckInstance.config.output = original;
       });
 
       describe('prefix', () => {
         var gPrefix = 'global prefix';
         beforeEach(() => {
-          apiCheck.config.output.prefix = gPrefix;
+          apiCheckInstance.config.output.prefix = gPrefix;
         });
         it('should prefix the error message', () => {
           expect(getFailureMessage()).to.match(new RegExp(`^${gPrefix}`));
@@ -397,14 +465,14 @@ describe('apiCheck', () => {
         });
 
         afterEach(() => {
-          apiCheck.config.output.prefix = '';
+          apiCheckInstance.config.output.prefix = '';
         });
       });
 
       describe('suffix', () => {
         var gSuffix = 'global suffix';
         beforeEach(() => {
-          apiCheck.config.output.suffix = gSuffix;
+          apiCheckInstance.config.output.suffix = gSuffix;
         });
         it('should suffix the error message', () => {
           expect(getFailureMessage()).to.contain(`${gSuffix}`);
@@ -423,14 +491,14 @@ describe('apiCheck', () => {
         });
 
         afterEach(() => {
-          apiCheck.config.output.suffix = '';
+          apiCheckInstance.config.output.suffix = '';
         });
       });
 
       describe('url', () => {
         var docsBaseUrl = 'http://www.example.com/errors#';
         beforeEach(() => {
-          apiCheck.config.output.docsBaseUrl = docsBaseUrl;
+          apiCheckInstance.config.output.docsBaseUrl = docsBaseUrl;
         });
         it('should not be in the message if a url is not specified', () => {
           expect(getFailureMessage()).to.not.contain(docsBaseUrl);
@@ -450,7 +518,7 @@ describe('apiCheck', () => {
         });
 
         afterEach(() => {
-          apiCheck.config.output.docsBaseUrl = '';
+          apiCheckInstance.config.output.docsBaseUrl = '';
         });
       });
 
@@ -461,8 +529,8 @@ describe('apiCheck', () => {
       function getFailureMessage(output) {
         var message;
         (function(a) {
-          message = apiCheck(apiCheck.string, arguments, output).message;
-        })();
+          message = apiCheckInstance(apiCheckInstance.string, a, output).message;
+        })(1);
         return message;
       }
 
@@ -473,42 +541,42 @@ describe('apiCheck', () => {
 
   describe('#getErrorMessage', () => {
     it('should say "nothing" when the args is empty', () => {
-      expect(apiCheck.getErrorMessage()).to.match(/nothing/i);
+      expect(apiCheckInstance.getErrorMessage()).to.match(/nothing/i);
     });
 
     it('should say the values and types I passed', () => {
       const regex = makeSpacedRegex('hey! 3 true string number boolean');
-      expect(apiCheck.getErrorMessage([], ['Hey!', 3, true])).to.match(regex);
+      expect(apiCheckInstance.getErrorMessage([], ['Hey!', 3, true])).to.match(regex);
     });
 
     it('should show only one api when only no optional arguments are provided', () => {
-      const result = apiCheck.getErrorMessage([apiCheck.object]);
+      const result = apiCheckInstance.getErrorMessage([apiCheckInstance.object]);
       expect(result).to.match(/you passed(.|\n)*?the api calls for(.|\n)*?object/i);
     });
 
     it(`should show the user's arguments and types nicely`, () => {
-      const result = apiCheck.getErrorMessage([
-        apiCheck.object,
-        apiCheck.array.optional,
-        apiCheck.string
+      const result = apiCheckInstance.getErrorMessage([
+        apiCheckInstance.object,
+        apiCheckInstance.array.optional,
+        apiCheckInstance.string
       ], [
         {a: 'a', r: new RegExp(), b: undefined},
         [23, false, null]
       ]);
       /* jshint -W101 */
       const regex = makeSpacedRegex(
-        'you passed a a r 23 false null with the types of a string r regexp b undefined number boolean null ' +
+        'you passed a a r {} [ 23 false null ] with the types: a string r regexp b undefined number boolean null ' +
         'the api calls for object array \\(optional\\) string'
       );
       expect(result).to.match(regex);
     });
 
     it('should be overrideable', () => {
-      let originalGetErrorMessage = apiCheck.getErrorMessage;
-      let api = [apiCheck.string, apiCheck.shape({}), apiCheck.array];
+      let originalGetErrorMessage = apiCheckInstance.getErrorMessage;
+      let api = [apiCheckInstance.string, apiCheckInstance.shape({}), apiCheckInstance.array];
       let args;
       let output = {};
-      apiCheck.getErrorMessage = (_api, _args, _message, _output) => {
+      apiCheckInstance.getErrorMessage = (_api, _args, _message, _output) => {
         expect(_api).to.equal(api);
         expect(_args).to.eql(Array.prototype.slice.call(args)); // only eql because the args are cloned
         expect(_message).to.have.length(3);
@@ -516,13 +584,15 @@ describe('apiCheck', () => {
       };
       (function(a, b, c) {
         args = arguments;
-        apiCheck(api, arguments, output);
+        apiCheckInstance(api, arguments, output);
       })(1, 2, 3);
-      apiCheck.getErrorMessage = originalGetErrorMessage;
+      apiCheckInstance.getErrorMessage = originalGetErrorMessage;
     });
 
-    it(`should return a terse message by default`, () => {
-      testApiTypes({
+
+    describe(`verbose`, () => {
+
+      const terseMessage = {
         __apiCheckData: {strict: false, optional: false, type: 'shape'},
         shape: {
           foo: {
@@ -541,12 +611,9 @@ describe('apiCheck', () => {
             }
           }
         }
-      });
-    });
+      };
 
-    it(`should log verbose information when verbose mode is enabled`, () => {
-      apiCheck.config.verbose = true;
-      testApiTypes({
+      const verboseMessage = {
         __apiCheckData: {strict: false, optional: false, type: 'shape'},
         shape: {
           foo: {
@@ -575,23 +642,54 @@ describe('apiCheck', () => {
             }
           }
         }
+      };
+
+      it(`should return a terse message by default`, () => {
+        testApiTypes(terseMessage);
       });
-      apiCheck.config.verbose = false;
+
+      it(`should return verbose message when verbose mode is enabled in the instance`, () => {
+        apiCheckInstance.config.verbose = true;
+        testApiTypes(verboseMessage);
+      });
+
+      it(`should return verbose message when verbose is enabled globally and not specified for the instance`, () => {
+        apiCheck.globalConfig.verbose = true;
+        testApiTypes(verboseMessage);
+      });
+
+      it(`should return verbose message when verbose is enabled globally and specified for the instance to be off`, () => {
+        apiCheckInstance.config.verbose = false;
+        apiCheck.globalConfig.verbose = true;
+        testApiTypes(verboseMessage);
+      });
+
+      it(`should return a terse message when verbose is specified to be off globally even when specified on by the instance`, () => {
+        apiCheckInstance.config.verbose = true;
+        apiCheck.globalConfig.verbose = false;
+        testApiTypes(terseMessage);
+      });
+
+      afterEach(() => {
+        delete apiCheckInstance.config.verbose;
+        delete apiCheck.globalConfig.verbose;
+      });
     });
 
+
     function testApiTypes(resultApiTypes) {
-      const optionsCheck = apiCheck.shape({
-        foo: apiCheck.shape({
-          foo1: apiCheck.string.optional,
-          foo2: apiCheck.number
+      const optionsCheck = apiCheckInstance.shape({
+        foo: apiCheckInstance.shape({
+          foo1: apiCheckInstance.string.optional,
+          foo2: apiCheckInstance.number
         }),
-        bar: apiCheck.func.withProperties({
-          bar1: apiCheck.string.optional,
-          bar2: apiCheck.bool
+        bar: apiCheckInstance.func.withProperties({
+          bar1: apiCheckInstance.string.optional,
+          bar2: apiCheckInstance.bool
         }),
-        foobar: apiCheck.shape({
-          foobar1: apiCheck.string.optional,
-          foobar2: apiCheck.instanceOf(Date)
+        foobar: apiCheckInstance.shape({
+          foobar1: apiCheckInstance.string.optional,
+          foobar2: apiCheckInstance.instanceOf(Date)
         }).optional
       });
       const myOptions = {
@@ -601,7 +699,7 @@ describe('apiCheck', () => {
         }
       };
       (function(a) {
-        const {apiTypes} = apiCheck(optionsCheck, arguments);
+        const {apiTypes} = apiCheckInstance(optionsCheck, a);
         expect(apiTypes).to.eql([resultApiTypes]);
       })(myOptions);
     }
@@ -614,25 +712,31 @@ describe('apiCheck', () => {
       console.warn = function() {
         warnCalls.push([...arguments]);
       };
-      apiCheck.handleErrorMessage('message', false);
+      apiCheckInstance.handleErrorMessage('message', false);
       expect(warnCalls).to.have.length(1);
       expect(warnCalls[0].join(' ')).to.equal('message');
       console.warn = originalWarn;
     });
     it('should throw the message when the second argument is truthy', () => {
-      expect(() => apiCheck.handleErrorMessage('message', true)).to.throw('message');
+      expect(() => apiCheckInstance.handleErrorMessage('message', true)).to.throw('message');
     });
 
     it('should be overrideable', () => {
-      var originalHandle = apiCheck.handleErrorMessage;
-      apiCheck.handleErrorMessage = (message, shouldThrow) => {
-        expect(message).to.match(/nothing(.|\n)*?string/i);
+      var originalHandle = apiCheckInstance.handleErrorMessage;
+      apiCheckInstance.handleErrorMessage = (message, shouldThrow) => {
+        expect(message).to.match(makeSpacedRegex('you passed undefined type undefined api calls for string'));
         expect(shouldThrow).to.be.true;
       };
       (function(a) {
-        apiCheck.throw(apiCheck.string, arguments);
+        apiCheckInstance.throw(apiCheckInstance.string, a);
       })();
-      apiCheck.handleErrorMessage = originalHandle;
+      apiCheckInstance.handleErrorMessage = originalHandle;
+    });
+  });
+
+  describe(`#noop`, () => {
+    it(`should return nothing`, () => {
+      expect(noop()).to.be.undefined;
     });
   });
 
