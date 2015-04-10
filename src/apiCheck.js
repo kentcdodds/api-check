@@ -339,10 +339,8 @@ function getArgDisplay(arg, gottenArgs) {
   gottenArgs.push(arg);
   const cName = arg && arg.constructor && arg.constructor.name;
   const type = typeOf(arg);
-  const hasKeys = arg && Object.keys(arg).length;
-
   if (type === 'function') {
-    if (hasKeys) {
+    if (hasKeys()) {
       let properties = stringify(getDisplay(arg, gottenArgs));
       return cName + ' (with properties: ' + properties + ')';
     }
@@ -357,11 +355,15 @@ function getArgDisplay(arg, gottenArgs) {
     return type;
   }
 
-  if (hasKeys) {
+  if (hasKeys()) {
     return getDisplay(arg, gottenArgs);
   }
 
   return cName;
+
+  function hasKeys() {
+    return arg && Object.keys(arg).length;
+  }
 }
 
 function getDisplay(obj, gottenArgs) {

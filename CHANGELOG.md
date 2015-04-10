@@ -1,3 +1,7 @@
+# 7.0.0-beta.2
+
+- Fixing bug with calling Object.keys on a non-object
+
 # 7.0.0-beta.1
 
 - Adding `json-stringify-safe` to do safe stringifying of data.
