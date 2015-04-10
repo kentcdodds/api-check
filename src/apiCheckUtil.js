@@ -1,3 +1,4 @@
+const stringify = require('json-stringify-safe');
 const checkerHelpers = {
   addOptional, getRequiredVersion, setupChecker
 };
@@ -122,7 +123,7 @@ function list(arry, join, finalJoin) {
 
 
 function getError(name, location, checkerType) {
-  const stringType = typeof checkerType !== 'object' ? checkerType : JSON.stringify(checkerType);
+  const stringType = typeof checkerType !== 'object' ? checkerType : stringify(checkerType);
   return new Error(`${nAtL(name, location)} must be ${t(stringType)}`);
 }
 
@@ -213,7 +214,7 @@ function getRequiredVersion(checker) {
     if (undef(val) && !checker.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
       const type = getCheckerDisplay(checker, {short: true});
-      const stringType = typeof type !== 'object' ? type : JSON.stringify(type);
+      const stringType = typeof type !== 'object' ? type : stringify(type);
       return new Error(`Required ${t(name)} not specified${tLocation}. Must be ${t(stringType)}`);
     } else {
       return checker(val, name, location, obj);

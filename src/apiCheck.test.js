@@ -179,6 +179,14 @@ describe('apiCheck', () => {
       expect(message).to.match(makeSpacedRegex(`you passed \\[\\] with the type: array`));
     });
 
+    it(`should handle circular references properly`, () => {
+      var foo = {};
+      var bar = {foo};
+      foo.bar = bar;
+      var message = apiCheckInstance(apiCheckInstance.number, foo).message;
+      expect(message).to.match(makeSpacedRegex(`bar foo \\[circular ~\\] bar foo \\[circular\\]`));
+    });
+
     describe(`custom checkers`, () => {
       it('should be accepted', () => {
         (function(a, b) {

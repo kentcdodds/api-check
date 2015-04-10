@@ -1,3 +1,7 @@
+# 7.0.0-beta.1
+
+- Adding `json-stringify-safe` to do safe stringifying of data.
+
 # 7.0.0-beta.0
 
 - Changing the api for disabled. No longer two functions, now just a value you set. You can also initialize it with a disabled property.

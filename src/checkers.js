@@ -1,3 +1,4 @@
+const stringify = require('json-stringify-safe');
 const {
   typeOf, each, copy, getCheckerDisplay, isError,
   arrayify, list, getError, nAtL, t, checkerHelpers,
@@ -97,7 +98,7 @@ function oneOfCheckGetter(enums) {
     __apiCheckData: {optional: false, type: 'enum'},
     enum: enums
   };
-  const shortType = `oneOf[${enums.map(enm => JSON.stringify(enm)).join(', ')}]`;
+  const shortType = `oneOf[${enums.map(enm => stringify(enm)).join(', ')}]`;
   return setupChecker(function oneOfCheckerDefinition(val, name, location) {
     if (!enums.some(enm => enm === val)) {
       return getError(name, location, shortType);

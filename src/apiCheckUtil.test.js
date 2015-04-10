@@ -1,6 +1,7 @@
 /*jshint expr: true*/
 /* jshint maxlen:false */
-var expect = require('chai').expect;
+const expect = require('chai').expect;
+const stringify = require('json-stringify-safe');
 const {coveredFunction} = require('./test.utils');
 describe('apiCheckUtil', () => {
   const {
@@ -120,7 +121,7 @@ describe('apiCheckUtil', () => {
         expect(called).to.equal(1);
         const result = wrapped();
         expect(result).to.be.instanceOf(Error);
-        expect(result.message).to.contain(JSON.stringify(foo.shortType));
+        expect(result.message).to.contain(stringify(foo.shortType));
         expect(called).to.equal(1);
       });
     });

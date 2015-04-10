@@ -1,3 +1,4 @@
+const stringify = require('json-stringify-safe');
 const apiCheckUtil = require('./apiCheckUtil');
 const {each, isError, t, arrayify, getCheckerDisplay, typeOf, getError} = apiCheckUtil;
 const checkers = require('./checkers');
@@ -208,7 +209,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
       } else if (types && types.length === 1) {
         types = types[0];
       }
-      return JSON.stringify(types, null, 2);
+      return stringify(types, null, 2);
     }
 
     function generateMessage() {
@@ -240,7 +241,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
         addHelpers: true
       });
     });
-    let argTypes = args.map(getArgDisplay);
+    let argTypes = args.map((arg) => getArgDisplay(arg, []));
     return {argTypes: argTypes, apiTypes};
   }
 
@@ -330,21 +331,20 @@ function checkEnoughArgs(api, args) {
   }
 }
 
-function getDisplay(obj) {
-  var argDisplay = {};
-  each(obj, (v, k) => argDisplay[k] = getArgDisplay(v));
-  return argDisplay;
-}
-
-function getArgDisplay(arg) {
+function getArgDisplay(arg, gottenArgs) {
   /* jshint maxcomplexity:7 */
+  if (gottenArgs.indexOf(arg) !== -1) {
+    return '[Circular]';
+  }
+  gottenArgs.push(arg);
   const cName = arg && arg.constructor && arg.constructor.name;
   const type = typeOf(arg);
   const hasKeys = arg && Object.keys(arg).length;
 
   if (type === 'function') {
     if (hasKeys) {
-      return cName + ' (with properties: ' + JSON.stringify(getDisplay(arg)) + ')';
+      let properties = stringify(getDisplay(arg, gottenArgs));
+      return cName + ' (with properties: ' + properties + ')';
     }
     return cName;
   }
@@ -358,10 +358,16 @@ function getArgDisplay(arg) {
   }
 
   if (hasKeys) {
-    return getDisplay(arg);
+    return getDisplay(arg, gottenArgs);
   }
 
   return cName;
+}
+
+function getDisplay(obj, gottenArgs) {
+  var argDisplay = {};
+  each(obj, (v, k) => argDisplay[k] = getArgDisplay(v, gottenArgs));
+  return argDisplay;
 }
 
 function getApiCheckApis() {
