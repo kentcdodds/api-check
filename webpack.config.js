@@ -37,7 +37,7 @@ function getConfig(env) {
     output: {
       library: 'apiCheck',
       libraryTarget: 'umd',
-      filename: dev ? 'apiCheck.js' : 'apiCheck.min.js',
+      filename: dev ? 'api-check.js' : 'api-check.min.js',
       path: here('dist'),
       pathinfo: dev
     },
