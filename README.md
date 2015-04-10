@@ -1,5 +1,7 @@
 # apiCheck.js
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/apiCheck.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![Build Status](https://travis-ci.org/kentcdodds/apiCheck.js.svg)](https://travis-ci.org/kentcdodds/apiCheck.js)
 [![Coverage Status](https://coveralls.io/repos/kentcdodds/apiCheck.js/badge.svg?branch=master)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
 *<-- if that build is ever red or that number is ever less than 100% then I want you to
@@ -18,14 +20,16 @@ Components.
 
 apiCheck.js utilizes [UMD](https://github.com/umdjs/umd), so you can:
 
-`var apiCheck = require('api-check')(/* your custom options and checkers*/);` (also available as AMD module or global)
+`var apiCheck = require('api-check')(/* your custom options, checkers*/);`
+
+Also available as an AMD module or as `apiCheck` on global
 
 ## Example
 
 Note, there are a bunch of tests. Those should be instructive as well.
 
 ```javascript
-var apiCheck = require('api-check)({
+var myApiCheck = require('api-check')({
   /* config options */
   output: {
     prefix: 'app/lib Name',
@@ -39,8 +43,8 @@ var apiCheck = require('api-check)({
 
 // given we have a function like this:
 function foo(bar, foobar) {
-  // we can define our api as the first argument to apiCheck.warn
-  apiCheck.warn([apiCheck.number, apiCheck.arrayOf(apiCheck.string)], arguments);
+  // we can define our api as the first argument to myApiCheck.warn
+  myApiCheck.warn([myApiCheck.number, myApiCheck.arrayOf(myApiCheck.string)], arguments);
   // do stuff
 }
 // the function above can be called like so:
@@ -51,7 +55,7 @@ foo('whatever', false);
 
 
 // here's something a little more complex (this is what's in the screenshot and [the demo](http://jsbin.com/hibocu/edit?js,console,output))
-var myCheck = apiCheck({
+var myCheck = require('api-check')({
   output: {
     prefix: 'myApp',
     suffix: 'see docs -->',
@@ -114,8 +118,10 @@ console.log('Failed call (invalid ip address)');
 doSomething(person, options, callback); // <-- this would fail because the ipAddress checker would fail
 
 // if you only wish to check the first argument to a function, you don't need to supply an array.
+
+var libCheck = apiCheck(); // you don't HAVE to pass anything if you don't want to.
 function bar(a) {
-  var errorMessage = apiCheck(apiCheck.string, arguments);
+  var errorMessage = libCheck(apiCheck.string, arguments);
   if (!errorMessage) {
     // success
   } else if (typeof errorMessage === 'string') {
@@ -458,7 +464,7 @@ apiCheck.any(jfio,.jgo); // <-- Syntax error.... ಠ_ಠ
 You can specify your own type. You do so like so:
 
 ```javascript
-var myCheck = apiCheck({
+var myCheck = require('api-check')({
   output: {prefix: 'myCheck'}
 });
 
@@ -494,10 +500,10 @@ You passed:
   "not-an-ip-address"
 ]
 
-With the types of:
+With the types:
 [
-  "String",
-  "String"
+  "string",
+  "string"
 ]
 
 The API calls for:
@@ -510,30 +516,41 @@ The API calls for:
 There's actually quite a bit of cool stuff you can do with custom types checkers. If you want to know what they are,
 look at the tests or file an issue for me to go document them. :-)
 
+### apiCheck.utils
+
+When writing custom types, you may find the `utils` helpful. Please file an issue to ask me to improve documentation for
+what's available. For now, check out `apiCheckUtils.test.js`
 
 ## Customization
 
 *Note, obviously, these things are specific to `apiCheck` and not part of React `propTypes`*
+
+When you create your instance of `apiCheck`, you can configure it with different options as part of the first argument.
+
 
 ### config.output
 
 You can specify some extra options for the output of the message.
 
 ```javascript
-apiCheck.config.output = {
-  prefix: 'Global prefix',
-  suffix: 'global suffix',
-  docsBaseUrl: 'https://example.com/errors-and-warnings#'
-};
+var myApiCheck = require('api-check')({
+  output: {
+    prefix: 'Global prefix',
+    suffix: 'global suffix',
+    docsBaseUrl: 'https://example.com/errors-and-warnings#'
+  },
+  verbose: false, // <-- defaults to false
+  disabled: false // <-- defaults to false, set this to true in production
+});
 ```
 
 You can also specify an `output` object to each `apiCheck()`, `apiCheck.throw()`, and `apiCheck.warn()` request:
 
 ```javascript
-apiCheck(apiCheck.bool, arguments, {
+myApiCheck(apiCheck.bool, arguments, {
   prefix: 'instance prefix:',
   suffix: 'instance suffix',
-  url: 'example-error-additional-info'
+  urlSuffix: 'example-error-additional-info'
 });
 ```
 
@@ -543,6 +560,13 @@ A failure with the above configuration would yield something like this:
 Global prefix instance prefix {{error message}} instance suffix global suffix https://example.com/errors-and-warnings#example-error-additional-info
 ```
 
+As an alternative to `urlSuffix`, you can also specify a `url`:
+
+```javascript
+myApiCheck(apiCheck.bool, arguments, {
+  url: 'https://example.com/some-direct-url-that-does-not-use-the-docsBaseUrl'
+});
+```
 
 ### getErrorMessage
 
@@ -557,6 +581,8 @@ Simply `apiCheck.handleErrorMessage = function(message, shouldThrow) { /* throw 
 ### Disable apiCheck
 
 It's a good idea to disable the apiCheck in production. To do this, simply invoke `disable()`
+
+
 
 ```javascript
 apiCheck.disable();

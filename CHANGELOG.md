@@ -1,3 +1,14 @@
+# 7.0.0-beta.0
+
+- Changing the api for disabled. No longer two functions, now just a value you set. You can also initialize it with a disabled property.
+- Adding globalConfig to allow you to disable all instances of apiCheck and to enable you to set everything to verbose.
+- Changed the name of the `dist` files to be `api-check.js` and `api-check.min.js` (used to be `apiCheck.js` and `apiCheck.min.js`)
+- Improved messages
+
+# 6.0.11
+
+- Fixing bower.json case issue
+
 # 6.0.10
 
 - Making output of user's arguments easier to read by replacing `null` with the function name.

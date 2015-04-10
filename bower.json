@@ -1,12 +1,12 @@
 {
   "name": "api-check",
-  "version": "6.0.11",
+  "version": "7.0.0-beta.0",
   "homepage": "https://github.com/kentcdodds/apiCheck.js",
   "authors": [
     "Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us)"
   ],
   "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
-  "main": "dist/apiCheck.js",
+  "main": "dist/api-check.js",
   "moduleType": [
     "amd",
     "globals",
