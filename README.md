@@ -7,7 +7,7 @@
 [![Coverage Status](https://img.shields.io/coveralls/kentcdodds/apiCheck.js/master.svg?style=flat-square)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/apiCheck.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-If that build is ever red or the coverage is ever less than 100% then I want you to
+*If that build is ever red or the coverage is ever less than 100% then I want you to
 [flame me on twitter (@kentcdodds)](https://twitter.com/kentcdodds) and be sure to mention how disappointed
 [@josepheames](https://twitter.com/josepheames) would be in me*
 
