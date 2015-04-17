@@ -1,3 +1,7 @@
+# 7.0.0-beta.3
+
+- Fixing issue where types were specifying [Circular] when it wasn't actually circular...
+
 # 7.0.0-beta.2
 
 - Fixing bug with calling Object.keys on a non-object
