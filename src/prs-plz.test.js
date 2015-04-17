@@ -4,7 +4,7 @@
  *  2. makes the test pass
  *  3. keeps the tests passing
  *  4. maintains 100% code coverage :-)
- * 
+ *
  * Thanks!
  */
 

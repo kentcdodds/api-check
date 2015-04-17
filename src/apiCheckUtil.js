@@ -184,10 +184,15 @@ function addOptional(checker) {
  * optional version
  * @param checker
  * @param properties properties to add to the checker
+ * @param disabled - when set to true, this will set the checker to a no-op function
  */
-function setupChecker(checker, properties) {
-  /* jshint maxcomplexity:7 */
-  checker.noop = noop; // do this first, so it can be overwritten.
+function setupChecker(checker, properties, disabled) {
+  /* jshint maxcomplexity:8 */
+  if (disabled) { // swap out the checker for its own copy of noop
+    checker = getNoop();
+    checker.isNoop = true;
+  }
+
   if (typeof checker.type === 'string') {
     checker.shortType = checker.type;
   }
@@ -199,7 +204,7 @@ function setupChecker(checker, properties) {
     checker.displayName = `apiCheck ${t(checker.shortType || checker.type || checker.name)} type checker`;
   }
 
-  if (!checker.notRequired) {
+  if (!checker.notRequired && !disabled) {
     checker = getRequiredVersion(checker);
   }
 
@@ -229,4 +234,10 @@ function copyProps(src, dest) {
 }
 
 function noop() {
+}
+
+function getNoop() {
+  /* istanbul ignore next */
+  return function noop() {
+  };
 }

@@ -406,7 +406,42 @@ describe('apiCheck', () => {
       apiCheck.globalConfig.disabled = true;
       const customInstance = apiCheck();
       check(customInstance, true);
-      expect(customInstance.string.name).to.eq('noop');
+      var checkers = [
+        customInstance.string,
+        customInstance.bool,
+        customInstance.func,
+        customInstance.array,
+        customInstance.number,
+
+        customInstance.object,
+        customInstance.object.nullOk,
+
+        customInstance.oneOf([null, 'foo']),
+        customInstance.oneOfType([
+          customInstance.string.optional,
+          customInstance.bool.optional
+        ]),
+
+        customInstance.arrayOf(customInstance.string),
+        customInstance.objectOf(customInstance.array),
+
+
+        customInstance.instanceOf(Date),
+
+        customInstance.shape({}),
+        customInstance.shape.ifNot('foo'),
+        customInstance.shape.onlyIf(['bar', 'baz']),
+
+        customInstance.typeOrArrayOf(customInstance.string),
+
+        customInstance.args,
+        customInstance.any
+      ];
+
+      checkers.forEach(checker => {
+        expect(checker.isNoop).to.be.true;
+        expect(checker.optional.isNoop).to.be.true;
+      });
     });
 
     function check(instance, disabled) {

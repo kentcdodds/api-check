@@ -20,6 +20,7 @@ module.exports.internalChecker = apiCheckApiCheck;
 each(checkers, (checker, name) => module.exports[name] = checker);
 
 function getApiCheckInstance(config = {}, extraCheckers = {}) {
+  /* jshint maxcomplexity:6 */
   if (apiCheckApiCheck && arguments.length) {
     apiCheckApiCheck.throw(apiCheckApis.getApiCheckInstanceCheckers, arguments, {
       prefix: 'creating an apiCheck instance'
@@ -44,13 +45,9 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
   };
 
   each(additionalProperties, (wrapper, name) => apiCheck[name] = wrapper);
-  each(checkers, (checker, name) => {
-    if ((!additionalProperties.disabled && !module.exports.globalConfig.disabled) || !checker.noop) {
-      apiCheck[name] = checker;
-    } else {
-      apiCheck[name] = checker.noop;
-    }
-  });
+
+  const disabled = apiCheck.disabled || module.exports.globalConfig.disabled;
+  each(checkers.getCheckers(disabled), (checker, name) => apiCheck[name] = checker);
   each(extraCheckers, (checker, name) => apiCheck[name] = checker);
 
   return apiCheck;
