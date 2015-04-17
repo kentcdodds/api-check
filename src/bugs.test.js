@@ -7,7 +7,7 @@ describe(`fixed bugs`, () => {
   const apiCheckInstance = apiCheck();
 
   it(`should not show [Circular] on things that aren't actually circular`, () => {
-    var y = [{foo: 'foo', bar: 'bar'}];
+    const y = [{foo: 'foo', bar: 'bar'}];
     const result = apiCheckInstance(apiCheckInstance.arrayOf(apiCheckInstance.string), y);
     expect(result.message).to.not.contain('[Circular]');
   });
