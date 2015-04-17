@@ -1,3 +1,7 @@
+# 7.0.0
+
+- Official release!
+
 # 7.0.0-beta.4
 
 - Now, all instances of apiCheck get their very own copies of checkers. If the instance of apiCheck is set to disabled, then any checkers created will be initialized as no-op functions to improve performance when doing checking.
