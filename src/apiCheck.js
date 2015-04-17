@@ -333,15 +333,11 @@ function checkEnoughArgs(api, args) {
 
 function getArgDisplay(arg, gottenArgs) {
   /* jshint maxcomplexity:7 */
-  if (gottenArgs.indexOf(arg) !== -1) {
-    return '[Circular]';
-  }
-  gottenArgs.push(arg);
   const cName = arg && arg.constructor && arg.constructor.name;
   const type = typeOf(arg);
   if (type === 'function') {
     if (hasKeys()) {
-      let properties = stringify(getDisplay(arg, gottenArgs));
+      let properties = stringify(getDisplayIfNotGotten());
       return cName + ' (with properties: ' + properties + ')';
     }
     return cName;
@@ -356,13 +352,22 @@ function getArgDisplay(arg, gottenArgs) {
   }
 
   if (hasKeys()) {
-    return getDisplay(arg, gottenArgs);
+    return getDisplayIfNotGotten();
   }
 
   return cName;
 
+  // utility functions
   function hasKeys() {
     return arg && Object.keys(arg).length;
+  }
+
+  function getDisplayIfNotGotten() {
+    if (gottenArgs.indexOf(arg) !== -1) {
+      return '[Circular]';
+    }
+    gottenArgs.push(arg);
+    return getDisplay(arg, gottenArgs);
   }
 }
 
