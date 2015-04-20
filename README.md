@@ -2,7 +2,7 @@
 
 [![bower version](https://img.shields.io/bower/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
 [![npm version](https://img.shields.io/npm/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
-[![npm downloads](https://img.shields.io/npm/dm/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
+[![npm downloads](https://img.shields.io/npm/dm/api-check.svg?style=flat-square)](http://npm-stat.com/charts.html?package=api-check)
 [![Build Status](https://img.shields.io/travis/kentcdodds/apiCheck.js.svg?style=flat-square)](https://travis-ci.org/kentcdodds/apiCheck.js)
 [![Coverage Status](https://img.shields.io/coveralls/kentcdodds/apiCheck.js/master.svg?style=flat-square)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/apiCheck.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
