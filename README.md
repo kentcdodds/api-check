@@ -583,15 +583,13 @@ Simply `apiCheck.handleErrorMessage = function(message, shouldThrow) { /* throw 
 
 ### Disable apiCheck
 
-It's a good idea to disable the apiCheck in production. To do this, simply invoke `disable()`
-
-
+It's a good idea to disable the apiCheck in production. You can disable your own instance of `apiCheck` as part of
+the `options`, but it's probably just better to disable `apiCheck` globally. I recommend you do this before you (or
+any of you dependencies) create an instance of `apiCheck`. Here's how you would do that:
 
 ```javascript
-apiCheck.disable();
-
-// to re-enable it
-apiCheck.enable();
+var apiCheck = require('api-check');
+apiCheck.globalConfig.disabled = true;
 ```
 
 ## Credits
