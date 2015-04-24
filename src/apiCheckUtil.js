@@ -226,6 +226,7 @@ function getRequiredVersion(checker) {
     }
   }
   copyProps(checker, requiredChecker);
+  requiredChecker.originalChecker = checker;
   return requiredChecker;
 }
 

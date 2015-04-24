@@ -1,3 +1,7 @@
+# Latest
+
+- Adding `originalChecker` property to the checker that's returned from `getRequiredVersion` for debugging ([#13](/../../issues/13))
+
 # 7.0.0
 
 - Official release!

@@ -93,6 +93,11 @@ describe('apiCheckUtil', () => {
         myChecker = checkerHelpers.setupChecker(myChecker);
         expect(myChecker.displayName).to.eq('Nephi');
       });
+
+      it(`should add an 'originalChecker' property`, () => {
+        const newChecker = checkerHelpers.setupChecker(myChecker);
+        expect(newChecker.originalChecker).to.eq(myChecker);
+      });
     });
 
 
