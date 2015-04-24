@@ -4,6 +4,7 @@
 - Added `null` checker ([#16](/../../issues/16))
 - Added `nullable` to all checkers and to `setupChecker` ([#16](/../../issues/16))
 - Added `range` checker ([#16](/../../issues/16))
+- Added `shape.requiredIfNot` checker
 
 # 7.0.0
 

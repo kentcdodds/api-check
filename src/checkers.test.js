@@ -589,6 +589,61 @@ describe('checkers', () => {
         }).to.not.throw();
       });
     });
+
+    describe(`requiredIfNot`, () => {
+      let checker;
+      beforeEach(() => {
+        checker = checkers.shape({
+          foo: checkers.shape.requiredIfNot('bar', checkers.array),
+          bar: checkers.string.optional,
+          foobar: checkers.shape.requiredIfNot(['foobaz', 'baz'], checkers.bool),
+          foobaz: checkers.object.optional,
+          baz: checkers.string.optional
+        });
+
+      });
+
+      it(`should pass when a value is specified and the other value(s) is/are not`, () => {
+        const obj = {
+          foo: [1, 2],
+          foobar: true
+        };
+        expect(checker(obj)).to.be.undefined;
+      });
+
+      it(`should pass when a value is specified and the other value(s) is/are too`, () => {
+        const obj = {
+          foo: [1, 2],
+          bar: 'hi',
+          foobar: true,
+          foobaz: {},
+          baz: 'hey'
+        };
+        expect(checker(obj)).to.be.undefined;
+      });
+
+      it(`should fail when a value is not given and the other value(s) is/are not either`, () => {
+        let obj = {
+          foo: [1, 2]
+          // missing foobar
+        };
+        expect(checker(obj)).to.be.an.instanceOf(Error);
+
+        obj = {
+          // missing foo
+          foobar: true
+        };
+        expect(checker(obj)).to.be.an.instanceOf(Error);
+      });
+
+      it(`should pass if only one of the other values is specified`, () => {
+        const obj = {
+          bar: 'hi',
+          baz: 'hey'
+        };
+        expect(checker(obj)).to.be.undefined;
+      });
+    });
   });
 
   describe(`arguments`, () => {

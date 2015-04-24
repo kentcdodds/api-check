@@ -312,6 +312,25 @@ function getCheckers(disabled) {
       }, {type, shortType: `onlyIf[${otherProps.join(', ')}]`}, disabled);
     };
 
+    shapeCheckGetter.requiredIfNot = function shapeRequiredIfNot(otherProps, propChecker) {
+      if (!Array.isArray(otherProps)) {
+        otherProps = [otherProps];
+      }
+      const type = `specified if these are not specified: ${t(otherProps.join(', '))} (otherwise it's optional)`;
+      return setupChecker(function shapeRequiredIfNotDefinition(prop, propName, location, obj) {
+        var propExists = obj && obj.hasOwnProperty(propName);
+        var otherPropsExist = otherProps.some(function (otherProp) {
+          return obj && obj.hasOwnProperty(otherProp);
+        });
+        if (!otherPropsExist && !propExists) {
+          return getError(propName, location, type);
+        } else if (propExists) {
+          return propChecker(prop, propName, location, obj);
+        }
+      }, {type, notRequired: true}, disabled);
+    };
+
+
     return shapeCheckGetter;
   }
 
