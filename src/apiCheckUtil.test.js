@@ -99,9 +99,17 @@ describe('apiCheckUtil', () => {
         expect(newChecker.originalChecker).to.eq(myChecker);
       });
 
-      it(`should be add nullable`, () => {
+      it(`should add nullable and it should be able to be optional`, () => {
         const fn = checkerHelpers.setupChecker(myChecker);
         expect(fn.nullable).to.exist;
+        expect(fn.nullable.optional).to.exist;
+      });
+
+      it(`should skip adding optional to nullable when notOptional`, () => {
+        myChecker.notOptional = true;
+        const fn = checkerHelpers.setupChecker(myChecker);
+        expect(fn.nullable).to.exist;
+        expect(fn.nullable.optional).to.not.exist;
       });
 
       it(`should skip adding nullable with notNullable property`, () => {

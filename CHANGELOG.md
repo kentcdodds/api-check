@@ -1,3 +1,7 @@
+# 7.2.0
+
+- Adding `.optional` to `.nullable` so you can do `apiCheck.string.nullable.optional`
+
 # 7.1.0
 
 - Adding `originalChecker` property to the checker that's returned from `getRequiredVersion` for debugging ([#13](/../../issues/13))

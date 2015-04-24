@@ -746,27 +746,35 @@ describe('checkers', () => {
     ];
 
     it('should have an optional function', () => {
+      _.each(builtInCheckers, shouldHaveOptional);
+    });
+
+    it(`should have a nullable function that can be optional`, () => {
       _.each(builtInCheckers, checker => {
-        expect(checker.optional).to.be.a('function');
-        expect(checker.optional.isOptional).to.be.true;
-        expect(checker.optional.originalChecker).to.eq(checker);
-        expect(checker.optional()).to.be.undefined;
+        shouldHaveNullable(checker);
+        shouldHaveOptional(checker.nullable);
       });
     });
 
-    it(`should have a nullable function`, () => {
-      _.each(builtInCheckers, checker => {
-        expect(checker.nullable).to.be.a('function');
-        expect(checker.nullable.isNullable).to.be.true;
-        expect(checker.nullable.originalChecker).to.eq(checker);
-        expect(checker.nullable(null)).to.be.undefined;
-      });
-    });
+    function shouldHaveNullable(checker) {
+      expect(checker.nullable).to.be.a('function');
+      expect(checker.nullable.isNullable).to.be.true;
+      expect(checker.nullable.originalChecker).to.eq(checker);
+      expect(checker.nullable(null)).to.be.undefined;
+    }
+
+    function shouldHaveOptional(checker) {
+      expect(checker.optional).to.be.a('function');
+      expect(checker.optional.isOptional).to.be.true;
+      expect(checker.optional.originalChecker).to.eq(checker);
+      expect(checker.optional()).to.be.undefined;
+    }
 
     it(`should check the actual checker if nullable and not passed null`, () => {
       expect(checkers.bool.nullable(true)).to.be.undefined;
       expect(checkers.func.nullable(32)).to.be.an.instanceOf(Error);
     });
+
 
   });
 });

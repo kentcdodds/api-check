@@ -174,6 +174,9 @@ function setupChecker(checker, properties, disabled) {
 
   if (!checker.notNullable) {
     addNullable(checker, disabled);
+    if (!checker.notOptional) {
+      addOptional(checker.nullable, disabled);
+    }
   }
 
   if (!checker.notOptional) {
