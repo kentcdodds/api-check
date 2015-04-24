@@ -98,6 +98,17 @@ describe('apiCheckUtil', () => {
         const newChecker = checkerHelpers.setupChecker(myChecker);
         expect(newChecker.originalChecker).to.eq(myChecker);
       });
+
+      it(`should be add nullable`, () => {
+        const fn = checkerHelpers.setupChecker(myChecker);
+        expect(fn.nullable).to.exist;
+      });
+
+      it(`should skip adding nullable with notNullable property`, () => {
+        myChecker.notNullable = true;
+        myChecker = checkerHelpers.setupChecker(myChecker);
+        expect(myChecker.nullable).to.not.exist;
+      });
     });
 
 
@@ -109,6 +120,18 @@ describe('apiCheckUtil', () => {
         foo();
         checkerHelpers.addOptional(foo);
         expect(foo.optional).to.be.a('function');
+        expect(foo.optional.isOptional).to.be.true;
+        expect(foo.optional()).to.be.undefined;
+      });
+    });
+
+    describe(`addNullable`, () => {
+      it(`should make a function nullable`, () => {
+        const fn = coveredFunction();
+        checkerHelpers.addNullable(fn);
+        expect(fn.nullable).to.be.a('function');
+        expect(fn.nullable.isNullable).to.be.true;
+        expect(fn.nullable(null)).to.be.undefined;
       });
     });
 

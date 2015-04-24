@@ -1,6 +1,6 @@
 const stringify = require('json-stringify-safe');
 const checkerHelpers = {
-  addOptional, getRequiredVersion, setupChecker
+  addOptional, getRequiredVersion, setupChecker, addNullable
 };
 
 module.exports = {
@@ -142,43 +142,6 @@ function undef(thing) {
 }
 
 
-
-
-function addOptional(checker) {
-  function optionalCheck(val, name, location, obj) {
-    if (!undef(val)) {
-      return checker(val, name, location, obj);
-    }
-  }
-  // inherit all properties on the original checker
-  copyProps(checker, optionalCheck);
-  each(Object.keys(checker), key => optionalCheck[key] = checker[key]);
-
-
-  optionalCheck.isOptional = true;
-  optionalCheck.displayName = checker.displayName + ' (optional)';
-
-
-  // the magic line that allows you to add .optional to the end of the checkers
-  checker.optional = optionalCheck;
-
-  // fix type, because it's not a straight copy...
-  // the reason is we need to specify type.__apiCheckData.optional as true for the terse/verbose option.
-  // we also want to add "(optional)" to the types with a string
-  if (typeof checker.optional.type === 'object') {
-    checker.optional.type = copy(checker.optional.type); // make our own copy of this
-  } else if (typeof checker.optional.type === 'function') {
-    checker.optional.type = function() {
-      return checker.type(...arguments);
-    };
-  } else {
-    checker.optional.type += ' (optional)';
-    return;
-  }
-  checker.optional.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
-  checker.optional.type.__apiCheckData.optional = true;
-}
-
 /**
  * This will set up the checker with all of the defaults that most checkers want like required by default and an
  * optional version
@@ -187,7 +150,7 @@ function addOptional(checker) {
  * @param disabled - when set to true, this will set the checker to a no-op function
  */
 function setupChecker(checker, properties, disabled) {
-  /* jshint maxcomplexity:8 */
+  /* jshint maxcomplexity:9 */
   if (disabled) { // swap out the checker for its own copy of noop
     checker = getNoop();
     checker.isNoop = true;
@@ -204,18 +167,24 @@ function setupChecker(checker, properties, disabled) {
     checker.displayName = `apiCheck ${t(checker.shortType || checker.type || checker.name)} type checker`;
   }
 
-  if (!checker.notRequired && !disabled) {
-    checker = getRequiredVersion(checker);
+
+  if (!checker.notRequired) {
+    checker = getRequiredVersion(checker, disabled);
+  }
+
+  if (!checker.notNullable) {
+    addNullable(checker, disabled);
   }
 
   if (!checker.notOptional) {
-    addOptional(checker);
+    addOptional(checker, disabled);
   }
+
   return checker;
 }
 
-function getRequiredVersion(checker) {
-  function requiredChecker(val, name, location, obj) {
+function getRequiredVersion(checker, disabled) {
+  var requiredChecker = disabled ? getNoop() : function requiredChecker(val, name, location, obj) {
     if (undef(val) && !checker.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
       const type = getCheckerDisplay(checker, {short: true});
@@ -224,11 +193,71 @@ function getRequiredVersion(checker) {
     } else {
       return checker(val, name, location, obj);
     }
-  }
+  };
   copyProps(checker, requiredChecker);
   requiredChecker.originalChecker = checker;
   return requiredChecker;
 }
+
+function addOptional(checker, disabled) {
+  var optionalCheck = disabled ? getNoop() : function optionalCheck(val, name, location, obj) {
+    if (!undef(val)) {
+      return checker(val, name, location, obj);
+    }
+  };
+  // inherit all properties on the original checker
+  copyProps(checker, optionalCheck);
+
+  optionalCheck.isOptional = true;
+  optionalCheck.displayName = checker.displayName + ' (optional)';
+  optionalCheck.originalChecker = checker;
+
+
+  // the magic line that allows you to add .optional to the end of the checkers
+  checker.optional = optionalCheck;
+
+  fixType(checker, checker.optional);
+}
+
+function addNullable(checker, disabled) {
+  var nullableCheck = disabled ? getNoop() : function nullableCheck(val, name, location, obj) {
+    if (val !== null) {
+      return checker(val, name, location, obj);
+    }
+  };
+  // inherit all properties on the original checker
+  copyProps(checker, nullableCheck);
+
+  nullableCheck.isNullable = true;
+  nullableCheck.displayName = checker.displayName + ' (nullable)';
+  nullableCheck.originalChecker = checker;
+
+  // the magic line that allows you to add .nullable to the end of the checkers
+  checker.nullable = nullableCheck;
+
+  fixType(checker, checker.nullable);
+}
+
+function fixType(checker, checkerCopy) {
+  // fix type, because it's not a straight copy...
+  // the reason is we need to specify type.__apiCheckData.optional as true for the terse/verbose option.
+  // we also want to add "(optional)" to the types with a string
+  if (typeof checkerCopy.type === 'object') {
+    checkerCopy.type = copy(checkerCopy.type); // make our own copy of this
+  } else if (typeof checkerCopy.type === 'function') {
+    checkerCopy.type = function() {
+      return checker.type(...arguments);
+    };
+  } else {
+    checkerCopy.type += ' (optional)';
+    return;
+  }
+  checkerCopy.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
+  checkerCopy.type.__apiCheckData.optional = true;
+}
+
+
+// UTILS
 
 function copyProps(src, dest) {
   each(Object.keys(src), key => dest[key] = src[key]);

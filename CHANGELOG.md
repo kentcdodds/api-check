@@ -2,6 +2,7 @@
 
 - Adding `originalChecker` property to the checker that's returned from `getRequiredVersion` for debugging ([#13](/../../issues/13))
 - Added `null` checker ([#16](/../../issues/16))
+- Added `nullable` to all checkers and to `setupChecker` ([#16](/../../issues/16))
 
 # 7.0.0
 
