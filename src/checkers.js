@@ -26,11 +26,14 @@ function getCheckers(disabled) {
     objectOf: objectOfCheckGetter,
     typeOrArrayOf: typeOrArrayOfCheckGetter,
 
+    range: rangeCheckGetter,
+
     shape: getShapeCheckGetter(),
     args: argumentsCheckerGetter(),
 
     any: anyCheckGetter(),
     null: nullCheckGetter()
+
   };
 
   function typeOfCheckGetter(type) {
@@ -332,4 +335,14 @@ function getCheckers(disabled) {
       }
     }, {type: 'null'}, disabled);
   }
+
+  function rangeCheckGetter(min, max) {
+    const type = `Range (${min} - ${max})`;
+    return setupChecker(function rangeChecker(val, name, location) {
+      if (typeof val !== 'number' || val < min || val > max) {
+        return getError(name, location, type);
+      }
+    }, {type}, disabled);
+  }
+
 }

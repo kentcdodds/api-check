@@ -639,6 +639,21 @@ describe('checkers', () => {
     });
   });
 
+  describe(`range`, () => {
+    it(`should pass when given an item within the specified range`, () => {
+      expect(checkers.range(0, 10)(4)).to.be.undefined;
+    });
+
+    it(`should fail when given an item outisde the specified range`, () => {
+      expect(checkers.range(0, 10)(15)).to.be.an.instanceOf(Error);
+      expect(checkers.range(0, 10)(-5)).to.be.an.instanceOf(Error);
+    });
+
+    it(`should fail when given a non-number`, () => {
+      expect(checkers.range(-10, 10)('hello')).to.be.an.instanceOf(Error);
+    });
+  });
+
   describe(`all checkers`, () => {
 
     const builtInCheckers = [
@@ -657,7 +672,8 @@ describe('checkers', () => {
       checkers.shape({}),
       checkers.args,
       checkers.any,
-      checkers.null
+      checkers.null,
+      checkers.range(1, 15)
     ];
 
     it('should have an optional function', () => {
