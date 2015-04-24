@@ -643,6 +643,44 @@ describe('checkers', () => {
         };
         expect(checker(obj)).to.be.undefined;
       });
+
+      describe(`all`, () => {
+
+        beforeEach(() => {
+          checker = checkers.shape({
+            foobar: checkers.shape.requiredIfNot.all(['foobaz', 'baz'], checkers.bool),
+            foobaz: checkers.object.optional,
+            baz: checkers.string.optional
+          });
+        });
+
+        it(`should pass if both the other values is specified`, () => {
+          const obj = {
+            bar: 'hi',
+            foobaz: {},
+            baz: 'hey'
+          };
+          expect(checker(obj)).to.be.undefined;
+        });
+
+        it(`should fail if only one of the other values is specified`, () => {
+          const obj = {
+            bar: 'hi',
+            baz: 'hey'
+          };
+          expect(checker(obj)).to.be.an.instanceOf(Error);
+        });
+
+        it(`should pass if none of the values is specified`, () => {
+          expect(checker({})).to.be.undefiend;
+        });
+
+        it(`should throw an error when trying to create an all with anything but an array`, () => {
+          expect(
+            () => checkers.shape.requiredIfNot.all('hi', checkers.bool)
+          ).to.throw('requiredIfNot.all must be passed an array');
+        });
+      });
     });
   });
 

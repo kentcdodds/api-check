@@ -1,6 +1,7 @@
 # 7.2.0
 
 - Adding `.optional` to `.nullable` so you can do `apiCheck.string.nullable.optional`
+- Adding `.all` to `shape.requiredIfNot` so you can do `apiCheck.shape.requiredIfNot(['foo', 'bar'], apiCheck.string)`
 
 # 7.1.0
 

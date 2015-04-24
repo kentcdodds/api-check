@@ -316,10 +316,24 @@ function getCheckers(disabled) {
       if (!Array.isArray(otherProps)) {
         otherProps = [otherProps];
       }
-      const type = `specified if these are not specified: ${t(otherProps.join(', '))} (otherwise it's optional)`;
+      return getRequiredIfNotChecker(false, otherProps, propChecker);
+    };
+
+    shapeCheckGetter.requiredIfNot.all = function shapeRequiredIfNotAll(otherProps, propChecker) {
+      if (!Array.isArray(otherProps)) {
+        throw new Error('requiredIfNot.all must be passed an array');
+      }
+      return getRequiredIfNotChecker(true, otherProps, propChecker);
+    };
+
+    function getRequiredIfNotChecker(all, otherProps, propChecker) {
+      const props = t(otherProps.join(', '));
+      const ifProps = `if ${all ? 'all of' : 'at least one of'}`;
+      const type = `specified ${ifProps} these are not specified: ${props} (otherwise it's optional)`;
       return setupChecker(function shapeRequiredIfNotDefinition(prop, propName, location, obj) {
-        var propExists = obj && obj.hasOwnProperty(propName);
-        var otherPropsExist = otherProps.some(function (otherProp) {
+        const propExists = obj && obj.hasOwnProperty(propName);
+        const iteration = all ? 'every' : 'some';
+        const otherPropsExist = otherProps[iteration](function (otherProp) {
           return obj && obj.hasOwnProperty(otherProp);
         });
         if (!otherPropsExist && !propExists) {
@@ -328,8 +342,7 @@ function getCheckers(disabled) {
           return propChecker(prop, propName, location, obj);
         }
       }, {type, notRequired: true}, disabled);
-    };
-
+    }
 
     return shapeCheckGetter;
   }
