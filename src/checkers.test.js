@@ -654,6 +654,19 @@ describe('checkers', () => {
     });
   });
 
+  describe(`emptyObject`, () => {
+    it(`should pass when given an empty object`, () => {
+      expect(checkers.emptyObject({})).to.be.undefined;
+    });
+
+    it(`should fail when given anything but an empty object`, () => {
+      expect(checkers.emptyObject({foo: 'bar'})).to.be.an.instanceOf(Error);
+      expect(checkers.emptyObject(null)).to.be.an.instanceOf(Error);
+      expect(checkers.emptyObject([])).to.be.an.instanceOf(Error);
+      expect(checkers.emptyObject(coveredFunction())).to.be.an.instanceOf(Error);
+    });
+  });
+
   describe(`all checkers`, () => {
 
     const builtInCheckers = [
@@ -673,7 +686,8 @@ describe('checkers', () => {
       checkers.args,
       checkers.any,
       checkers.null,
-      checkers.range(1, 15)
+      checkers.range(1, 15),
+      checkers.emptyObject
     ];
 
     it('should have an optional function', () => {

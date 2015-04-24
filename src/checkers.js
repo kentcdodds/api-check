@@ -18,6 +18,8 @@ function getCheckers(disabled) {
     func: funcCheckGetter(),
     object: objectCheckGetter(),
 
+    emptyObject: emptyObjectCheckGetter(),
+
     instanceOf: instanceCheckGetter,
     oneOf: oneOfCheckGetter,
     oneOfType: oneOfTypeCheckGetter,
@@ -329,17 +331,27 @@ function getCheckers(disabled) {
   }
 
   function nullCheckGetter() {
+    const type = 'null';
     return setupChecker(function nullChecker(val, name, location) {
       if (val !== null) {
-        return getError(name, location, 'null');
+        return getError(name, location, type);
       }
-    }, {type: 'null'}, disabled);
+    }, {type}, disabled);
   }
 
   function rangeCheckGetter(min, max) {
     const type = `Range (${min} - ${max})`;
     return setupChecker(function rangeChecker(val, name, location) {
       if (typeof val !== 'number' || val < min || val > max) {
+        return getError(name, location, type);
+      }
+    }, {type}, disabled);
+  }
+
+  function emptyObjectCheckGetter() {
+    const type = 'empty object';
+    return setupChecker(function emptyObjectChecker(val, name, location) {
+      if (typeOf(val) !== 'object' || val === null || Object.keys(val).length) {
         return getError(name, location, type);
       }
     }, {type}, disabled);
