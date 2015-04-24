@@ -1,4 +1,4 @@
-# Latest
+# 7.1.0
 
 - Adding `originalChecker` property to the checker that's returned from `getRequiredVersion` for debugging ([#13](/../../issues/13))
 - Added `null` checker ([#16](/../../issues/16))
