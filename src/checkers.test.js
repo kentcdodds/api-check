@@ -626,6 +626,19 @@ describe('checkers', () => {
     });
   });
 
+  describe(`null`, () => {
+    it(`should pass with null`, () => {
+      expect(checkers.null(null)).to.be.undefined;
+    });
+
+    it(`should fail with anything but null`, () => {
+      expect(checkers.null('foo')).to.be.an.instanceOf(Error);
+      expect(checkers.null(23)).to.be.an.instanceOf(Error);
+      expect(checkers.null({})).to.be.an.instanceOf(Error);
+      expect(checkers.null()).to.be.an.instanceOf(Error);
+    });
+  });
+
   describe('optional', () => {
     it('all built in checkers should be optional', () => {
       const builtInCheckers = [
@@ -643,7 +656,8 @@ describe('checkers', () => {
         checkers.typeOrArrayOf(checkers.number),
         checkers.shape({}),
         checkers.args,
-        checkers.any
+        checkers.any,
+        checkers.null
       ];
       _.each(builtInCheckers, checker => {
         expect(checker).to.have.property('optional');

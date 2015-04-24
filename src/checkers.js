@@ -29,7 +29,8 @@ function getCheckers(disabled) {
     shape: getShapeCheckGetter(),
     args: argumentsCheckerGetter(),
 
-    any: anyCheckGetter()
+    any: anyCheckGetter(),
+    null: nullCheckGetter()
   };
 
   function typeOfCheckGetter(type) {
@@ -322,5 +323,13 @@ function getCheckers(disabled) {
     return setupChecker(function anyCheckerDefinition() {
       // don't do anything
     }, {type: 'any'}, disabled);
+  }
+
+  function nullCheckGetter() {
+    return setupChecker(function nullChecker(val, name, location) {
+      if (val !== null) {
+        return getError(name, location, 'null');
+      }
+    }, {type: 'null'}, disabled);
   }
 }
