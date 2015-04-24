@@ -174,9 +174,6 @@ function setupChecker(checker, properties, disabled) {
 
   if (!checker.notNullable) {
     addNullable(checker, disabled);
-    if (!checker.notOptional) {
-      addOptional(checker.nullable, disabled);
-    }
   }
 
   if (!checker.notOptional) {
@@ -239,6 +236,9 @@ function addNullable(checker, disabled) {
   checker.nullable = nullableCheck;
 
   fixType(checker, checker.nullable);
+  if (!checker.notOptional) {
+    addOptional(checker.nullable, disabled);
+  }
 }
 
 function fixType(checker, checkerCopy) {
