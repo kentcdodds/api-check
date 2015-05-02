@@ -1,3 +1,7 @@
+# 7.2.1
+
+- Improving messaging for types that take a checker as part of the checker
+
 # 7.2.0
 
 - Adding `.optional` to `.nullable` so you can do `apiCheck.string.nullable.optional`
