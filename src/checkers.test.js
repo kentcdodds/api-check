@@ -2,6 +2,7 @@
 var expect = require('chai').expect;
 var _ = require('lodash-node');
 const {coveredFunction} = require('./test.utils');
+const {getCheckerDisplay} = require('./apiCheckUtil');
 
 describe('checkers', () => {
   var checkers = require('./checkers');
@@ -128,7 +129,7 @@ describe('checkers', () => {
         }),
         checkers.func
       ]);
-      expect(checker.type).to.eql({
+      expect(getCheckerDisplay(checker)).to.eql({
         __apiCheckData: {optional: false, type: 'oneOfType'},
         oneOfType: [
           {
@@ -321,14 +322,13 @@ describe('checkers', () => {
       const check = checkers.shape({
         mint: checkers.bool.optional,
         chocolate: checkers.bool,
-        candy: checkers.shape({
+        candy: checkers.arrayOf(checkers.shape({
           good: checkers.bool,
           bad: checkers.bool.optional
-        })
-      });
+        }))});
       const obj = {
         mint: false,
-        candy: {}
+        candy: [{}]
       };
       const typeTypes = check.type({terse: true, obj, addHelpers: true});
       expect(typeTypes).to.eql({
@@ -336,11 +336,17 @@ describe('checkers', () => {
         mint: 'Boolean (optional)',
         candy: {
           __apiCheckData: {
-            strict: false, optional: false, type: 'shape',
-            error: 'THIS IS THE PROBLEM: Required `good` not specified in `candy`. Must be `Boolean`'
+            type: 'arrayOf', optional: false, error: 'THIS IS THE PROBLEM: `candy` must be `arrayOf[shape]`'
           },
-          shape: {
-            good: 'Boolean <-- YOU ARE MISSING THIS'
+          arrayOf: {
+            __apiCheckData: {
+              strict: false, optional: false, type: 'shape',
+              // TODO make the output include this:
+              //error: 'THIS IS THE PROBLEM: Required `good` not specified in `candy`. Must be `Boolean`'
+            },
+            shape: {
+              good: 'Boolean <-- YOU ARE MISSING THIS'
+            }
           }
         }
       });
@@ -380,7 +386,12 @@ describe('checkers', () => {
       const typeTypes = check.type({terse: true, obj, addHelpers: true});
       expect(typeTypes).to.eql({
         voyager: {
-          __apiCheckData: {type: 'shape', strict: false, optional: false, error: 'THIS IS THE PROBLEM: `voyager` must be `Object`'},
+          __apiCheckData: {
+            type: 'shape',
+            strict: false,
+            optional: false,
+            error: 'THIS IS THE PROBLEM: `voyager` must be `Object`'
+          },
           shape: {
             seasons: 'coveredFunction <-- YOU ARE MISSING THIS'
           }
