@@ -422,6 +422,57 @@ apiCheck.shape({
 })({cookies: true, chips: true}); // <-- fail
 ```
 
+#### requiredIfNot *
+
+*Not available in React's `propTypes`*
+
+This can only be used in combination with `shape`
+
+```javascript
+checker = checkers.shape({
+  foobar: checkers.shape.requiredIfNot(['foobaz', 'baz'], checkers.bool),
+  foobaz: checkers.object.optional,
+  baz: checkers.string.optional,
+  foo: checkers.string.optional
+});
+checker({
+  foo: [1, 2],
+  foobar: true
+}); // <-- passes
+
+checker({foo: 'bar'}); // <-- fails
+```
+
+##### all
+
+*Not available in React's `propTypes`*
+
+This can only be used in combination with `shape.requiredIfNot`
+
+
+```javascript
+checker = checkers.shape({
+  foobar: checkers.shape.requiredIfNot.all(['foobaz', 'baz'], checkers.bool),
+  foobaz: checkers.object.optional,
+  baz: checkers.string.optional,
+  foo: checkers.string.optional
+});
+checker({
+  foo: [1, 2]
+}); // <-- fails
+
+checker({
+  foo: [1, 2],
+  foobar: true
+}); // <-- passes
+
+checker({
+  foo: [1, 2],
+  baz: 'foo'
+}); // <-- passes
+```
+
+
 ### args *
 
 *Not available in React's `propTypes`*
