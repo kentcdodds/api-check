@@ -1,3 +1,7 @@
+# 7.2.2
+
+- Fixing bug with displaying function instead of shortType.
+
 # 7.2.1
 
 - Improving messaging for types that take a checker as part of the checker

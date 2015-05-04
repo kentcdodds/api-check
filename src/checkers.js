@@ -115,12 +115,15 @@ function getCheckers(disabled) {
   }
 
   function oneOfTypeCheckGetter(checkers) {
+    const checkersDisplay = checkers.map((checker) => getCheckerDisplay(checker, {short: true}));
+    const shortType = `oneOfType[${checkersDisplay.join(', ')}]`;
     function type(options) {
+      if (options && options.short) {
+        return shortType;
+      }
       return checkers.map((checker) => getCheckerDisplay(checker, options));
     }
     type.__apiCheckData = {optional: false, type: 'oneOfType'};
-    const checkersDisplay = checkers.map((checker) => getCheckerDisplay(checker, {short: true}));
-    const shortType = `oneOfType[${checkersDisplay.join(', ')}]`;
     return setupChecker(function oneOfTypeCheckerDefinition(val, name, location) {
       if (!checkers.some(checker => !isError(checker(val, name, location)))) {
         return getError(name, location, shortType);
@@ -129,14 +132,17 @@ function getCheckers(disabled) {
   }
 
   function arrayOfCheckGetter(checker) {
+    const shortCheckerDisplay = getCheckerDisplay(checker, {short: true});
+    const shortType = `arrayOf[${shortCheckerDisplay}]`;
 
     function type(options) {
+      if (options && options.short) {
+        return shortType;
+      }
       return getCheckerDisplay(checker, options);
     }
     type.__apiCheckData = {optional: false, type: 'arrayOf'};
 
-    const shortCheckerDisplay = getCheckerDisplay(checker, {short: true});
-    const shortType = `arrayOf[${shortCheckerDisplay}]`;
     return setupChecker(function arrayOfCheckerDefinition(val, name, location) {
       if (isError(checkers.array(val)) || !val.every((item) => !isError(checker(item)))) {
         return getError(name, location, shortType);
@@ -145,14 +151,17 @@ function getCheckers(disabled) {
   }
 
   function objectOfCheckGetter(checker) {
+    const checkerDisplay = getCheckerDisplay(checker, {short: true});
+    const shortType = `objectOf[${checkerDisplay}]`;
 
     function type(options) {
+      if (options && options.short) {
+        return shortType;
+      }
       return getCheckerDisplay(checker, options);
     }
     type.__apiCheckData = {optional: false, type: 'objectOf'};
 
-    const checkerDisplay = getCheckerDisplay(checker, {short: true});
-    const shortType = `objectOf[${checkerDisplay}]`;
     return setupChecker(function objectOfCheckerDefinition(val, name, location) {
       const notObject = checkers.object(val, name, location);
       if (isError(notObject)) {
@@ -170,13 +179,17 @@ function getCheckers(disabled) {
   }
 
   function typeOrArrayOfCheckGetter(checker) {
+    const checkerDisplay = getCheckerDisplay(checker, {short: true});
+    const shortType = `typeOrArrayOf[${checkerDisplay}]`;
+
     function type(options) {
+      if (options && options.short) {
+        return shortType;
+      }
       return getCheckerDisplay(checker, options);
     }
 
     type.__apiCheckData = {optional: false, type: 'typeOrArrayOf'};
-    const checkerDisplay = getCheckerDisplay(checker, {short: true});
-    const shortType = `typeOrArrayOf[${checkerDisplay}]`;
     return setupChecker(function typeOrArrayOfDefinition(val, name, location, obj) {
       if (isError(checkers.oneOfType([checker, checkers.arrayOf(checker)])(val, name, location, obj))) {
         return getError(name, location, shortType);
@@ -286,7 +299,8 @@ function getCheckers(disabled) {
       } else {
         description = `specified only if none of the following are specified: [${list(otherProps, ', ', 'and ')}]`;
       }
-      const type = getTypeForShapeChild(propChecker, description);
+      const shortType = `ifNot[${otherProps.join(', ')}]`;
+      const type = getTypeForShapeChild(propChecker, description, shortType);
       return setupChecker(function ifNotChecker(prop, propName, location, obj) {
         let propExists = obj && obj.hasOwnProperty(propName);
         let otherPropsExist = otherProps.some(otherProp => obj && obj.hasOwnProperty(otherProp));
@@ -295,7 +309,7 @@ function getCheckers(disabled) {
         } else if (propExists) {
           return propChecker(prop, propName, location, obj);
         }
-      }, {notRequired: true, type, shortType: `ifNot[${otherProps.join(', ')}]`}, disabled);
+      }, {notRequired: true, type, shortType}, disabled);
     };
 
     shapeCheckGetter.onlyIf = function onlyIf(otherProps, propChecker) {
@@ -306,7 +320,8 @@ function getCheckers(disabled) {
       } else {
         description = `specified only if all of the following are specified: [${list(otherProps, ', ', 'and ')}]`;
       }
-      const type = getTypeForShapeChild(propChecker, description);
+      const shortType = `onlyIf[${otherProps.join(', ')}]`;
+      const type = getTypeForShapeChild(propChecker, description, shortType);
       return setupChecker(function onlyIfCheckerDefinition(prop, propName, location, obj) {
         const othersPresent = otherProps.every(prop => obj.hasOwnProperty(prop));
         if (!othersPresent) {
@@ -314,7 +329,7 @@ function getCheckers(disabled) {
         } else {
           return propChecker(prop, propName, location, obj);
         }
-      }, {type, shortType: `onlyIf[${otherProps.join(', ')}]`}, disabled);
+      }, {type, shortType}, disabled);
     };
 
     shapeCheckGetter.requiredIfNot = function shapeRequiredIfNot(otherProps, propChecker) {
@@ -335,7 +350,8 @@ function getCheckers(disabled) {
       const props = t(otherProps.join(', '));
       const ifProps = `if ${all ? 'all of' : 'at least one of'}`;
       const description = `specified ${ifProps} these are not specified: ${props} (otherwise it's optional)`;
-      const type = getTypeForShapeChild(propChecker, description);
+      const shortType = `requiredIfNot${all ? '.all' : ''}[${otherProps.join(', ')}}]`;
+      const type = getTypeForShapeChild(propChecker, description, shortType);
       return setupChecker(function shapeRequiredIfNotDefinition(prop, propName, location, obj) {
         const propExists = obj && obj.hasOwnProperty(propName);
         const iteration = all ? 'every' : 'some';
@@ -352,8 +368,11 @@ function getCheckers(disabled) {
 
     return shapeCheckGetter;
 
-    function getTypeForShapeChild(propChecker, description) {
+    function getTypeForShapeChild(propChecker, description, shortType) {
       function type(options) {
+        if (options && options.short) {
+          return shortType;
+        }
         return getCheckerDisplay(propChecker);
       }
       type.__apiCheckData = {optional: false, type: 'ifNot', description};

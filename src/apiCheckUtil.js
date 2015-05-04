@@ -123,6 +123,9 @@ function list(arry, join, finalJoin) {
 
 
 function getError(name, location, checkerType) {
+  if (typeof checkerType === 'function') {
+    checkerType = checkerType({short: true});
+  }
   const stringType = typeof checkerType !== 'object' ? checkerType : stringify(checkerType);
   return new Error(`${nAtL(name, location)} must be ${t(stringType)}`);
 }
