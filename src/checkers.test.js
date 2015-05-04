@@ -119,6 +119,11 @@ describe('checkers', () => {
       expect(checkers.oneOfType([checkers.object, checkers.string])(54)).to.be.an.instanceOf(Error);
     });
 
+    it(`should have a type that can return a shortType`, () => {
+      const check = checkers.oneOfType([checkers.object, checkers.func]);
+      expect(check.type({short: true})).to.equal('oneOfType[Object, Function]');
+    });
+
     it(`should have the full checker type of its children`, () => {
       const checker = checkers.oneOfType([
         checkers.shape({
@@ -171,6 +176,10 @@ describe('checkers', () => {
     it('should fail when one of the values does not match the type', () => {
       expect(checkers.arrayOf(checkers.number)([1, 'string', 3])).to.be.an.instanceOf(Error);
     });
+    it(`should have a type that can return a shortType`, () => {
+      const check = checkers.arrayOf(checkers.object);
+      expect(check.type({short: true})).to.equal('arrayOf[Object]');
+    });
   });
 
   describe(`typeOrArrayOf`, () => {
@@ -189,6 +198,10 @@ describe('checkers', () => {
       expect(checkers.typeOrArrayOf(checkers.object)(true)).to.be.an.instanceOf(Error);
       expect(checkers.typeOrArrayOf(checkers.array)('not array')).to.be.an.instanceOf(Error);
     });
+    it(`should have a type that can return a shortType`, () => {
+      const check = checkers.typeOrArrayOf(checkers.object);
+      expect(check.type({short: true})).to.equal('typeOrArrayOf[Object]');
+    });
   });
 
   describe('objectOf', () => {
@@ -204,6 +217,11 @@ describe('checkers', () => {
     });
     it('should fail when one of the properties does not match the type', () => {
       expect(checkers.objectOf(checkers.number)({a: 1, b: 'string', c: 3})).to.be.an.instanceOf(Error);
+    });
+
+    it(`should have a type that can return a shortType`, () => {
+      const check = checkers.objectOf(checkers.bool);
+      expect(check.type({short: true})).to.equal('objectOf[Boolean]');
     });
   });
 
@@ -526,6 +544,26 @@ describe('checkers', () => {
         });
       });
 
+
+      it(`should show the properties it should not have`, () => {
+        const check = checkers.shape({
+          template: checkers.shape.ifNot('templateUrl', checkers.oneOfType([checkers.string, checkers.func])).optional,
+          templateUrl: checkers.shape.ifNot('template', checkers.oneOfType([checkers.string, checkers.func])).optional
+        });
+
+        const error = check({template: 'foo', templateUrl: 'foo.html'});
+        expect(error.message).to.eq('`template` must be `ifNot[templateUrl]`');
+      });
+
+      it(`should show the shortType checkers passed to it`, () => {
+        const check = checkers.shape({
+          template: checkers.shape.ifNot('templateUrl', checkers.oneOfType([checkers.string, checkers.func])).optional,
+          templateUrl: checkers.shape.ifNot('template', checkers.oneOfType([checkers.string, checkers.func])).optional
+        });
+
+        const error = check({template: true});
+        expect(error.message).to.eq('`template` must be `oneOfType[String, Function]`');
+      });
     });
 
     describe('onlyIf', () => {
