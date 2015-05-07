@@ -1,3 +1,7 @@
+# Latest
+
+- Renamed repo to `api-check`
+
 # 7.2.2
 
 - Fixing bug with displaying function instead of shortType.
