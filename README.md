@@ -1,11 +1,11 @@
-# apiCheck.js
+# api-check
 
 [![bower version](https://img.shields.io/bower/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
 [![npm version](https://img.shields.io/npm/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
 [![npm downloads](https://img.shields.io/npm/dm/api-check.svg?style=flat-square)](http://npm-stat.com/charts.html?package=api-check)
-[![Build Status](https://img.shields.io/travis/kentcdodds/apiCheck.js.svg?style=flat-square)](https://travis-ci.org/kentcdodds/apiCheck.js)
-[![Coverage Status](https://img.shields.io/coveralls/kentcdodds/apiCheck.js/master.svg?style=flat-square)](https://coveralls.io/r/kentcdodds/apiCheck.js?branch=master)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/apiCheck.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://img.shields.io/travis/kentcdodds/api-check.svg?style=flat-square)](https://travis-ci.org/kentcdodds/api-check)
+[![Coverage Status](https://img.shields.io/coveralls/kentcdodds/api-check/master.svg?style=flat-square)](https://coveralls.io/r/kentcdodds/api-check?branch=master)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/api-check?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 *If that build is ever red or the coverage is ever less than 100% then I want you to
 [flame me on twitter (@kentcdodds)](https://twitter.com/kentcdodds) and be sure to mention how disappointed
@@ -21,7 +21,7 @@ Components.
 
 `$ npm i -S api-check` or `$bower i -S api-check`
 
-apiCheck.js utilizes [UMD](https://github.com/umdjs/umd), so you can:
+api-check utilizes [UMD](https://github.com/umdjs/umd), so you can:
 
 `var apiCheck = require('api-check')(/* your custom options, checkers*/);`
 
