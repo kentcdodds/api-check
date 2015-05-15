@@ -1,5 +1,6 @@
-# Latest
+# 7.2.3
 
+- Removing sourcemaps from the dist file because it's not removed during minification.
 - Renamed repo to `api-check`
 
 # 7.2.2
