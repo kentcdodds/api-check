@@ -43,8 +43,6 @@ var config = {
     reasons: true
   },
 
-  devtool: 'source-map',
-
   plugins: _.filter(_.union(plugins[env], plugins.commonPost)),
 
   resolve: {
@@ -68,6 +66,10 @@ var config = {
     emitErrors: true
   }
 };
+
+if(prod){
+  config.devtool = 'source-map';
+}
 
 console.log('Config is in ' + env + ' mode');
 module.exports = config;
