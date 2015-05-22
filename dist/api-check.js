@@ -1,4 +1,4 @@
-// apiCheck.js v7.2.3 built with ♥ by Kent C. Dodds (ó ì_í)=óò=(ì_í ò)
+// apiCheck.js v7.2.4 built with ♥ by Kent C. Dodds (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -60,7 +60,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	
+
 	module.exports = __webpack_require__(/*! ./apiCheck */ 1);
 
 /***/ },
@@ -71,7 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	
+
 	var stringify = __webpack_require__(/*! json-stringify-safe */ 4);
 	var apiCheckUtil = __webpack_require__(/*! ./apiCheckUtil */ 2);
 	var each = apiCheckUtil.each;
@@ -81,37 +81,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getCheckerDisplay = apiCheckUtil.getCheckerDisplay;
 	var typeOf = apiCheckUtil.typeOf;
 	var getError = apiCheckUtil.getError;
-	
+
 	var checkers = __webpack_require__(/*! ./checkers */ 3);
 	var apiCheckApis = getApiCheckApis();
-	
+
 	module.exports = getApiCheckInstance;
 	module.exports.utils = apiCheckUtil;
 	module.exports.globalConfig = {
 	  verbose: false,
 	  disabled: false
 	};
-	
+
 	var apiCheckApiCheck = getApiCheckInstance({
 	  output: { prefix: "apiCheck" }
 	});
 	module.exports.internalChecker = apiCheckApiCheck;
-	
+
 	each(checkers, function (checker, name) {
 	  return module.exports[name] = checker;
 	});
-	
+
 	function getApiCheckInstance() {
 	  var config = arguments[0] === undefined ? {} : arguments[0];
 	  var extraCheckers = arguments[1] === undefined ? {} : arguments[1];
-	
+
 	  /* jshint maxcomplexity:6 */
 	  if (apiCheckApiCheck && arguments.length) {
 	    apiCheckApiCheck["throw"](apiCheckApis.getApiCheckInstanceCheckers, arguments, {
 	      prefix: "creating an apiCheck instance"
 	    });
 	  }
-	
+
 	  var additionalProperties = {
 	    "throw": getApiCheck(true),
 	    warn: getApiCheck(false),
@@ -128,11 +128,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    utils: apiCheckUtil
 	  };
-	
+
 	  each(additionalProperties, function (wrapper, name) {
 	    return apiCheck[name] = wrapper;
 	  });
-	
+
 	  var disabled = apiCheck.disabled || module.exports.globalConfig.disabled;
 	  each(checkers.getCheckers(disabled), function (checker, name) {
 	    return apiCheck[name] = checker;
@@ -140,9 +140,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  each(extraCheckers, function (checker, name) {
 	    return apiCheck[name] = checker;
 	  });
-	
+
 	  return apiCheck;
-	
+
 	  /**
 	   * This is the instance function. Other things are attached to this see additional properties above.
 	   * @param api {Array}
@@ -172,7 +172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      // this is where we actually go perform the checks.
 	      messages = checkApiWithArgs(api, args);
 	    }
-	
+
 	    var returnObject = getTypes(api, args);
 	    if (messages.length) {
 	      returnObject.message = apiCheck.getErrorMessage(api, args, messages, output);
@@ -185,7 +185,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return returnObject;
 	  }
-	
+
 	  /**
 	   * checkApiCheckApi, should be read like: check apiCheck api. As in, check the api for apiCheck :-)
 	   * @param checkApiArgs
@@ -194,7 +194,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var api = checkApiArgs[0];
 	    var args = checkApiArgs[1];
 	    var isArrayOrArgs = Array.isArray(args) || args && typeof args === "object" && typeof args.length === "number";
-	
+
 	    if (Array.isArray(api) && !isArrayOrArgs) {
 	      throw new Error(getErrorMessage(api, [args], ["If an array is provided for the api, an array must be provided for the args as well."], { prefix: "apiCheck" }));
 	    }
@@ -207,7 +207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      apiCheck.handleErrorMessage(message, true);
 	    }
 	  }
-	
+
 	  function getApiCheck(shouldThrow) {
 	    return function apiCheckWrapper(api, args, output) {
 	      var result = apiCheck(api, args, output);
@@ -215,7 +215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return result; // wont get here if an error is thrown
 	    };
 	  }
-	
+
 	  function handleErrorMessage(message, shouldThrow) {
 	    if (shouldThrow && message) {
 	      throw new Error(message);
@@ -223,11 +223,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      console.warn(message);
 	    }
 	  }
-	
+
 	  function getErrorMessage(api, args) {
 	    var messages = arguments[2] === undefined ? [] : arguments[2];
 	    var output = arguments[3] === undefined ? {} : arguments[3];
-	
+
 	    var gOut = apiCheck.config.output || {};
 	    var prefix = getPrefix();
 	    var suffix = getSuffix();
@@ -235,7 +235,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var message = "apiCheck failed! " + messages.join(", ");
 	    var passedAndShouldHavePassed = "\n\n" + buildMessageFromApiAndArgs(api, args);
 	    return ("" + prefix + " " + message + " " + suffix + " " + (url || "") + "" + passedAndShouldHavePassed).trim();
-	
+
 	    function getPrefix() {
 	      var prefix = output.onlyPrefix;
 	      if (!prefix) {
@@ -243,7 +243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return prefix;
 	    }
-	
+
 	    function getSuffix() {
 	      var suffix = output.onlySuffix;
 	      if (!suffix) {
@@ -251,7 +251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return suffix;
 	    }
-	
+
 	    function getUrl() {
 	      var url = output.url;
 	      if (!url) {
@@ -260,24 +260,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return url;
 	    }
 	  }
-	
+
 	  function buildMessageFromApiAndArgs(api, args) {
 	    var _getTypes = getTypes(api, args);
-	
+
 	    var apiTypes = _getTypes.apiTypes;
 	    var argTypes = _getTypes.argTypes;
-	
+
 	    var copy = Array.prototype.slice.call(args || []);
 	    var replacedItems = [];
 	    replaceFunctionWithName(copy);
 	    var passedArgs = getObjectString(copy);
 	    argTypes = getObjectString(argTypes);
 	    apiTypes = getObjectString(apiTypes);
-	
+
 	    return generateMessage();
-	
+
 	    // functions
-	
+
 	    function replaceFunctionWithName(obj) {
 	      each(obj, function (val, name) {
 	        /* jshint maxcomplexity:6 */
@@ -292,7 +292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      });
 	    }
-	
+
 	    function getObjectString(types) {
 	      if (!types || !types.length) {
 	        return "nothing";
@@ -301,7 +301,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      return stringify(types, null, 2);
 	    }
-	
+
 	    function generateMessage() {
 	      var n = "\n";
 	      var useS = true;
@@ -317,7 +317,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return "You passed:" + n + "" + passedArgs + "" + newLine + ("With the " + types + ":" + n + "" + argTypes + "" + newLine) + ("The API calls for:" + n + "" + apiTypes);
 	    }
 	  }
-	
+
 	  function getTypes(api, args) {
 	    api = arrayify(api);
 	    args = arrayify(args);
@@ -335,9 +335,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return { argTypes: argTypes, apiTypes: apiTypes };
 	  }
 	}
-	
+
 	// STATELESS FUNCTIONS
-	
+
 	/**
 	 * This is where the magic happens for actually checking the arguments with the api.
 	 * @param api {Array} - checkers
@@ -376,7 +376,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return failed ? messages : [];
 	}
-	
+
 	checkerTypeType.type = "function with __apiCheckData property and `${function.type}` property";
 	function checkerTypeType(checkerType, name, location) {
 	  var apiCheckDataChecker = checkers.shape({
@@ -393,16 +393,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return getError(name, location, checkerTypeType.type);
 	  }
 	}
-	
+
 	function getCheckerErrorMessage(res, checker, val) {
 	  var checkerHelp = getCheckerHelp(checker, val);
 	  checkerHelp = checkerHelp ? " - " + checkerHelp : "";
 	  return res.message + checkerHelp;
 	}
-	
+
 	function getCheckerHelp(_ref, val) {
 	  var help = _ref.help;
-	
+
 	  if (!help) {
 	    return "";
 	  }
@@ -411,7 +411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return help;
 	}
-	
+
 	function checkEnoughArgs(api, args) {
 	  var requiredArgs = api.filter(function (a) {
 	    return !a.isOptional;
@@ -422,7 +422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return [];
 	  }
 	}
-	
+
 	function getArgDisplay(arg, gottenArgs) {
 	  /* jshint maxcomplexity:7 */
 	  var cName = arg && arg.constructor && arg.constructor.name;
@@ -434,26 +434,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return cName;
 	  }
-	
+
 	  if (arg === null) {
 	    return "null";
 	  }
-	
+
 	  if (type !== "array" && type !== "object") {
 	    return type;
 	  }
-	
+
 	  if (hasKeys()) {
 	    return getDisplayIfNotGotten();
 	  }
-	
+
 	  return cName;
-	
+
 	  // utility functions
 	  function hasKeys() {
 	    return arg && Object.keys(arg).length;
 	  }
-	
+
 	  function getDisplayIfNotGotten() {
 	    if (gottenArgs.indexOf(arg) !== -1) {
 	      return "[Circular]";
@@ -462,7 +462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return getDisplay(arg, gottenArgs);
 	  }
 	}
-	
+
 	function getDisplay(obj, gottenArgs) {
 	  var argDisplay = {};
 	  each(obj, function (v, k) {
@@ -470,10 +470,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	  return argDisplay;
 	}
-	
+
 	function getApiCheckApis() {
 	  var os = checkers.string.optional;
-	
+
 	  var checkerFnChecker = checkers.func.withProperties({
 	    type: checkers.oneOfType([checkers.string, checkerTypeType]).optional,
 	    displayName: checkers.string.optional,
@@ -481,7 +481,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    notOptional: checkers.bool.optional,
 	    notRequired: checkers.bool.optional
 	  });
-	
+
 	  var getApiCheckInstanceCheckers = [checkers.shape({
 	    output: checkers.shape({
 	      prefix: checkers.string.optional,
@@ -491,12 +491,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    verbose: checkers.bool.optional,
 	    disabled: checkers.bool.optional
 	  }).strict.optional, checkers.objectOf(checkerFnChecker).optional];
-	
+
 	  var checkApiCheckApi = [checkers.typeOrArrayOf(checkerFnChecker), checkers.any.optional, checkers.shape({
 	    prefix: os, suffix: os, urlSuffix: os, // appended case
 	    onlyPrefix: os, onlySuffix: os, url: os // override case
 	  }).strict.optional];
-	
+
 	  return {
 	    checkerFnChecker: checkerFnChecker,
 	    getApiCheckInstanceCheckers: getApiCheckInstanceCheckers,
@@ -512,20 +512,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	
+
 	var _defineProperty = function (obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); };
-	
+
 	var stringify = __webpack_require__(/*! json-stringify-safe */ 4);
 	var checkerHelpers = {
 	  addOptional: addOptional, getRequiredVersion: getRequiredVersion, setupChecker: setupChecker, addNullable: addNullable
 	};
-	
+
 	module.exports = {
 	  each: each, copy: copy, typeOf: typeOf, arrayify: arrayify, getCheckerDisplay: getCheckerDisplay,
 	  isError: isError, list: list, getError: getError, nAtL: nAtL, t: t, undef: undef, checkerHelpers: checkerHelpers,
 	  noop: noop
 	};
-	
+
 	function copy(obj) {
 	  var type = typeOf(obj);
 	  var daCopy = undefined;
@@ -541,7 +541,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  });
 	  return daCopy;
 	}
-	
+
 	function typeOf(obj) {
 	  if (Array.isArray(obj)) {
 	    return "array";
@@ -551,7 +551,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return typeof obj;
 	  }
 	}
-	
+
 	function getCheckerDisplay(checker, options) {
 	  /* jshint maxcomplexity:7 */
 	  var display = undefined;
@@ -565,10 +565,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return display;
 	}
-	
+
 	function getCheckerType(_ref, options) {
 	  var type = _ref.type;
-	
+
 	  if (typeof type === "function") {
 	    var __apiCheckData = type.__apiCheckData;
 	    var typeTypes = type(options);
@@ -577,7 +577,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return type;
 	}
-	
+
 	function arrayify(obj) {
 	  if (!obj) {
 	    return [];
@@ -587,7 +587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return [obj];
 	  }
 	}
-	
+
 	function each(obj, iterator, context) {
 	  if (Array.isArray(obj)) {
 	    return eachArry.apply(undefined, arguments);
@@ -595,7 +595,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return eachObj.apply(undefined, arguments);
 	  }
 	}
-	
+
 	function eachObj(obj, iterator, context) {
 	  var ret;
 	  var hasOwn = Object.prototype.hasOwnProperty;
@@ -609,7 +609,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return true;
 	}
-	
+
 	function eachArry(obj, iterator, context) {
 	  var ret;
 	  var length = obj.length;
@@ -621,11 +621,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return true;
 	}
-	
+
 	function isError(obj) {
 	  return obj instanceof Error;
 	}
-	
+
 	function list(arry, join, finalJoin) {
 	  arry = arrayify(arry);
 	  var copy = arry.slice();
@@ -635,7 +635,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return copy.join(join) + ("" + (copy.length ? join + finalJoin : "") + "" + last);
 	}
-	
+
 	function getError(name, location, checkerType) {
 	  if (typeof checkerType === "function") {
 	    checkerType = checkerType({ short: true });
@@ -643,21 +643,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var stringType = typeof checkerType !== "object" ? checkerType : stringify(checkerType);
 	  return new Error("" + nAtL(name, location) + " must be " + t(stringType));
 	}
-	
+
 	function nAtL(name, location) {
 	  var tName = t(name || "value");
 	  var tLocation = !location ? "" : " at " + t(location);
 	  return "" + tName + "" + tLocation;
 	}
-	
+
 	function t(thing) {
 	  return "`" + thing + "`";
 	}
-	
+
 	function undef(thing) {
 	  return typeof thing === "undefined";
 	}
-	
+
 	/**
 	 * This will set up the checker with all of the defaults that most checkers want like required by default and an
 	 * optional version
@@ -672,35 +672,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	    checker = getNoop();
 	    checker.isNoop = true;
 	  }
-	
+
 	  if (typeof checker.type === "string") {
 	    checker.shortType = checker.type;
 	  }
-	
+
 	  // assign all properties given
 	  each(properties, function (prop, name) {
 	    return checker[name] = prop;
 	  });
-	
+
 	  if (!checker.displayName) {
 	    checker.displayName = "apiCheck " + t(checker.shortType || checker.type || checker.name) + " type checker";
 	  }
-	
+
 	  if (!checker.notRequired) {
 	    checker = getRequiredVersion(checker, disabled);
 	  }
-	
+
 	  if (!checker.notNullable) {
 	    addNullable(checker, disabled);
 	  }
-	
+
 	  if (!checker.notOptional) {
 	    addOptional(checker, disabled);
 	  }
-	
+
 	  return checker;
 	}
-	
+
 	function getRequiredVersion(checker, disabled) {
 	  var requiredChecker = disabled ? getNoop() : function requiredChecker(val, name, location, obj) {
 	    if (undef(val) && !checker.isOptional) {
@@ -716,7 +716,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  requiredChecker.originalChecker = checker;
 	  return requiredChecker;
 	}
-	
+
 	function addOptional(checker, disabled) {
 	  var optionalCheck = disabled ? getNoop() : function optionalCheck(val, name, location, obj) {
 	    if (!undef(val)) {
@@ -725,17 +725,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	  // inherit all properties on the original checker
 	  copyProps(checker, optionalCheck);
-	
+
 	  optionalCheck.isOptional = true;
 	  optionalCheck.displayName = checker.displayName + " (optional)";
 	  optionalCheck.originalChecker = checker;
-	
+
 	  // the magic line that allows you to add .optional to the end of the checkers
 	  checker.optional = optionalCheck;
-	
+
 	  fixType(checker, checker.optional);
 	}
-	
+
 	function addNullable(checker, disabled) {
 	  var nullableCheck = disabled ? getNoop() : function nullableCheck(val, name, location, obj) {
 	    if (val !== null) {
@@ -744,20 +744,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  };
 	  // inherit all properties on the original checker
 	  copyProps(checker, nullableCheck);
-	
+
 	  nullableCheck.isNullable = true;
 	  nullableCheck.displayName = checker.displayName + " (nullable)";
 	  nullableCheck.originalChecker = checker;
-	
+
 	  // the magic line that allows you to add .nullable to the end of the checkers
 	  checker.nullable = nullableCheck;
-	
+
 	  fixType(checker, checker.nullable);
 	  if (!checker.notOptional) {
 	    addOptional(checker.nullable, disabled);
 	  }
 	}
-	
+
 	function fixType(checker, checkerCopy) {
 	  // fix type, because it's not a straight copy...
 	  // the reason is we need to specify type.__apiCheckData.optional as true for the terse/verbose option.
@@ -775,17 +775,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	  checkerCopy.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
 	  checkerCopy.type.__apiCheckData.optional = true;
 	}
-	
+
 	// UTILS
-	
+
 	function copyProps(src, dest) {
 	  each(Object.keys(src), function (key) {
 	    return dest[key] = src[key];
 	  });
 	}
-	
+
 	function noop() {}
-	
+
 	function getNoop() {
 	  /* istanbul ignore next */
 	  return function noop() {};
@@ -799,11 +799,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	
+
 	var stringify = __webpack_require__(/*! json-stringify-safe */ 4);
-	
+
 	var _require = __webpack_require__(/*! ./apiCheckUtil */ 2);
-	
+
 	var typeOf = _require.typeOf;
 	var each = _require.each;
 	var copy = _require.copy;
@@ -817,10 +817,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var checkerHelpers = _require.checkerHelpers;
 	var undef = _require.undef;
 	var setupChecker = checkerHelpers.setupChecker;
-	
+
 	var checkers = module.exports = getCheckers();
 	module.exports.getCheckers = getCheckers;
-	
+
 	function getCheckers(disabled) {
 	  return {
 	    array: typeOfCheckGetter("Array"),
@@ -829,27 +829,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	    string: typeOfCheckGetter("String"),
 	    func: funcCheckGetter(),
 	    object: objectCheckGetter(),
-	
+
 	    emptyObject: emptyObjectCheckGetter(),
-	
+
 	    instanceOf: instanceCheckGetter,
 	    oneOf: oneOfCheckGetter,
 	    oneOfType: oneOfTypeCheckGetter,
-	
+
 	    arrayOf: arrayOfCheckGetter,
 	    objectOf: objectOfCheckGetter,
 	    typeOrArrayOf: typeOrArrayOfCheckGetter,
-	
+
 	    range: rangeCheckGetter,
-	
+
 	    shape: getShapeCheckGetter(),
 	    args: argumentsCheckerGetter(),
-	
+
 	    any: anyCheckGetter(),
 	    "null": nullCheckGetter()
-	
+
 	  };
-	
+
 	  function typeOfCheckGetter(type) {
 	    var lType = type.toLowerCase();
 	    return setupChecker(function typeOfCheckerDefinition(val, name, location) {
@@ -858,7 +858,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type }, disabled);
 	  }
-	
+
 	  function funcCheckGetter() {
 	    var type = "Function";
 	    var functionChecker = setupChecker(function functionCheckerDefinition(val, name, location) {
@@ -866,7 +866,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return getError(name, location, type);
 	      }
 	    }, { type: type }, disabled);
-	
+
 	    functionChecker.withProperties = function getWithPropertiesChecker(properties) {
 	      var apiError = checkers.objectOf(checkers.func)(properties, "properties", "apiCheck.func.withProperties");
 	      if (isError(apiError)) {
@@ -874,7 +874,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      var shapeChecker = checkers.shape(properties, true);
 	      shapeChecker.type.__apiCheckData.type = "func.withProperties";
-	
+
 	      return setupChecker(function functionWithPropertiesChecker(val, name, location) {
 	        var notFunction = checkers.func(val, name, location);
 	        if (isError(notFunction)) {
@@ -885,7 +885,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return functionChecker;
 	  }
-	
+
 	  function objectCheckGetter() {
 	    var type = "Object";
 	    var nullType = "Object (null ok)";
@@ -894,16 +894,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return getError(name, location, nullType);
 	      }
 	    }, { type: nullType }, disabled);
-	
+
 	    var objectChecker = setupChecker(function objectCheckerDefinition(val, name, location) {
 	      if (val === null || isError(objectNullOkChecker(val, name, location))) {
 	        return getError(name, location, objectChecker.type);
 	      }
 	    }, { type: type, nullOk: objectNullOkChecker }, disabled);
-	
+
 	    return objectChecker;
 	  }
-	
+
 	  function instanceCheckGetter(classToCheck) {
 	    return setupChecker(function instanceCheckerDefinition(val, name, location) {
 	      if (!(val instanceof classToCheck)) {
@@ -911,7 +911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: classToCheck.name }, disabled);
 	  }
-	
+
 	  function oneOfCheckGetter(enums) {
 	    var type = {
 	      __apiCheckData: { optional: false, type: "enum" },
@@ -928,7 +928,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type, shortType: shortType }, disabled);
 	  }
-	
+
 	  function oneOfTypeCheckGetter(checkers) {
 	    var checkersDisplay = checkers.map(function (checker) {
 	      return getCheckerDisplay(checker, { short: true });
@@ -951,11 +951,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type, shortType: shortType }, disabled);
 	  }
-	
+
 	  function arrayOfCheckGetter(checker) {
 	    var shortCheckerDisplay = getCheckerDisplay(checker, { short: true });
 	    var shortType = "arrayOf[" + shortCheckerDisplay + "]";
-	
+
 	    function type(options) {
 	      if (options && options.short) {
 	        return shortType;
@@ -963,7 +963,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return getCheckerDisplay(checker, options);
 	    }
 	    type.__apiCheckData = { optional: false, type: "arrayOf" };
-	
+
 	    return setupChecker(function arrayOfCheckerDefinition(val, name, location) {
 	      if (isError(checkers.array(val)) || !val.every(function (item) {
 	        return !isError(checker(item));
@@ -972,11 +972,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type, shortType: shortType }, disabled);
 	  }
-	
+
 	  function objectOfCheckGetter(checker) {
 	    var checkerDisplay = getCheckerDisplay(checker, { short: true });
 	    var shortType = "objectOf[" + checkerDisplay + "]";
-	
+
 	    function type(options) {
 	      if (options && options.short) {
 	        return shortType;
@@ -984,7 +984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return getCheckerDisplay(checker, options);
 	    }
 	    type.__apiCheckData = { optional: false, type: "objectOf" };
-	
+
 	    return setupChecker(function objectOfCheckerDefinition(val, name, location) {
 	      var notObject = checkers.object(val, name, location);
 	      if (isError(notObject)) {
@@ -1000,18 +1000,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type, shortType: shortType }, disabled);
 	  }
-	
+
 	  function typeOrArrayOfCheckGetter(checker) {
 	    var checkerDisplay = getCheckerDisplay(checker, { short: true });
 	    var shortType = "typeOrArrayOf[" + checkerDisplay + "]";
-	
+
 	    function type(options) {
 	      if (options && options.short) {
 	        return shortType;
 	      }
 	      return getCheckerDisplay(checker, options);
 	    }
-	
+
 	    type.__apiCheckData = { optional: false, type: "typeOrArrayOf" };
 	    return setupChecker(function typeOrArrayOfDefinition(val, name, location, obj) {
 	      if (isError(checkers.oneOfType([checker, checkers.arrayOf(checker)])(val, name, location, obj))) {
@@ -1019,7 +1019,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type, shortType: shortType }, disabled);
 	  }
-	
+
 	  function getShapeCheckGetter() {
 	    function shapeCheckGetter(shape, nonObject) {
 	      var shapeTypes = {};
@@ -1028,12 +1028,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	      });
 	      function type() {
 	        var options = arguments[0] === undefined ? {} : arguments[0];
-	
+
 	        var ret = {};
 	        var terse = options.terse;
 	        var obj = options.obj;
 	        var addHelpers = options.addHelpers;
-	
+
 	        var parentRequired = options.required;
 	        each(shape, function (checker, prop) {
 	          /* jshint maxcomplexity:6 */
@@ -1047,7 +1047,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        });
 	        return ret;
-	
+
 	        function modifyTypeDisplayToHelpOut(ret, prop, specified, checker, required) {
 	          if (!specified && required && !checker.isOptional) {
 	            var item = "ITEM";
@@ -1061,7 +1061,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	              addHelper("error", "THIS IS THE PROBLEM: " + error.message, " <-- THIS IS THE PROBLEM: " + error.message);
 	            }
 	          }
-	
+
 	          function addHelper(property, objectMessage, stringMessage) {
 	            if (typeof ret[prop] === "string") {
 	              ret[prop] += stringMessage;
@@ -1071,7 +1071,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }
 	        }
 	      }
-	
+
 	      type.__apiCheckData = { strict: false, optional: false, type: "shape" };
 	      var shapeChecker = setupChecker(function shapeCheckerDefinition(val, name, location) {
 	        /* jshint maxcomplexity:6 */
@@ -1092,11 +1092,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return shapePropError;
 	        }
 	      }, { type: type, shortType: "shape" }, disabled);
-	
+
 	      function strictType() {
 	        return type.apply(undefined, arguments);
 	      }
-	
+
 	      strictType.__apiCheckData = copy(shapeChecker.type.__apiCheckData);
 	      strictType.__apiCheckData.strict = true;
 	      shapeChecker.strict = setupChecker(function strictShapeCheckerDefinition(val, name, location) {
@@ -1112,10 +1112,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return new Error("" + nAtL(name, location) + " cannot have extra properties: " + t(extraProps.join("`, `")) + "." + ("It is limited to " + t(allowedProperties.join("`, `"))));
 	        }
 	      }, { type: strictType, shortType: "strict shape" }, disabled);
-	
+
 	      return shapeChecker;
 	    }
-	
+
 	    shapeCheckGetter.ifNot = function ifNot(otherProps, propChecker) {
 	      if (!Array.isArray(otherProps)) {
 	        otherProps = [otherProps];
@@ -1140,7 +1140,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }, { notRequired: true, type: type, shortType: shortType }, disabled);
 	    };
-	
+
 	    shapeCheckGetter.onlyIf = function onlyIf(otherProps, propChecker) {
 	      otherProps = arrayify(otherProps);
 	      var description = undefined;
@@ -1162,21 +1162,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }, { type: type, shortType: shortType }, disabled);
 	    };
-	
+
 	    shapeCheckGetter.requiredIfNot = function shapeRequiredIfNot(otherProps, propChecker) {
 	      if (!Array.isArray(otherProps)) {
 	        otherProps = [otherProps];
 	      }
 	      return getRequiredIfNotChecker(false, otherProps, propChecker);
 	    };
-	
+
 	    shapeCheckGetter.requiredIfNot.all = function shapeRequiredIfNotAll(otherProps, propChecker) {
 	      if (!Array.isArray(otherProps)) {
 	        throw new Error("requiredIfNot.all must be passed an array");
 	      }
 	      return getRequiredIfNotChecker(true, otherProps, propChecker);
 	    };
-	
+
 	    function getRequiredIfNotChecker(all, otherProps, propChecker) {
 	      var props = t(otherProps.join(", "));
 	      var ifProps = "if " + (all ? "all of" : "at least one of");
@@ -1196,9 +1196,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	      }, { type: type, notRequired: true }, disabled);
 	    }
-	
+
 	    return shapeCheckGetter;
-	
+
 	    function getTypeForShapeChild(propChecker, description, shortType) {
 	      function type(options) {
 	        if (options && options.short) {
@@ -1210,7 +1210,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      return type;
 	    }
 	  }
-	
+
 	  function argumentsCheckerGetter() {
 	    var type = "function arguments";
 	    return setupChecker(function argsCheckerDefinition(val, name, location) {
@@ -1219,11 +1219,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type }, disabled);
 	  }
-	
+
 	  function anyCheckGetter() {
 	    return setupChecker(function anyCheckerDefinition() {}, { type: "any" }, disabled);
 	  }
-	
+
 	  function nullCheckGetter() {
 	    var type = "null";
 	    return setupChecker(function nullChecker(val, name, location) {
@@ -1232,7 +1232,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type }, disabled);
 	  }
-	
+
 	  function rangeCheckGetter(min, max) {
 	    var type = "Range (" + min + " - " + max + ")";
 	    return setupChecker(function rangeChecker(val, name, location) {
@@ -1241,7 +1241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }, { type: type }, disabled);
 	  }
-	
+
 	  function emptyObjectCheckGetter() {
 	    var type = "empty object";
 	    return setupChecker(function emptyObjectChecker(val, name, location) {
@@ -1251,7 +1251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, { type: type }, disabled);
 	  }
 	}
-	
+
 	// don't do anything
 
 /***/ },
@@ -1262,7 +1262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	module.exports = stringify;
-	
+
 	function getSerialize (fn, decycle) {
 	  var seen = [], keys = [];
 	  decycle = decycle || function(key, value) {
@@ -1282,7 +1282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ret;
 	  }
 	}
-	
+
 	function getPath (value, seen, keys) {
 	  var index = seen.indexOf(value);
 	  var path = [ keys[index] ];
@@ -1294,16 +1294,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	  return '~' + path.join('.');
 	}
-	
+
 	function stringify(obj, fn, spaces, decycle) {
 	  return JSON.stringify(obj, getSerialize(fn, decycle), spaces);
 	}
-	
+
 	stringify.getSerialize = getSerialize;
 
 
 /***/ }
 /******/ ])
 });
-
-//# sourceMappingURL=api-check.js.map
