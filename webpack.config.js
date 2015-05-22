@@ -43,7 +43,7 @@ var config = {
     reasons: true
   },
 
-  devtool: 'source-map',
+  devtool: prod ? 'source-map' : undefined,
 
   plugins: _.filter(_.union(plugins[env], plugins.commonPost)),
 

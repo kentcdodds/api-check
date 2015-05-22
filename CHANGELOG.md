@@ -1,3 +1,9 @@
+# 7.2.4
+
+## Bug Fixes
+
+- Removing source-maps entirely for the unminified build...
+
 # 7.2.3
 
 - Removing sourcemaps from the dist file because it's not removed during minification.
