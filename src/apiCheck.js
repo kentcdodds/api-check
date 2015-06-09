@@ -84,6 +84,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     }
 
     let returnObject = getTypes(api, args);
+    returnObject.args = args;
     if (messages.length) {
       returnObject.message = apiCheck.getErrorMessage(api, args, messages, output);
       returnObject.failed = true;

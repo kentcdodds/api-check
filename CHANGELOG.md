@@ -1,3 +1,9 @@
+# 7.3.0
+
+## New Features
+
+- Adding `args` to the result of `apiCheck` instance function ([#25](/../../issues/25)).
+
 # 7.2.4
 
 ## Bug Fixes

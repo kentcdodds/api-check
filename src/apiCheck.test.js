@@ -783,6 +783,21 @@ describe('apiCheck', () => {
     });
   });
 
+  describe(`results`, () => {
+    it(`should contain useful information about the check`, () => {
+      const args = ['hi', true];
+      const result = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.bool], args);
+      expect(result).to.eql({
+        apiTypes: ['String', 'Boolean'],
+        argTypes: ['string', 'boolean'],
+        failed: false,
+        passed: true,
+        message: '',
+        args
+      });
+    });
+  });
+
   function makeSpacedRegex(string) {
     return new RegExp(string.replace(/ /g, '(.|\\n)*?'), 'i');
   }
