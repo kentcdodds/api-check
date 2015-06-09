@@ -11,4 +11,8 @@ describe(`fixed bugs`, () => {
     const result = apiCheckInstance(apiCheckInstance.arrayOf(apiCheckInstance.string), y);
     expect(result.message).to.not.contain('[Circular]');
   });
+
+  it(`should not try to call Object.keys(null) when generating a message for a single arg of null`, () => {
+    expect(() => apiCheckInstance(apiCheckInstance.string, null)).to.not.throw();
+  });
 });

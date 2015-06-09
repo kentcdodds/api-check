@@ -4,6 +4,10 @@
 
 - Adding `args` to the result of `apiCheck` instance function ([#25](/../../issues/25)).
 
+## Bug Fixes
+
+- If you passed `null` as one of the arguments, `api-check` would try to call `Object.keys(null)` when generating the message. ([#24](/../../issues/24))
+
 # 7.2.4
 
 ## Bug Fixes

@@ -214,7 +214,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
       const n = '\n';
       let useS = true;
       if (args && args.length === 1) {
-        if (typeof args[0] === 'object') {
+        if (typeof args[0] === 'object' && args[0] !== null) {
           useS = !!Object.keys(args[0]).length;
         } else {
           useS = false;
