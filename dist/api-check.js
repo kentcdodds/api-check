@@ -1,4 +1,4 @@
-// apiCheck.js v7.2.4 built with ♥ by Kent C. Dodds (ó ì_í)=óò=(ì_í ò)
+// apiCheck.js v7.3.0 built with ♥ by Kent C. Dodds (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -174,6 +174,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    var returnObject = getTypes(api, args);
+	    returnObject.args = args;
 	    if (messages.length) {
 	      returnObject.message = apiCheck.getErrorMessage(api, args, messages, output);
 	      returnObject.failed = true;
@@ -306,7 +307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      var n = "\n";
 	      var useS = true;
 	      if (args && args.length === 1) {
-	        if (typeof args[0] === "object") {
+	        if (typeof args[0] === "object" && args[0] !== null) {
 	          useS = !!Object.keys(args[0]).length;
 	        } else {
 	          useS = false;
