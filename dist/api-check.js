@@ -1,4 +1,4 @@
-//! api-check version 7.3.0 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
+//! api-check version 7.4.0 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var apiCheckApis = getApiCheckApis();
 
 	module.exports = getApiCheckInstance;
-	module.exports.VERSION = ("7.3.0");
+	module.exports.VERSION = ("7.4.0");
 	module.exports.utils = apiCheckUtil;
 	module.exports.globalConfig = {
 	  verbose: false,
