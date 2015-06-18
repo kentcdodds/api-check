@@ -37,7 +37,7 @@ function typeOf(obj) {
 }
 
 function getCheckerDisplay(checker, options) {
-  /* jshint maxcomplexity:7 */
+  /* eslint complexity:[2, 7] */
   let display;
   let short = options && options.short;
   if (short && checker.shortType) {
@@ -153,7 +153,7 @@ function undef(thing) {
  * @param disabled - when set to true, this will set the checker to a no-op function
  */
 function setupChecker(checker, properties, disabled) {
-  /* jshint maxcomplexity:9 */
+  /* eslint complexity:[2, 9] */
   if (disabled) { // swap out the checker for its own copy of noop
     checker = getNoop();
     checker.isNoop = true;
@@ -273,6 +273,7 @@ function noop() {
 }
 
 function getNoop() {
+  /* eslint no-shadow:0 */
   /* istanbul ignore next */
   return function noop() {
   };

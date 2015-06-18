@@ -573,7 +573,7 @@ look at the tests or file an issue for me to go document them. :-)
 ### apiCheck.utils
 
 When writing custom types, you may find the `utils` helpful. Please file an issue to ask me to improve documentation for
-what's available. For now, check out `apiCheckUtils.test.js`
+what's available. For now, check out `api-check-utils.test.js`
 
 ## Customization
 

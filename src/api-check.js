@@ -1,10 +1,11 @@
 const stringify = require('json-stringify-safe');
-const apiCheckUtil = require('./apiCheckUtil');
+const apiCheckUtil = require('./api-check-util');
 const {each, isError, t, arrayify, getCheckerDisplay, typeOf, getError} = apiCheckUtil;
 const checkers = require('./checkers');
 const apiCheckApis = getApiCheckApis();
 
 module.exports = getApiCheckInstance;
+module.exports.VERSION = VERSION;
 module.exports.utils = apiCheckUtil;
 module.exports.globalConfig = {
   verbose: false,
@@ -20,7 +21,7 @@ module.exports.internalChecker = apiCheckApiCheck;
 each(checkers, (checker, name) => module.exports[name] = checker);
 
 function getApiCheckInstance(config = {}, extraCheckers = {}) {
-  /* jshint maxcomplexity:6 */
+  /* eslint complexity:[2, 6] */
   if (apiCheckApiCheck && arguments.length) {
     apiCheckApiCheck.throw(apiCheckApis.getApiCheckInstanceCheckers, arguments, {
       prefix: 'creating an apiCheck instance'
@@ -61,7 +62,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
    * @returns {Object} - if this has a failed = true property, then it failed
    */
   function apiCheck(api, args, output) {
-    /* jshint maxcomplexity:8 */
+    /* eslint complexity:[2, 8] */
     if (apiCheck.config.disabled || module.exports.globalConfig.disabled) {
       return {
         apiTypes: {}, argTypes: {},
@@ -135,6 +136,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     if (shouldThrow && message) {
       throw new Error(message);
     } else if (message) {
+      /* eslint no-console:0 */
       console.warn(message);
     }
   }
@@ -149,27 +151,27 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     return `${prefix} ${message} ${suffix} ${url || ''}${passedAndShouldHavePassed}`.trim();
 
     function getPrefix() {
-      let prefix = output.onlyPrefix;
-      if (!prefix) {
-        prefix = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
+      let p = output.onlyPrefix;
+      if (!p) {
+        p = `${gOut.prefix || ''} ${output.prefix || ''}`.trim();
       }
-      return prefix;
+      return p;
     }
 
     function getSuffix() {
-      let suffix = output.onlySuffix;
-      if (!suffix) {
-        suffix = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
+      let s = output.onlySuffix;
+      if (!s) {
+        s = `${output.suffix || ''} ${gOut.suffix || ''}`.trim();
       }
-      return suffix;
+      return s;
     }
 
     function getUrl() {
-      let url = output.url;
-      if (!url) {
-        url = gOut.docsBaseUrl && output.urlSuffix && `${gOut.docsBaseUrl}${output.urlSuffix}`.trim();
+      let u = output.url;
+      if (!u) {
+        u = gOut.docsBaseUrl && output.urlSuffix && `${gOut.docsBaseUrl}${output.urlSuffix}`.trim();
       }
-      return url;
+      return u;
     }
   }
 
@@ -189,7 +191,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
 
     function replaceFunctionWithName(obj) {
       each(obj, (val, name) => {
-        /* jshint maxcomplexity:6 */
+        /* eslint complexity:[2, 6] */
         if (replacedItems.indexOf(val) === -1) { // avoid recursive problems
           replacedItems.push(val);
           if (typeof val === 'object') {
@@ -255,7 +257,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
  * @returns {Array}
  */
 function checkApiWithArgs(api, args) {
-  /* jshint maxcomplexity:7 */
+  /* eslint complexity:[2, 7] */
   let messages = [];
   let failed = false;
   let checkerIndex = 0;
@@ -330,7 +332,7 @@ function checkEnoughArgs(api, args) {
 }
 
 function getArgDisplay(arg, gottenArgs) {
-  /* jshint maxcomplexity:7 */
+  /* eslint complexity:[2, 7] */
   const cName = arg && arg.constructor && arg.constructor.name;
   const type = typeOf(arg);
   if (type === 'function') {

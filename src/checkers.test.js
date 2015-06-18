@@ -1,8 +1,8 @@
-/*jshint expr: true*/
+/* eslint max-nested-callbacks:0 */
 var expect = require('chai').expect;
-var _ = require('lodash-node');
+var _ = require('lodash');
 const {coveredFunction} = require('./test.utils');
-const {getCheckerDisplay} = require('./apiCheckUtil');
+const {getCheckerDisplay} = require('./api-check-util');
 
 describe('checkers', () => {
   var checkers = require('./checkers');

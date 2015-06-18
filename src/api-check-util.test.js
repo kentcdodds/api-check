@@ -1,13 +1,11 @@
-/*jshint expr: true*/
-/* jshint maxlen:false */
 const expect = require('chai').expect;
 const stringify = require('json-stringify-safe');
 const {coveredFunction} = require('./test.utils');
-describe('apiCheckUtil', () => {
+describe('api-check-util', () => {
   const {
     each, checkerHelpers, getCheckerDisplay, copy, list,
     getError
-    } = require('./apiCheckUtil');
+    } = require('./api-check-util');
 
   describe('each', () => {
     it('should iterate over objects', () => {
@@ -117,6 +115,12 @@ describe('apiCheckUtil', () => {
         myChecker = checkerHelpers.setupChecker(myChecker);
         expect(myChecker.nullable).to.not.exist;
       });
+
+      it(`should return a runnable noop function when disabled`, () => {
+        const noopChecker = checkerHelpers.setupChecker(myChecker, {}, true);
+        expect(noopChecker.isNoop).to.be.true;
+        expect(() => noopChecker()).to.not.throw();
+      });
     });
 
 
@@ -166,6 +170,7 @@ describe('apiCheckUtil', () => {
   describe(`getCheckerDisplay`, () => {
     let myChecker;
     beforeEach(() => {
+      /* eslint no-shadow:0 */
       myChecker = function myChecker() {
       };
       myChecker(); // full coverage
@@ -186,7 +191,7 @@ describe('apiCheckUtil', () => {
 
   describe(`copy`, () => {
     it(`should copy an array`, () => {
-      const x = [1,2,3];
+      const x = [1, 2, 3];
       const c = copy(x);
       expect(c).to.not.equal(x);
       expect(c).to.eql(x);

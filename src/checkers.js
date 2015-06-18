@@ -3,7 +3,7 @@ const {
   typeOf, each, copy, getCheckerDisplay, isError,
   arrayify, list, getError, nAtL, t, checkerHelpers,
   undef
-  } = require('./apiCheckUtil');
+  } = require('./api-check-util');
 const {setupChecker} = checkerHelpers;
 
 let checkers = module.exports = getCheckers();
@@ -114,18 +114,18 @@ function getCheckers(disabled) {
     }, {type, shortType}, disabled);
   }
 
-  function oneOfTypeCheckGetter(checkers) {
-    const checkersDisplay = checkers.map((checker) => getCheckerDisplay(checker, {short: true}));
+  function oneOfTypeCheckGetter(typeCheckers) {
+    const checkersDisplay = typeCheckers.map((checker) => getCheckerDisplay(checker, {short: true}));
     const shortType = `oneOfType[${checkersDisplay.join(', ')}]`;
     function type(options) {
       if (options && options.short) {
         return shortType;
       }
-      return checkers.map((checker) => getCheckerDisplay(checker, options));
+      return typeCheckers.map((checker) => getCheckerDisplay(checker, options));
     }
     type.__apiCheckData = {optional: false, type: 'oneOfType'};
     return setupChecker(function oneOfTypeCheckerDefinition(val, name, location) {
-      if (!checkers.some(checker => !isError(checker(val, name, location)))) {
+      if (!typeCheckers.some(checker => !isError(checker(val, name, location)))) {
         return getError(name, location, shortType);
       }
     }, {type, shortType}, disabled);
@@ -208,7 +208,7 @@ function getCheckers(disabled) {
         const {terse, obj, addHelpers} = options;
         const parentRequired = options.required;
         each(shape, (checker, prop) => {
-          /* jshint maxcomplexity:6 */
+          /* eslint complexity:[2, 6] */
           const specified = obj && obj.hasOwnProperty(prop);
           const required = undef(parentRequired) ? !checker.isOptional : parentRequired;
           if (!terse || (specified || !checker.isOptional)) {
@@ -220,7 +220,7 @@ function getCheckers(disabled) {
         });
         return ret;
 
-        function modifyTypeDisplayToHelpOut(ret, prop, specified, checker, required) {
+        function modifyTypeDisplayToHelpOut(theRet, prop, specified, checker, required) {
           if (!specified && required && !checker.isOptional) {
             let item = 'ITEM';
             if (checker.type && checker.type.__apiCheckData) {
@@ -235,10 +235,10 @@ function getCheckers(disabled) {
           }
 
           function addHelper(property, objectMessage, stringMessage) {
-            if (typeof ret[prop] === 'string') {
-              ret[prop] += stringMessage;
+            if (typeof theRet[prop] === 'string') {
+              theRet[prop] += stringMessage;
             } else {
-              ret[prop].__apiCheckData[property] = objectMessage;
+              theRet[prop].__apiCheckData[property] = objectMessage;
             }
           }
         }
@@ -246,7 +246,7 @@ function getCheckers(disabled) {
 
       type.__apiCheckData = {strict: false, optional: false, type: 'shape'};
       let shapeChecker = setupChecker(function shapeCheckerDefinition(val, name, location) {
-        /* jshint maxcomplexity:6 */
+        /* eslint complexity:[2, 6] */
         let isObject = !nonObject && checkers.object(val, name, location);
         if (isError(isObject)) {
           return isObject;
@@ -323,7 +323,7 @@ function getCheckers(disabled) {
       const shortType = `onlyIf[${otherProps.join(', ')}]`;
       const type = getTypeForShapeChild(propChecker, description, shortType);
       return setupChecker(function onlyIfCheckerDefinition(prop, propName, location, obj) {
-        const othersPresent = otherProps.every(prop => obj.hasOwnProperty(prop));
+        const othersPresent = otherProps.every(property => obj.hasOwnProperty(property));
         if (!othersPresent) {
           return getError(propName, location, type);
         } else {

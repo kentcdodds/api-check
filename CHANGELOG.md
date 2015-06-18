@@ -1,3 +1,14 @@
+# 7.4.0
+
+## New Features
+
+- Adding `VERSION` variable to main export.
+
+## Internal Changes
+
+- Now using more sophisticated build system with `webpack` and `karma`.
+- Renamed files in `src` directory to use dashes rather than camelCase.
+
 # 7.3.0
 
 ## New Features

@@ -1,5 +1,5 @@
 require('./checkers.test');
-require('./apiCheckUtil.test');
-require('./apiCheck.test');
+require('./api-check-util.test');
+require('./api-check.test');
 require('./bugs.test');
 require('./prs-plz.test');

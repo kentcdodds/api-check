@@ -1,14 +1,19 @@
-/*jshint expr: true*/
-/* jshint maxlen: 180 */
+/* eslint max-len:[2, 150] */
+/* eslint no-console:0 */
 var expect = require('chai').expect;
 const {coveredFunction} = require('./test.utils');
 describe('apiCheck', () => {
   const apiCheck = require('./index');
   const apiCheckInstance = apiCheck();
-  const {getError, noop} = require('./apiCheckUtil');
+  const {getError, noop} = require('./api-check-util');
 
   describe(`main export`, () => {
     const getApiCheck = require('./index');
+
+    it(`should have a version`, () => {
+      expect(getApiCheck.VERSION).to.exist;
+    });
+
     it(`should allow you to create instances of apiCheck that do not conflict`, () => {
       const apiCheck1 = getApiCheck({
         output: {
