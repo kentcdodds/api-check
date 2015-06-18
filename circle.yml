@@ -1,0 +1,6 @@
+deployment:
+  master:
+    branch: master
+    owner: kentcdodds
+    commands:
+      - npm run deploy
