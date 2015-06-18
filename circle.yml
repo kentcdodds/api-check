@@ -1,3 +1,6 @@
+machine:
+  environment:
+    CI: true
 test:
   pre:
     - npm run code-checks
