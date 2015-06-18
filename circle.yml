@@ -3,9 +3,9 @@ test:
     - npm run code-checks
   override:
     - npm run test:single
-    - run check-coverage
+    - npm run check-coverage
   post:
-    - run report-coverage
+    - npm run report-coverage
 deployment:
   master:
     branch: master
