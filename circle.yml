@@ -1,6 +1,15 @@
+test:
+  pre:
+    - npm run code-checks
+  override:
+    - npm run test:single
+    - run check-coverage
+  post:
+    - run report-coverage
 deployment:
   master:
     branch: master
     owner: kentcdodds
     commands:
+      - npm run build
       - npm run deploy
