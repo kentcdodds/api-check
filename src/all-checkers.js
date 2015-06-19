@@ -1,3 +1,5 @@
+import extraCheckers from './checkers';
+
 const stringify = require('json-stringify-safe');
 const {
   typeOf, each, copy, getCheckerDisplay, isError,
@@ -18,7 +20,7 @@ function getCheckers(disabled) {
     func: funcCheckGetter(),
     object: objectCheckGetter(),
 
-    emptyObject: emptyObjectCheckGetter(),
+    emptyObject: extraCheckers.emptyObject(disabled),
 
     instanceOf: instanceCheckGetter,
     oneOf: oneOfCheckGetter,
@@ -412,14 +414,4 @@ function getCheckers(disabled) {
       }
     }, {type}, disabled);
   }
-
-  function emptyObjectCheckGetter() {
-    const type = 'empty object';
-    return setupChecker(function emptyObjectChecker(val, name, location) {
-      if (typeOf(val) !== 'object' || val === null || Object.keys(val).length) {
-        return getError(name, location, type);
-      }
-    }, {type}, disabled);
-  }
-
 }

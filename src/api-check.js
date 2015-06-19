@@ -1,7 +1,7 @@
 const stringify = require('json-stringify-safe');
 const apiCheckUtil = require('./api-check-util');
 const {each, isError, t, arrayify, getCheckerDisplay, typeOf, getError} = apiCheckUtil;
-const checkers = require('./checkers');
+const checkers = require('./all-checkers');
 const apiCheckApis = getApiCheckApis();
 
 module.exports = getApiCheckInstance;
