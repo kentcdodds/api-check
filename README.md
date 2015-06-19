@@ -295,7 +295,7 @@ apiCheck.arrayOf(
 apiCheck.arrayOf(apiCheck.bool)(['a', 'b', 'c']); // <-- fail
 ```
 
-### typeOrArrayOfType *
+### typeOrArrayOf *
 
 *Not available in React's `propTypes`*
 
@@ -310,16 +310,16 @@ apiCheck.oneOfType([
 with
 
 ```javascript
-apiCheck.typeOrArrayOfType(apiCheck.string);
+apiCheck.typeOrArrayOf(apiCheck.string);
 ```
 
 which is a common enough use case to justify the checker.
 
 ```javascript
-apiCheck.typeOrArrayOfType(apiCheck.string)('string'); // <-- pass
-apiCheck.typeOrArrayOfType(apiCheck.string)(['array', 'of strings']); // <-- pass
-apiCheck.typeOrArrayOfType(apiCheck.bool)(['array', false]); // <-- fail
-apiCheck.typeOrArrayOfType(apiCheck.object)(32); // <-- fail
+apiCheck.typeOrArrayOf(apiCheck.string)('string'); // <-- pass
+apiCheck.typeOrArrayOf(apiCheck.string)(['array', 'of strings']); // <-- pass
+apiCheck.typeOrArrayOf(apiCheck.bool)(['array', false]); // <-- fail
+apiCheck.typeOrArrayOf(apiCheck.object)(32); // <-- fail
 ```
 
 ### objectOf
