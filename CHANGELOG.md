@@ -1,3 +1,9 @@
+# 7.4.1
+
+## Bug Fixes
+
+- Adding the `LICENCE` file back to the repo directly rather than a symbolic link.
+
 # 7.4.0
 
 ## New Features
