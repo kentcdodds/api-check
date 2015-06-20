@@ -5,7 +5,7 @@ const {coveredFunction} = require('./test.utils');
 const {getCheckerDisplay} = require('./api-check-util');
 
 describe('checkers', () => {
-  var checkers = require('./checkers');
+  var checkers = require('./all-checkers');
   describe('typeOfs', () => {
     it('should check string', () => {
       expect(checkers.string('string')).to.be.undefined;

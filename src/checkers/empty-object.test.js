@@ -9,10 +9,6 @@ describe(`emptyObject`, () => {
     expect(checker({})).to.be.undefined;
   });
 
-  it(`should fail`, () => {
-    expect(false).to.be.true;
-  });
-
   it(`should fail when given anything but an empty object`, () => {
     expect(checker({foo: 'bar'})).to.be.an.instanceOf(Error);
     expect(checker(null)).to.be.an.instanceOf(Error);

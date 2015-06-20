@@ -1,3 +1,3 @@
-import emptyObject from 'empty-object';
+import emptyObject from './empty-object';
 
 export default {emptyObject};
