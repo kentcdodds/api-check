@@ -796,6 +796,36 @@ describe('checkers', () => {
     });
   });
 
+  describe(`lessThan`, () => {
+    it(`should pass when given an item less than the specified maximum`, () => {
+      expect(checkers.lessThan(10)(9)).to.be.undefined;
+    });
+
+    it(`should fail when given an item greater than the specified maximum`, () => {
+      expect(checkers.lessThan(5)(15)).to.be.an.instanceOf(Error);
+      expect(checkers.lessThan(-5)(0)).to.be.an.instanceOf(Error);
+    });
+
+    it(`should fail when given a non-number`, () => {
+      expect(checkers.lessThan(10)('Frogs!')).to.be.an.instanceOf(Error);
+    });
+  });
+
+  describe(`greaterThan`, () => {
+    it(`should pass when given an item greater than the specified minimum`, () => {
+      expect(checkers.greaterThan(100)(200)).to.be.undefined;
+    });
+
+    it(`should fail when given an item less than the specified minimum`, () => {
+      expect(checkers.greaterThan(25)(15)).to.be.an.instanceOf(Error);
+      expect(checkers.greaterThan(0)(-5)).to.be.an.instanceOf(Error);
+    });
+
+    it(`should fail when given a non-number`, () => {
+      expect(checkers.greaterThan(10)('Frogs!')).to.be.an.instanceOf(Error);
+    });
+  });
+
   describe(`emptyObject`, () => {
     it(`should pass when given an empty object`, () => {
       expect(checkers.emptyObject({})).to.be.undefined;
@@ -829,6 +859,8 @@ describe('checkers', () => {
       checkers.any,
       checkers.null,
       checkers.range(1, 15),
+      checkers.lessThan(10),
+      checkers.greaterThan(15),
       checkers.emptyObject
     ];
 
