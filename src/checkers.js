@@ -29,6 +29,8 @@ function getCheckers(disabled) {
     typeOrArrayOf: typeOrArrayOfCheckGetter,
 
     range: rangeCheckGetter,
+    lessThan: lessThanCheckGetter,
+    greaterThan: greaterThanCheckGetter,
 
     shape: getShapeCheckGetter(),
     args: argumentsCheckerGetter(),
@@ -408,6 +410,24 @@ function getCheckers(disabled) {
     const type = `Range (${min} - ${max})`;
     return setupChecker(function rangeChecker(val, name, location) {
       if (typeof val !== 'number' || val < min || val > max) {
+        return getError(name, location, type);
+      }
+    }, {type}, disabled);
+  }
+
+  function lessThanCheckGetter(min) {
+    const type = `lessThan[${min}]`;
+    return setupChecker(function lessThanChecker(val, name, location) {
+      if (typeof val !== 'number' || val > min) {
+        return getError(name, location, type);
+      }
+    }, {type}, disabled);
+  }
+
+  function greaterThanCheckGetter(max) {
+    const type = `greaterThan[${max}]`;
+    return setupChecker(function greaterThanChecker(val, name, location) {
+      if (typeof val !== 'number' || val < max) {
         return getError(name, location, type);
       }
     }, {type}, disabled);
