@@ -1,3 +1,9 @@
+# 7.5.0
+
+## New Features
+
+- Adding `greaterThan` and `lessThan` checkers. Thanks [AimeeKnight](https://github.com/AimeeKnight)! [#20](/../../issues/20)
+
 # 7.4.1
 
 ## Bug Fixes

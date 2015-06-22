@@ -260,6 +260,29 @@ apiCheck.string('I am a string!'); // <-- pass
 apiCheck.string([]); // <-- fail
 ```
 
+### range
+
+```javascript
+apiCheck.range(0, 10)(4); // <-- pass
+apiCheck.rang(-100, 100)(500); // <-- fail
+```
+
+### greaterThan
+
+```javascript
+apiCheck.greaterThan(100)(200); // <-- pass
+apiCheck.greaterThan(-10)(-20); // <-- fail
+apiCheck.greaterThan(50)('Frogs!'); // <-- fail
+```
+
+### lessThan
+
+```javascript
+apiCheck.lessThan(100)(50); // <-- pass
+apiCheck.lessThan(-10)(0); // <-- fail
+apiCheck.lessThan(50)('Frogs!'); // <-- fail
+```
+
 ### instanceOf
 
 ```javascript
