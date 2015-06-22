@@ -1,4 +1,4 @@
-//! api-check version 7.4.0 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
+//! api-check version 7.5.0 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var apiCheckApis = getApiCheckApis();
 
 	module.exports = getApiCheckInstance;
-	module.exports.VERSION = ("7.4.0");
+	module.exports.VERSION = ("7.5.0");
 	module.exports.utils = apiCheckUtil;
 	module.exports.globalConfig = {
 	  verbose: false,
@@ -890,6 +890,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    typeOrArrayOf: typeOrArrayOfCheckGetter,
 
 	    range: rangeCheckGetter,
+	    lessThan: lessThanCheckGetter,
+	    greaterThan: greaterThanCheckGetter,
 
 	    shape: getShapeCheckGetter(),
 	    args: argumentsCheckerGetter(),
@@ -1286,6 +1288,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var type = 'Range (' + min + ' - ' + max + ')';
 	    return setupChecker(function rangeChecker(val, name, location) {
 	      if (typeof val !== 'number' || val < min || val > max) {
+	        return getError(name, location, type);
+	      }
+	    }, { type: type }, disabled);
+	  }
+
+	  function lessThanCheckGetter(min) {
+	    var type = 'lessThan[' + min + ']';
+	    return setupChecker(function lessThanChecker(val, name, location) {
+	      if (typeof val !== 'number' || val > min) {
+	        return getError(name, location, type);
+	      }
+	    }, { type: type }, disabled);
+	  }
+
+	  function greaterThanCheckGetter(max) {
+	    var type = 'greaterThan[' + max + ']';
+	    return setupChecker(function greaterThanChecker(val, name, location) {
+	      if (typeof val !== 'number' || val < max) {
 	        return getError(name, location, type);
 	      }
 	    }, { type: type }, disabled);
