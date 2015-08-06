@@ -24,6 +24,8 @@
     "other",
     ".editorconfig",
     ".travis.yml",
+    ".eslintrc",
+    "src",
     "webpack.config.js",
     "webpack.config.minify.js"
   ]
