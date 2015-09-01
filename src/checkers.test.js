@@ -83,6 +83,9 @@ describe('checkers', () => {
     it('should check the instance of a class', () => {
       expect(checkers.instanceOf(RegExp)(/regex/)).to.be.undefined;
       expect(checkers.instanceOf(RegExp)({})).to.be.an.instanceOf(Error);
+
+      expect(checkers.instanceof(RegExp)(/regex/)).to.be.undefined;
+      expect(checkers.instanceof(RegExp)({})).to.be.an.instanceOf(Error);
     });
   });
 

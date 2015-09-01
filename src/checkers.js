@@ -21,6 +21,8 @@ function getCheckers(disabled) {
     emptyObject: emptyObjectCheckGetter(),
 
     instanceOf: instanceCheckGetter,
+    instanceof: instanceCheckGetter,
+
     oneOf: oneOfCheckGetter,
     oneOfType: oneOfTypeCheckGetter,
 
