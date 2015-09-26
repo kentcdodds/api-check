@@ -1,11 +1,11 @@
 /* eslint max-nested-callbacks:0 */
-var expect = require('chai').expect;
-var _ = require('lodash');
+const expect = require('chai').expect;
+const _ = require('lodash');
 const {coveredFunction} = require('./test.utils');
 const {getCheckerDisplay} = require('./api-check-util');
 
 describe('checkers', () => {
-  var checkers = require('./checkers');
+  const checkers = require('./checkers');
   describe('typeOfs', () => {
     it('should check string', () => {
       expect(checkers.string('string')).to.be.undefined;
@@ -227,7 +227,7 @@ describe('checkers', () => {
 
   describe('shape', () => {
     it('should pass when the object contains at least the properties of the types specified', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         name: checkers.shape({
           first: checkers.string,
           last: checkers.string
@@ -237,7 +237,7 @@ describe('checkers', () => {
         walk: checkers.func,
         childrenNames: checkers.arrayOf(checkers.string)
       });
-      var obj = {
+      const obj = {
         name: {
           first: 'Matt',
           last: 'Meese'
@@ -251,28 +251,28 @@ describe('checkers', () => {
     });
 
     it('should fail when the object is missing any of the properties specified', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         scores: checkers.objectOf(checkers.number)
       });
       expect(check({sports: ['soccer', 'baseball']})).to.be.an.instanceOf(Error);
     });
 
     it('should have an optional function that does the same thing', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         appliances: checkers.arrayOf(checkers.object)
       }).optional;
       expect(check({appliances: [{name: 'refridgerator'}]})).to.be.undefined;
     });
 
     it('should be false when passed a non-object', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         friends: checkers.arrayOf(checkers.object)
       });
       expect(check([3])).to.be.an.instanceOf(Error);
     });
 
     it('should fail when the given object is missing properties', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         mint: checkers.bool,
         chocolate: checkers.bool
       });
@@ -280,7 +280,7 @@ describe('checkers', () => {
     });
 
     it('should pass when the given object is missing properties that are optional', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         mint: checkers.bool,
         chocolate: checkers.bool.optional
       });
@@ -288,7 +288,7 @@ describe('checkers', () => {
     });
 
     it('should pass when it is strict and the given object conforms to the shape exactly', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         mint: checkers.bool,
         chocolate: checkers.bool,
         milk: checkers.bool
@@ -297,7 +297,7 @@ describe('checkers', () => {
     });
 
     it('should fail when it is strict and the given object has extra properties', () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         mint: checkers.bool,
         chocolate: checkers.bool,
         milk: checkers.bool
@@ -306,7 +306,7 @@ describe('checkers', () => {
     });
 
     it(`should fail when it is strict and it is an invalid shape`, () => {
-      var check = checkers.shape({
+      const check = checkers.shape({
         mint: checkers.bool,
         chocolate: checkers.bool,
         milk: checkers.bool
@@ -315,7 +315,7 @@ describe('checkers', () => {
     });
 
     it(`should display the location of sub-children well`, () => {
-      var obj = {
+      const obj = {
         person: {
           home: {
             location: {
@@ -438,7 +438,7 @@ describe('checkers', () => {
     describe('ifNot', () => {
 
       it('should pass if the specified property exists but the other does not', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot('mint', checkers.bool),
           mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
@@ -446,7 +446,7 @@ describe('checkers', () => {
       });
 
       it('should fail if neither of the ifNot properties exists', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot('mint', checkers.bool),
           mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
@@ -454,21 +454,21 @@ describe('checkers', () => {
       });
 
       it('should pass if the specified array of properties do not exist', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)
         });
         expect(check({cookies: true})).to.be.undefined;
       });
 
       it('should fail if any of the specified array of properties exists', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot(['mint', 'chips'], checkers.bool)
         });
         expect(check({cookies: true, chips: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail even if both ifNots are optional', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot('mint', checkers.bool).optional,
           mint: checkers.shape.ifNot('cookies', checkers.bool).optional
         });
@@ -476,7 +476,7 @@ describe('checkers', () => {
       });
 
       it('should fail if the specified property exists and the other does too', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot('mint', checkers.bool),
           mint: checkers.shape.ifNot('cookies', checkers.bool)
         });
@@ -484,14 +484,14 @@ describe('checkers', () => {
       });
 
       it('should fail if it fails the specified checker', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.ifNot('mint', checkers.bool)
         });
         expect(check({cookies: 43})).to.be.an.instanceOf(Error);
       });
 
       it(`should have a legible type`, () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           name: checkers.shape({
             first: checkers.string,
             last: checkers.string
@@ -568,42 +568,42 @@ describe('checkers', () => {
 
     describe('onlyIf', () => {
       it('should pass only if the specified property is also present', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.onlyIf('mint', checkers.bool)
         });
         expect(check({cookies: true, mint: true})).to.be.undefined;
       });
 
       it('should pass only if all specified properties are also present', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
         expect(check({cookies: true, mint: true, chip: true})).to.be.undefined;
       });
 
       it('should fail if the specified property is not present', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.onlyIf('mint', checkers.bool)
         });
         expect(check({cookies: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if any specified properties are not present', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
         expect(check({cookies: true, chip: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if all specified properties are not present', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
         expect(check({cookies: true})).to.be.an.instanceOf(Error);
       });
 
       it('should fail if it fails the specified checker', () => {
-        var check = checkers.shape({
+        const check = checkers.shape({
           cookies: checkers.shape.onlyIf(['mint', 'chip'], checkers.bool)
         });
         expect(check({cookies: 42, mint: true, chip: true})).to.be.an.instanceOf(Error);

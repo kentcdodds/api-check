@@ -6,7 +6,7 @@ const {
   } = require('./api-check-util');
 const {setupChecker} = checkerHelpers;
 
-let checkers = module.exports = getCheckers();
+const checkers = module.exports = getCheckers();
 module.exports.getCheckers = getCheckers;
 
 function getCheckers(disabled) {
@@ -51,7 +51,7 @@ function getCheckers(disabled) {
 
   function funcCheckGetter() {
     const type = 'Function';
-    let functionChecker = setupChecker(function functionCheckerDefinition(val, name, location) {
+    const functionChecker = setupChecker(function functionCheckerDefinition(val, name, location) {
       if (typeOf(val) !== 'function') {
         return getError(name, location, type);
       }
@@ -62,7 +62,7 @@ function getCheckers(disabled) {
       if (isError(apiError)) {
         throw apiError;
       }
-      let shapeChecker = checkers.shape(properties, true);
+      const shapeChecker = checkers.shape(properties, true);
       shapeChecker.type.__apiCheckData.type = 'func.withProperties';
 
       return setupChecker(function functionWithPropertiesChecker(val, name, location) {
@@ -79,13 +79,13 @@ function getCheckers(disabled) {
   function objectCheckGetter() {
     const type = 'Object';
     const nullType = 'Object (null ok)';
-    let objectNullOkChecker = setupChecker(function objectNullOkCheckerDefinition(val, name, location) {
+    const objectNullOkChecker = setupChecker(function objectNullOkCheckerDefinition(val, name, location) {
       if (typeOf(val) !== 'object') {
         return getError(name, location, nullType);
       }
     }, {type: nullType}, disabled);
 
-    let objectChecker = setupChecker(function objectCheckerDefinition(val, name, location) {
+    const objectChecker = setupChecker(function objectCheckerDefinition(val, name, location) {
       if (val === null || isError(objectNullOkChecker(val, name, location))) {
         return getError(name, location, objectChecker.type);
       }
@@ -201,12 +201,12 @@ function getCheckers(disabled) {
 
   function getShapeCheckGetter() {
     function shapeCheckGetter(shape, nonObject) {
-      let shapeTypes = {};
+      const shapeTypes = {};
       each(shape, (checker, prop) => {
         shapeTypes[prop] = getCheckerDisplay(checker);
       });
       function type(options = {}) {
-        let ret = {};
+        const ret = {};
         const {terse, obj, addHelpers} = options;
         const parentRequired = options.required;
         each(shape, (checker, prop) => {
@@ -230,7 +230,7 @@ function getCheckers(disabled) {
             }
             addHelper('missing', `MISSING THIS ${item}`, ' <-- YOU ARE MISSING THIS');
           } else if (specified) {
-            let error = checker(obj[prop], prop, null, obj);
+            const error = checker(obj[prop], prop, null, obj);
             if (isError(error)) {
               addHelper('error', `THIS IS THE PROBLEM: ${error.message}`, ` <-- THIS IS THE PROBLEM: ${error.message}`);
             }
@@ -247,9 +247,9 @@ function getCheckers(disabled) {
       }
 
       type.__apiCheckData = {strict: false, optional: false, type: 'shape'};
-      let shapeChecker = setupChecker(function shapeCheckerDefinition(val, name, location) {
+      const shapeChecker = setupChecker(function shapeCheckerDefinition(val, name, location) {
         /* eslint complexity:[2, 6] */
-        let isObject = !nonObject && checkers.object(val, name, location);
+        const isObject = !nonObject && checkers.object(val, name, location);
         if (isError(isObject)) {
           return isObject;
         }
@@ -304,8 +304,8 @@ function getCheckers(disabled) {
       const shortType = `ifNot[${otherProps.join(', ')}]`;
       const type = getTypeForShapeChild(propChecker, description, shortType);
       return setupChecker(function ifNotChecker(prop, propName, location, obj) {
-        let propExists = obj && obj.hasOwnProperty(propName);
-        let otherPropsExist = otherProps.some(otherProp => obj && obj.hasOwnProperty(otherProp));
+        const propExists = obj && obj.hasOwnProperty(propName);
+        const otherPropsExist = otherProps.some(otherProp => obj && obj.hasOwnProperty(otherProp));
         if (propExists === otherPropsExist) {
           return getError(propName, location, type);
         } else if (propExists) {
@@ -357,7 +357,7 @@ function getCheckers(disabled) {
       return setupChecker(function shapeRequiredIfNotDefinition(prop, propName, location, obj) {
         const propExists = obj && obj.hasOwnProperty(propName);
         const iteration = all ? 'every' : 'some';
-        const otherPropsExist = otherProps[iteration](function (otherProp) {
+        const otherPropsExist = otherProps[iteration](function(otherProp) {
           return obj && obj.hasOwnProperty(otherProp);
         });
         if (!otherPropsExist && !propExists) {

@@ -1,6 +1,7 @@
 /* eslint max-len:[2, 150] */
 /* eslint no-console:0 */
-var expect = require('chai').expect;
+/* eslint no-unused-vars:0 */
+const expect = require('chai').expect;
 const {coveredFunction} = require('./test.utils');
 describe('apiCheck', () => {
   const apiCheck = require('./index');
@@ -87,28 +88,28 @@ describe('apiCheck', () => {
 
     it('should handle array with types', () => {
       (function(a, b, c) {
-        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.number, apiCheckInstance.bool], arguments).message;
+        const message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.number, apiCheckInstance.bool], arguments).message;
         expect(message).to.be.empty;
       })('a', 1, true);
     });
 
     it('should handle optional arguments', () => {
       (function(a, b, c) {
-        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.number.optional, apiCheckInstance.bool], arguments).message;
+        const message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.number.optional, apiCheckInstance.bool], arguments).message;
         expect(message).to.be.empty;
       })('a', true);
     });
 
     it(`should handle an any.optional that's in the middle of the arg list`, () => {
       (function(a, b, c) {
-        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.any.optional, apiCheckInstance.bool], arguments).message;
+        const message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.any.optional, apiCheckInstance.bool], arguments).message;
         expect(message).to.be.empty;
       })('a', true);
     });
 
     it(`should handle the crazy optional specifications`, () => {
       function crazyFunction() {
-        var message = apiCheckInstance([
+        const message = apiCheckInstance([
           apiCheckInstance.string.optional, apiCheckInstance.number.optional, apiCheckInstance.bool,
           apiCheckInstance.object.optional, apiCheckInstance.func.optional, apiCheckInstance.array,
           apiCheckInstance.string.optional, apiCheckInstance.func
@@ -122,7 +123,7 @@ describe('apiCheck', () => {
 
     it(`should handle a final two optional arguments`, () => {
       (function(a, b, c) {
-        var message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.oneOfType([
+        const message = apiCheckInstance([apiCheckInstance.string, apiCheckInstance.oneOfType([
           apiCheckInstance.arrayOf(apiCheckInstance.string),
           apiCheckInstance.shape({name: apiCheckInstance.string})
         ]).optional, apiCheckInstance.shape({
@@ -148,7 +149,7 @@ describe('apiCheck', () => {
       const foo = new Foo();
 
       (function(a) {
-        var message = apiCheckInstance(apiCheckInstance.number, a).message;
+        const message = apiCheckInstance(apiCheckInstance.number, a).message;
         expect(message).to.match(makeSpacedRegex('you passed bar "baz" baz 123 foobar with types string number date'));
       })(foo);
     });
@@ -159,7 +160,7 @@ describe('apiCheck', () => {
       const foo = new Foo();
 
       (function(a) {
-        var message = apiCheckInstance(apiCheckInstance.number, a).message;
+        const message = apiCheckInstance(apiCheckInstance.number, a).message;
         expect(message).to.match(makeSpacedRegex('you passed {} with type Foo'));
       })(foo);
     });
@@ -169,39 +170,39 @@ describe('apiCheck', () => {
       func.foo = 'bar';
 
       (function(a) {
-        var message = apiCheckInstance(apiCheckInstance.number, a).message;
+        const message = apiCheckInstance(apiCheckInstance.number, a).message;
         expect(message).to.match(makeSpacedRegex(`you passed ${func.name} with the type: Function with properties foo string`));
       })(func);
     });
 
     it(`should output an empty object`, () => {
-      var message = apiCheckInstance(apiCheckInstance.number, {}).message;
+      const message = apiCheckInstance(apiCheckInstance.number, {}).message;
       expect(message).to.match(makeSpacedRegex(`you passed {} with the type: object`));
     });
 
     it(`should output an empty array`, () => {
-      var message = apiCheckInstance(apiCheckInstance.number, []).message;
+      const message = apiCheckInstance(apiCheckInstance.number, []).message;
       expect(message).to.match(makeSpacedRegex(`you passed \\[\\] with the type: array`));
     });
 
     it(`should handle circular references properly`, () => {
-      var foo = {};
-      var bar = {foo};
+      const foo = {};
+      const bar = {foo};
       foo.bar = bar;
-      var message = apiCheckInstance(apiCheckInstance.number, foo).message;
+      const message = apiCheckInstance(apiCheckInstance.number, foo).message;
       expect(message).to.match(makeSpacedRegex(`bar foo \\[circular ~\\] bar foo \\[circular\\]`));
     });
 
     describe(`custom checkers`, () => {
       it('should be accepted', () => {
         (function(a, b) {
-          var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
+          const message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
           expect(message).to.be.empty;
         })('a', '127.0.0.1');
 
 
         (function(a, b) {
-          var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
+          const message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
           expect(message).to.match(/argument.*?2.*?must.*?be.*?ipAddressString/i);
         })('a', 32);
       });
@@ -297,7 +298,7 @@ describe('apiCheck', () => {
         it(`should be printed as is as part of the message`, () => {
           ipAddressChecker.help = 'This needs to be a valid IP address. Like 127.0.0.1';
           (function(a, b) {
-            var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
+            const message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
             expect(message).to.contain(ipAddressChecker.help);
           })('a', 32);
         });
@@ -310,7 +311,7 @@ describe('apiCheck', () => {
             return val + suffix;
           };
           (function(a, b) {
-            var message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
+            const message = apiCheckInstance([apiCheckInstance.string, ipAddressChecker], arguments).message;
             expect(message).to.contain(suffix);
           })('a', 32);
         });
@@ -340,8 +341,7 @@ describe('apiCheck', () => {
   });
 
   describe('#warn', () => {
-    var originalWarn;
-    var warnCalls;
+    let originalWarn, warnCalls;
     beforeEach(() => {
       originalWarn = console.warn;
       warnCalls = [];
@@ -375,7 +375,7 @@ describe('apiCheck', () => {
 
     it(`should return the results`, () => {
       (function(a) {
-        let message = apiCheckInstance.warn(apiCheckInstance.number, a).message;
+        const message = apiCheckInstance.warn(apiCheckInstance.number, a).message;
         expect(message).to.match(makeSpacedRegex('you passed a the api calls for number'));
       })('a', 3);
     });
@@ -411,7 +411,7 @@ describe('apiCheck', () => {
       apiCheck.globalConfig.disabled = true;
       const customInstance = apiCheck();
       check(customInstance, true);
-      var checkers = [
+      const checkers = [
         customInstance.string,
         customInstance.bool,
         customInstance.func,
@@ -452,7 +452,7 @@ describe('apiCheck', () => {
     function check(instance, disabled) {
       const error = /not.*?enough.*?arguments.*?requires.*?2.*?passed.*?1/i;
       (function(a, b) {
-        var message = instance([instance.instanceOf(RegExp), instance.number], arguments).message;
+        const message = instance([instance.instanceOf(RegExp), instance.number], arguments).message;
         if (disabled) {
           expect(message).to.be.empty;
         } else {
@@ -475,7 +475,7 @@ describe('apiCheck', () => {
     });
     it(`should throw an error when the wrong types are passed`, () => {
       (function(a) {
-        var args = arguments;
+        const args = arguments;
         expect(() => apiCheckInstance(true, args)).to.throw(/argument.*1.*must.*be.*typeOrArrayOf.*func\.withProperties/i);
       })('a');
     });
@@ -485,14 +485,14 @@ describe('apiCheck', () => {
     describe('output', () => {
 
       it('should fallback to an empty object is output is removed', () => {
-        var original = apiCheckInstance.config.output;
+        const original = apiCheckInstance.config.output;
         apiCheckInstance.config.output = null;
         expect(getFailureMessage).to.not.throw();
         apiCheckInstance.config.output = original;
       });
 
       describe('prefix', () => {
-        var gPrefix = 'global prefix';
+        const gPrefix = 'global prefix';
         beforeEach(() => {
           apiCheckInstance.config.output.prefix = gPrefix;
         });
@@ -501,7 +501,7 @@ describe('apiCheck', () => {
         });
 
         it('should allow the specification of an additional prefix that comes after the global config prefix', () => {
-          var prefix = 'secondary prefix';
+          const prefix = 'secondary prefix';
           expect(getFailureMessage({prefix})).to.match(new RegExp(`^${gPrefix} ${prefix}`));
         });
 
@@ -518,7 +518,7 @@ describe('apiCheck', () => {
       });
 
       describe('suffix', () => {
-        var gSuffix = 'global suffix';
+        const gSuffix = 'global suffix';
         beforeEach(() => {
           apiCheckInstance.config.output.suffix = gSuffix;
         });
@@ -527,7 +527,7 @@ describe('apiCheck', () => {
         });
 
         it('should allow the specification of an additional suffix that comes after the global config suffix', () => {
-          var suffix = 'secondary suffix';
+          const suffix = 'secondary suffix';
           expect(getFailureMessage({suffix})).to.contain(`${suffix} ${gSuffix}`);
         });
 
@@ -544,7 +544,7 @@ describe('apiCheck', () => {
       });
 
       describe('url', () => {
-        var docsBaseUrl = 'http://www.example.com/errors#';
+        const docsBaseUrl = 'http://www.example.com/errors#';
         beforeEach(() => {
           apiCheckInstance.config.output.docsBaseUrl = docsBaseUrl;
         });
@@ -554,7 +554,7 @@ describe('apiCheck', () => {
         });
 
         it('should be added to the message if a url is specified', () => {
-          var urlSuffix = 'some-error-message';
+          const urlSuffix = 'some-error-message';
           expect(getFailureMessage({urlSuffix})).to.contain(`${docsBaseUrl}${urlSuffix}`);
         });
 
@@ -575,7 +575,7 @@ describe('apiCheck', () => {
       });
 
       function getFailureMessage(output) {
-        var message;
+        let message;
         (function(a) {
           message = apiCheckInstance(apiCheckInstance.string, a, output).message;
         })(1);
@@ -620,10 +620,10 @@ describe('apiCheck', () => {
     });
 
     it('should be overrideable', () => {
-      let originalGetErrorMessage = apiCheckInstance.getErrorMessage;
-      let api = [apiCheckInstance.string, apiCheckInstance.shape({}), apiCheckInstance.array];
+      const originalGetErrorMessage = apiCheckInstance.getErrorMessage;
+      const api = [apiCheckInstance.string, apiCheckInstance.shape({}), apiCheckInstance.array];
       let args;
-      let output = {};
+      const output = {};
       apiCheckInstance.getErrorMessage = (_api, _args, _message, _output) => {
         expect(_api).to.equal(api);
         expect(_args).to.eql(Array.prototype.slice.call(args)); // only eql because the args are cloned
@@ -755,8 +755,8 @@ describe('apiCheck', () => {
 
   describe('#handleErrorMessage', () => {
     it('should send the message to console.warn when the second argument is falsy', () => {
-      var originalWarn = console.warn;
-      var warnCalls = [];
+      const originalWarn = console.warn;
+      const warnCalls = [];
       console.warn = function() {
         warnCalls.push([...arguments]);
       };
@@ -770,7 +770,7 @@ describe('apiCheck', () => {
     });
 
     it('should be overrideable', () => {
-      var originalHandle = apiCheckInstance.handleErrorMessage;
+      const originalHandle = apiCheckInstance.handleErrorMessage;
       apiCheckInstance.handleErrorMessage = (message, shouldThrow) => {
         expect(message).to.match(makeSpacedRegex('you passed undefined type undefined api calls for string'));
         expect(shouldThrow).to.be.true;

@@ -1,4 +1,4 @@
-//! api-check version 7.5.0 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
+//! api-check version 0.0.0-semantically-released.0 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var apiCheckApis = getApiCheckApis();
 
 	module.exports = getApiCheckInstance;
-	module.exports.VERSION = ("7.5.0");
+	module.exports.VERSION = ("0.0.0-semantically-released.0");
 	module.exports.utils = apiCheckUtil;
 	module.exports.globalConfig = {
 	  verbose: false,
@@ -151,9 +151,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * This is the instance function. Other things are attached to this see additional properties above.
-	   * @param api {Array}
-	   * @param args {arguments}
-	   * @param output {Object}
+	   * @param {Array} api - the checkers to check with
+	   * @param {Array} args - the args to check
+	   * @param {Object} output - output options
 	   * @returns {Object} - if this has a failed = true property, then it failed
 	   */
 	  function apiCheck(api, args, output) {
@@ -195,7 +195,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  /**
 	   * checkApiCheckApi, should be read like: check apiCheck api. As in, check the api for apiCheck :-)
-	   * @param checkApiArgs
+	   * @param {Array} checkApiArgs - args provided to apiCheck function
 	   */
 	  function checkApiCheckApi(checkApiArgs) {
 	    var api = checkApiArgs[0];
@@ -348,9 +348,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * This is where the magic happens for actually checking the arguments with the api.
-	 * @param api {Array} - checkers
-	 * @param args {Array} - and arguments object
-	 * @returns {Array}
+	 * @param {Array} api - checkers
+	 * @param  {Array} args - and arguments object
+	 * @returns {Array} - the error messages
 	 */
 	function checkApiWithArgs(api, args) {
 	  /* eslint complexity:[2, 7] */
@@ -641,15 +641,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function each(obj, iterator, context) {
 	  if (Array.isArray(obj)) {
-	    return eachArry.apply(undefined, arguments);
+	    return eachArry(obj, iterator, context);
 	  } else {
-	    return eachObj.apply(undefined, arguments);
+	    return eachObj(obj, iterator, context);
 	  }
 	}
 
 	function eachObj(obj, iterator, context) {
-	  var ret;
+	  var ret = undefined;
 	  var hasOwn = Object.prototype.hasOwnProperty;
+	  /* eslint prefer-const:0 */ // some weird eslint bug?
 	  for (var key in obj) {
 	    if (hasOwn.call(obj, key)) {
 	      ret = iterator.call(context, obj[key], key, obj);
@@ -662,7 +663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function eachArry(obj, iterator, context) {
-	  var ret;
+	  var ret = undefined;
 	  var length = obj.length;
 	  for (var i = 0; i < length; i++) {
 	    ret = iterator.call(context, obj[i], i, obj);
@@ -712,9 +713,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * This will set up the checker with all of the defaults that most checkers want like required by default and an
 	 * optional version
-	 * @param checker
-	 * @param properties properties to add to the checker
-	 * @param disabled - when set to true, this will set the checker to a no-op function
+	 *
+	 * @param {Function} checker - the checker to setup with properties
+	 * @param {Object} properties - properties to add to the checker
+	 * @param {boolean} disabled - when set to true, this will set the checker to a no-op function
+	 * @returns {Function} checker - the setup checker
 	 */
 	function setupChecker(checker, properties, disabled) {
 	  /* eslint complexity:[2, 9] */

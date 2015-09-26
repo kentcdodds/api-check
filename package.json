@@ -1,6 +1,6 @@
 {
   "name": "api-check",
-  "version": "7.5.0",
+  "version": "0.0.0-semantically-released.0",
   "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
   "main": "dist/api-check.js",
   "dependencies": {},
@@ -9,11 +9,15 @@
     "babel-core": "5.5.8",
     "babel-eslint": "3.1.17",
     "babel-loader": "5.1.4",
+    "bootstrap": "3.3.5",
     "chai": "2.1.0",
     "codecov.io": "0.1.4",
-    "eslint": "0.23.0",
-    "eslint-loader": "0.14.0",
-    "ghooks": "0.2.4",
+    "commitizen": "1.0.4",
+    "cz-conventional-changelog": "1.1.0",
+    "eslint": "1.5.1",
+    "eslint-config-kentcdodds": "4.0.0",
+    "eslint-loader": "1.0.0",
+    "ghooks": "0.3.2",
     "isparta": "3.0.3",
     "isparta-loader": "0.2.0",
     "istanbul": "0.3.5",
@@ -29,32 +33,31 @@
     "lodash": "3.9.3",
     "mocha": "2.1.0",
     "node-libs-browser": "^0.5.2",
+    "publish-latest": "1.1.0",
+    "semantic-release": "^4.3.5",
     "surge": "0.14.2",
     "uglify-loader": "1.2.0",
-    "webpack": "1.9.11",
-    "with-package": "0.2.0"
+    "validate-commit-msg": "1.0.0",
+    "webpack": "1.9.11"
   },
   "scripts": {
-    "start": "npm run test",
-    "test": "COVERAGE=true NODE_ENV=test karma start",
-    "test:single": "COVERAGE=true NODE_ENV=test karma start --single-run",
+    "commit": "git-cz",
+    "start": "COVERAGE=true NODE_ENV=test karma start",
+    "test": "COVERAGE=true NODE_ENV=test karma start --single-run",
     "test:debug": "echo 'WARNING: This is currently not working quite right...' && NODE_ENV=test karma start --browsers Chrome",
     "build:dist": "NODE_ENV=development webpack --config node_modules/kcd-common-tools/shared/webpack.config.js --progress --colors",
     "build:prod": "NODE_ENV=production webpack --config node_modules/kcd-common-tools/shared/webpack.config.js --progress --colors",
     "build": "npm run build:dist & npm run build:prod",
-    "ci": "npm run code-checks && npm run test:single && npm run check-coverage && npm run build",
     "check-coverage": "./node_modules/istanbul/lib/cli.js check-coverage --statements 100 --functions 100 --lines 100 --branches 100",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
     "deploy": "npm run deployClean && npm run deployCopy && npm run deploySurge",
     "deploySurge": "surge -p deploy.ignored -d api-check.surge.sh",
     "deployCopy": "cp index.html deploy.ignored/ && cp dist/api-check.js deploy.ignored/dist/",
     "deployClean": "rm -rf deploy.ignored/ && mkdir deploy.ignored/ && mkdir deploy.ignored/dist/",
-    "only-check": "node node_modules/kcd-common-tools/shared/scripts/only-check.js",
-    "console-check": "node node_modules/kcd-common-tools/shared/scripts/console-check.js",
-    "code-checks": "npm run only-check && npm run console-check",
-    "release": "npm run build && with-package git commit -am pkg.version && with-package git tag pkg.version && git push && npm publish && git push --tags",
-    "release:beta": "npm run release && npm run tag:beta",
-    "tag:beta": "with-package npm dist-tag add pkg.name@pkg.version beta"
+    "code-checks": "eslint src/",
+    "prepublish": "npm run build",
+    "postpublish": "publish-latest",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
     "type": "git",
@@ -75,8 +78,11 @@
   "homepage": "https://github.com/kentcdodds/api-check",
   "config": {
     "ghooks": {
-      "pre-commit": "npm run ci"
+      "pre-commit": "./node_modules/.bin/validate-commit-msg && npm run code-checks && npm t && npm run check-coverage"
     }
+  },
+  "czConfig": {
+    "path": "node_modules/cz-conventional-changelog"
   },
   "kcdCommon": {
     "webpack": {

@@ -10,7 +10,7 @@ module.exports = {
 };
 
 function copy(obj) {
-  let type = typeOf(obj);
+  const type = typeOf(obj);
   let daCopy;
   if (type === 'array') {
     daCopy = [];
@@ -39,7 +39,7 @@ function typeOf(obj) {
 function getCheckerDisplay(checker, options) {
   /* eslint complexity:[2, 7] */
   let display;
-  let short = options && options.short;
+  const short = options && options.short;
   if (short && checker.shortType) {
     display = checker.shortType;
   } else if (!short && typeof checker.type === 'object' || checker.type === 'function') {
@@ -52,8 +52,8 @@ function getCheckerDisplay(checker, options) {
 
 function getCheckerType({type}, options) {
   if (typeof type === 'function') {
-    let __apiCheckData = type.__apiCheckData;
-    let typeTypes = type(options);
+    const __apiCheckData = type.__apiCheckData;
+    const typeTypes = type(options);
     type = {
       __apiCheckData,
       [__apiCheckData.type]: typeTypes
@@ -75,16 +75,17 @@ function arrayify(obj) {
 
 function each(obj, iterator, context) {
   if (Array.isArray(obj)) {
-    return eachArry(...arguments);
+    return eachArry(obj, iterator, context);
   } else {
-    return eachObj(...arguments);
+    return eachObj(obj, iterator, context);
   }
 }
 
 function eachObj(obj, iterator, context) {
-  var ret;
-  var hasOwn = Object.prototype.hasOwnProperty;
-  for (var key in obj) {
+  let ret;
+  const hasOwn = Object.prototype.hasOwnProperty;
+  /* eslint prefer-const:0 */ // some weird eslint bug?
+  for (let key in obj) {
     if (hasOwn.call(obj, key)) {
       ret = iterator.call(context, obj[key], key, obj);
       if (ret === false) {
@@ -96,9 +97,9 @@ function eachObj(obj, iterator, context) {
 }
 
 function eachArry(obj, iterator, context) {
-  var ret;
-  var length = obj.length;
-  for (var i = 0; i < length; i++) {
+  let ret;
+  const length = obj.length;
+  for (let i = 0; i < length; i++) {
     ret = iterator.call(context, obj[i], i, obj);
     if (ret === false) {
       return ret;
@@ -113,8 +114,8 @@ function isError(obj) {
 
 function list(arry, join, finalJoin) {
   arry = arrayify(arry);
-  let copy = arry.slice();
-  let last = copy.pop();
+  const copy = arry.slice();
+  const last = copy.pop();
   if (copy.length === 1) {
     join = ' ';
   }
@@ -148,9 +149,11 @@ function undef(thing) {
 /**
  * This will set up the checker with all of the defaults that most checkers want like required by default and an
  * optional version
- * @param checker
- * @param properties properties to add to the checker
- * @param disabled - when set to true, this will set the checker to a no-op function
+ *
+ * @param {Function} checker - the checker to setup with properties
+ * @param {Object} properties - properties to add to the checker
+ * @param {boolean} disabled - when set to true, this will set the checker to a no-op function
+ * @returns {Function} checker - the setup checker
  */
 function setupChecker(checker, properties, disabled) {
   /* eslint complexity:[2, 9] */
@@ -187,7 +190,7 @@ function setupChecker(checker, properties, disabled) {
 }
 
 function getRequiredVersion(checker, disabled) {
-  var requiredChecker = disabled ? getNoop() : function requiredChecker(val, name, location, obj) {
+  const requiredChecker = disabled ? getNoop() : function requiredChecker(val, name, location, obj) {
     if (undef(val) && !checker.isOptional) {
       let tLocation = location ? ` in ${t(location)}` : '';
       const type = getCheckerDisplay(checker, {short: true});
@@ -203,7 +206,7 @@ function getRequiredVersion(checker, disabled) {
 }
 
 function addOptional(checker, disabled) {
-  var optionalCheck = disabled ? getNoop() : function optionalCheck(val, name, location, obj) {
+  const optionalCheck = disabled ? getNoop() : function optionalCheck(val, name, location, obj) {
     if (!undef(val)) {
       return checker(val, name, location, obj);
     }
@@ -223,7 +226,7 @@ function addOptional(checker, disabled) {
 }
 
 function addNullable(checker, disabled) {
-  var nullableCheck = disabled ? getNoop() : function nullableCheck(val, name, location, obj) {
+  const nullableCheck = disabled ? getNoop() : function nullableCheck(val, name, location, obj) {
     if (val !== null) {
       return checker(val, name, location, obj);
     }

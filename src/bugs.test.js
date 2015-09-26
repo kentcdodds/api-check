@@ -1,6 +1,6 @@
 /*jshint expr: true*/
 /* jshint maxlen: 180 */
-var expect = require('chai').expect;
+const expect = require('chai').expect;
 
 describe(`fixed bugs`, () => {
   const apiCheck = require('./index');

@@ -28,7 +28,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
     });
   }
 
-  let additionalProperties = {
+  const additionalProperties = {
     throw: getApiCheck(true),
     warn: getApiCheck(false),
     getErrorMessage,
@@ -56,9 +56,9 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
 
   /**
    * This is the instance function. Other things are attached to this see additional properties above.
-   * @param api {Array}
-   * @param args {arguments}
-   * @param output {Object}
+   * @param {Array} api - the checkers to check with
+   * @param {Array} args - the args to check
+   * @param {Object} output - output options
    * @returns {Object} - if this has a failed = true property, then it failed
    */
   function apiCheck(api, args, output) {
@@ -84,7 +84,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
       messages = checkApiWithArgs(api, args);
     }
 
-    let returnObject = getTypes(api, args);
+    const returnObject = getTypes(api, args);
     returnObject.args = args;
     if (messages.length) {
       returnObject.message = apiCheck.getErrorMessage(api, args, messages, output);
@@ -100,12 +100,12 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
 
   /**
    * checkApiCheckApi, should be read like: check apiCheck api. As in, check the api for apiCheck :-)
-   * @param checkApiArgs
+   * @param {Array} checkApiArgs - args provided to apiCheck function
    */
   function checkApiCheckApi(checkApiArgs) {
     const api = checkApiArgs[0];
     const args = checkApiArgs[1];
-    var isArrayOrArgs = Array.isArray(args) || (args && typeof args === 'object' && typeof args.length === 'number');
+    const isArrayOrArgs = Array.isArray(args) || (args && typeof args === 'object' && typeof args.length === 'number');
 
     if (Array.isArray(api) && !isArrayOrArgs) {
       throw new Error(getErrorMessage(api, [args],
@@ -126,7 +126,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
 
   function getApiCheck(shouldThrow) {
     return function apiCheckWrapper(api, args, output) {
-      let result = apiCheck(api, args, output);
+      const result = apiCheck(api, args, output);
       apiCheck.handleErrorMessage(result.message, shouldThrow);
       return result; // wont get here if an error is thrown
     };
@@ -142,12 +142,12 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
   }
 
   function getErrorMessage(api, args, messages = [], output = {}) {
-    let gOut = apiCheck.config.output || {};
-    let prefix = getPrefix();
-    let suffix = getSuffix();
-    let url = getUrl();
-    let message = `apiCheck failed! ${messages.join(', ')}`;
-    var passedAndShouldHavePassed = '\n\n' + buildMessageFromApiAndArgs(api, args);
+    const gOut = apiCheck.config.output || {};
+    const prefix = getPrefix();
+    const suffix = getSuffix();
+    const url = getUrl();
+    const message = `apiCheck failed! ${messages.join(', ')}`;
+    const passedAndShouldHavePassed = '\n\n' + buildMessageFromApiAndArgs(api, args);
     return `${prefix} ${message} ${suffix} ${url || ''}${passedAndShouldHavePassed}`.trim();
 
     function getPrefix() {
@@ -177,8 +177,8 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
 
   function buildMessageFromApiAndArgs(api, args) {
     let {apiTypes, argTypes} = getTypes(api, args);
-    let copy = Array.prototype.slice.call(args || []);
-    let replacedItems = [];
+    const copy = Array.prototype.slice.call(args || []);
+    const replacedItems = [];
     replaceFunctionWithName(copy);
     const passedArgs = getObjectString(copy);
     argTypes = getObjectString(argTypes);
@@ -233,7 +233,7 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
   function getTypes(api, args) {
     api = arrayify(api);
     args = arrayify(args);
-    let apiTypes = api.map((checker, index) => {
+    const apiTypes = api.map((checker, index) => {
       const specified = module.exports.globalConfig.hasOwnProperty('verbose');
       return getCheckerDisplay(checker, {
         terse: specified ? !module.exports.globalConfig.verbose : !apiCheck.config.verbose,
@@ -241,8 +241,8 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
         addHelpers: true
       });
     });
-    let argTypes = args.map((arg) => getArgDisplay(arg, []));
-    return {argTypes: argTypes, apiTypes};
+    const argTypes = args.map((arg) => getArgDisplay(arg, []));
+    return {argTypes, apiTypes};
   }
 
 }
@@ -252,13 +252,13 @@ function getApiCheckInstance(config = {}, extraCheckers = {}) {
 
 /**
  * This is where the magic happens for actually checking the arguments with the api.
- * @param api {Array} - checkers
- * @param args {Array} - and arguments object
- * @returns {Array}
+ * @param {Array} api - checkers
+ * @param  {Array} args - and arguments object
+ * @returns {Array} - the error messages
  */
 function checkApiWithArgs(api, args) {
   /* eslint complexity:[2, 7] */
-  let messages = [];
+  const messages = [];
   let failed = false;
   let checkerIndex = 0;
   let argIndex = 0;
@@ -321,7 +321,7 @@ function getCheckerHelp({help}, val) {
 
 
 function checkEnoughArgs(api, args) {
-  let requiredArgs = api.filter(a => !a.isOptional);
+  const requiredArgs = api.filter(a => !a.isOptional);
   if (args.length < requiredArgs.length) {
     return [
       'Not enough arguments specified. Requires `' + requiredArgs.length + '`, you passed `' + args.length + '`'
@@ -337,7 +337,7 @@ function getArgDisplay(arg, gottenArgs) {
   const type = typeOf(arg);
   if (type === 'function') {
     if (hasKeys()) {
-      let properties = stringify(getDisplayIfNotGotten());
+      const properties = stringify(getDisplayIfNotGotten());
       return cName + ' (with properties: ' + properties + ')';
     }
     return cName;
@@ -372,7 +372,7 @@ function getArgDisplay(arg, gottenArgs) {
 }
 
 function getDisplay(obj, gottenArgs) {
-  var argDisplay = {};
+  const argDisplay = {};
   each(obj, (v, k) => argDisplay[k] = getArgDisplay(v, gottenArgs));
   return argDisplay;
 }

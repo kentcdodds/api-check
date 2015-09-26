@@ -9,7 +9,7 @@ describe('api-check-util', () => {
 
   describe('each', () => {
     it('should iterate over objects', () => {
-      var called = [];
+      const called = [];
       each({a: 'a', b: 'b'}, (val, prop) => {
         called.push({val, prop});
       });
@@ -17,8 +17,8 @@ describe('api-check-util', () => {
     });
 
     it('should exit objects early if false is explicitly returned', () => {
-      var called = [];
-      var ret = each({a: 'a', b: 'b', c: 'c', d: 'd'}, (val, prop) => {
+      const called = [];
+      const ret = each({a: 'a', b: 'b', c: 'c', d: 'd'}, (val, prop) => {
         if (prop === 'c') {
           return false;
         }
@@ -29,13 +29,13 @@ describe('api-check-util', () => {
     });
 
     it('should not iterate over properties that are not the object\'s own', () => {
-      var called = [];
-      var Daddy = function() {
+      const called = [];
+      function Daddy() {
         this.a = 'a';
         this.b = 'b';
-      };
+      }
       Daddy.prototype.x = 'x';
-      var man = new Daddy();
+      const man = new Daddy();
       each(man, (val, prop) => {
         called.push({val, prop});
       });
@@ -43,7 +43,7 @@ describe('api-check-util', () => {
     });
 
     it('should iterate over arrays', () => {
-      var called = [];
+      const called = [];
       each([1, 2], (val, index) => {
         called.push({val, index});
       });
@@ -51,8 +51,8 @@ describe('api-check-util', () => {
     });
 
     it('should exit arrays early if false is explicitly returned', () => {
-      var called = [];
-      var ret = each([1, 2, 3, 4], (val, index) => {
+      const called = [];
+      const ret = each([1, 2, 3, 4], (val, index) => {
         if (index > 1) {
           return false;
         }
