@@ -34,7 +34,7 @@
     "lodash": "3.9.3",
     "mocha": "2.1.0",
     "node-libs-browser": "^0.5.2",
-    "publish-latest": "1.1.1",
+    "publish-latest": "1.1.2",
     "semantic-release": "^4.3.5",
     "surge": "0.14.2",
     "uglify-loader": "1.2.0",
