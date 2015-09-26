@@ -17,6 +17,7 @@
     "eslint": "1.5.1",
     "eslint-config-kentcdodds": "4.0.0",
     "eslint-loader": "1.0.0",
+    "eslint-plugin-mocha": "0.5.1",
     "ghooks": "0.3.2",
     "isparta": "3.0.3",
     "isparta-loader": "0.2.0",
