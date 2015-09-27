@@ -10,7 +10,7 @@
     "babel-eslint": "3.1.17",
     "babel-loader": "5.1.4",
     "bootstrap": "3.3.5",
-    "chai": "2.1.0",
+    "chai": "3.3.0",
     "codecov.io": "0.1.4",
     "commitizen": "1.0.4",
     "cz-conventional-changelog": "1.1.0",
