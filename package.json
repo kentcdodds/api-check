@@ -21,7 +21,7 @@
     "ghooks": "0.3.2",
     "isparta": "3.0.3",
     "isparta-loader": "0.2.0",
-    "istanbul": "0.3.5",
+    "istanbul": "0.3.21",
     "json-stringify-safe": "5.0.0",
     "karma": "0.12.36",
     "karma-chai": "0.1.0",
