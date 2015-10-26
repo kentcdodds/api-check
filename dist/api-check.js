@@ -1,4 +1,4 @@
-//! api-check version 7.5.3 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
+//! api-check version 7.5.4 built with ♥ by Kent C. Dodds <kent@doddsfamily.us> (http://kent.doddsfamily.us) (ó ì_í)=óò=(ì_í ò)
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var apiCheckApis = getApiCheckApis();
 
 	module.exports = getApiCheckInstance;
-	module.exports.VERSION = ("7.5.3");
+	module.exports.VERSION = ("7.5.4");
 	module.exports.utils = apiCheckUtil;
 	module.exports.globalConfig = {
 	  verbose: false,
@@ -108,8 +108,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	function getApiCheckInstance() {
-	  var config = arguments[0] === undefined ? {} : arguments[0];
-	  var extraCheckers = arguments[1] === undefined ? {} : arguments[1];
+	  var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	  var extraCheckers = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 	  /* eslint complexity:[2, 6] */
 	  if (apiCheckApiCheck && arguments.length) {
@@ -233,8 +233,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  function getErrorMessage(api, args) {
-	    var messages = arguments[2] === undefined ? [] : arguments[2];
-	    var output = arguments[3] === undefined ? {} : arguments[3];
+	    var messages = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+	    var output = arguments.length <= 3 || arguments[3] === undefined ? {} : arguments[3];
 
 	    var gOut = apiCheck.config.output || {};
 	    var prefix = getPrefix();
@@ -242,12 +242,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var url = getUrl();
 	    var message = 'apiCheck failed! ' + messages.join(', ');
 	    var passedAndShouldHavePassed = '\n\n' + buildMessageFromApiAndArgs(api, args);
-	    return ('' + prefix + ' ' + message + ' ' + suffix + ' ' + (url || '') + '' + passedAndShouldHavePassed).trim();
+	    return (prefix + ' ' + message + ' ' + suffix + ' ' + (url || '') + passedAndShouldHavePassed).trim();
 
 	    function getPrefix() {
 	      var p = output.onlyPrefix;
 	      if (!p) {
-	        p = ('' + (gOut.prefix || '') + ' ' + (output.prefix || '')).trim();
+	        p = ((gOut.prefix || '') + ' ' + (output.prefix || '')).trim();
 	      }
 	      return p;
 	    }
@@ -255,7 +255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function getSuffix() {
 	      var s = output.onlySuffix;
 	      if (!s) {
-	        s = ('' + (output.suffix || '') + ' ' + (gOut.suffix || '')).trim();
+	        s = ((output.suffix || '') + ' ' + (gOut.suffix || '')).trim();
 	      }
 	      return s;
 	    }
@@ -263,7 +263,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function getUrl() {
 	      var u = output.url;
 	      if (!u) {
-	        u = gOut.docsBaseUrl && output.urlSuffix && ('' + gOut.docsBaseUrl + '' + output.urlSuffix).trim();
+	        u = gOut.docsBaseUrl && output.urlSuffix && ('' + gOut.docsBaseUrl + output.urlSuffix).trim();
 	      }
 	      return u;
 	    }
@@ -322,7 +322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      var types = 'type' + (useS ? 's' : '');
 	      var newLine = n + n;
-	      return 'You passed:' + n + '' + passedArgs + '' + newLine + ('With the ' + types + ':' + n + '' + argTypes + '' + newLine) + ('The API calls for:' + n + '' + apiTypes);
+	      return 'You passed:' + n + passedArgs + newLine + ('With the ' + types + ':' + n + argTypes + newLine) + ('The API calls for:' + n + apiTypes);
 	    }
 	  }
 
@@ -379,7 +379,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    } else if (argFailed && checker.isOptional) {
 	      argIndex--;
 	    } else {
-	      messages.push('' + t(argName) + ' passed');
+	      messages.push(t(argName) + ' passed');
 	    }
 	  }
 	  return failed ? messages : [];
@@ -563,7 +563,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	function _defineProperty(obj, key, value) { return Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); }
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	var stringify = __webpack_require__(2);
 	var checkerHelpers = {
@@ -685,7 +685,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (copy.length === 1) {
 	    join = ' ';
 	  }
-	  return copy.join(join) + ('' + (copy.length ? join + finalJoin : '') + '' + last);
+	  return copy.join(join) + ('' + (copy.length ? join + finalJoin : '') + last);
 	}
 
 	function getError(name, location, checkerType) {
@@ -693,13 +693,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    checkerType = checkerType({ short: true });
 	  }
 	  var stringType = typeof checkerType !== 'object' ? checkerType : stringify(checkerType);
-	  return new Error('' + nAtL(name, location) + ' must be ' + t(stringType));
+	  return new Error(nAtL(name, location) + ' must be ' + t(stringType));
 	}
 
 	function nAtL(name, location) {
 	  var tName = t(name || 'value');
 	  var tLocation = !location ? '' : ' at ' + t(location);
-	  return '' + tName + '' + tLocation;
+	  return '' + tName + tLocation;
 	}
 
 	function t(thing) {
@@ -819,13 +819,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  if (typeof checkerCopy.type === 'object') {
 	    checkerCopy.type = copy(checkerCopy.type); // make our own copy of this
 	  } else if (typeof checkerCopy.type === 'function') {
-	    checkerCopy.type = function () {
-	      return checker.type.apply(checker, arguments);
-	    };
-	  } else {
-	    checkerCopy.type += ' (optional)';
-	    return;
-	  }
+	      checkerCopy.type = function () {
+	        return checker.type.apply(checker, arguments);
+	      };
+	    } else {
+	      checkerCopy.type += ' (optional)';
+	      return;
+	    }
 	  checkerCopy.type.__apiCheckData = copy(checker.type.__apiCheckData) || {}; // and this
 	  checkerCopy.type.__apiCheckData.optional = true;
 	}
@@ -1081,7 +1081,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        shapeTypes[prop] = getCheckerDisplay(checker);
 	      });
 	      function type() {
-	        var options = arguments[0] === undefined ? {} : arguments[0];
+	        var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
 	        var ret = {};
 	        var terse = options.terse;
@@ -1138,7 +1138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        name = name || '';
 	        each(shape, function (checker, prop) {
 	          if (val.hasOwnProperty(prop) || !checker.isOptional) {
-	            shapePropError = checker(val[prop], prop, '' + location + '' + name, val);
+	            shapePropError = checker(val[prop], prop, '' + location + name, val);
 	            return !isError(shapePropError);
 	          }
 	        });
@@ -1163,7 +1163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          return allowedProperties.indexOf(prop) === -1;
 	        });
 	        if (extraProps.length) {
-	          return new Error('' + nAtL(name, location) + ' cannot have extra properties: ' + t(extraProps.join('`, `')) + '.' + ('It is limited to ' + t(allowedProperties.join('`, `'))));
+	          return new Error(nAtL(name, location) + ' cannot have extra properties: ' + t(extraProps.join('`, `')) + '.' + ('It is limited to ' + t(allowedProperties.join('`, `'))));
 	        }
 	      }, { type: strictType, shortType: 'strict shape' }, disabled);
 
@@ -1275,7 +1275,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 
 	  function anyCheckGetter() {
-	    return setupChecker(function anyCheckerDefinition() {}, { type: 'any' }, disabled);
+	    return setupChecker(function anyCheckerDefinition() {
+	      // don't do anything
+	    }, { type: 'any' }, disabled);
 	  }
 
 	  function nullCheckGetter() {
@@ -1323,8 +1325,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, { type: type }, disabled);
 	  }
 	}
-
-	// don't do anything
 
 /***/ }
 /******/ ])
