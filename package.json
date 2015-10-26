@@ -1,6 +1,6 @@
 {
   "name": "api-check",
-  "version": "7.5.4",
+  "version": "7.5.5",
   "description": "Validate the api to your functions to help people use them correctly. This is pretty much React's propTypes without React.",
   "main": "dist/api-check.js",
   "dependencies": {},
@@ -56,9 +56,7 @@
     "deployCopy": "cp index.html deploy.ignored/ && cp dist/api-check.js deploy.ignored/dist/",
     "deployClean": "rm -rf deploy.ignored/ && mkdir deploy.ignored/ && mkdir deploy.ignored/dist/",
     "code-checks": "eslint src/",
-    "prepublish": "npm run build",
-    "postpublish": "publish-latest",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm run build && npm publish && publish-latest && semantic-release post"
   },
   "repository": {
     "type": "git",
