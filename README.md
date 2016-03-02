@@ -1,7 +1,7 @@
 # api-check
 
-[![bower version](https://img.shields.io/bower/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
-[![npm version](https://img.shields.io/npm/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/angular-formly)
+[![bower version](https://img.shields.io/bower/v/api-check.svg?style=flat-square)](https://github.com/kentcdodds/api-check)
+[![npm version](https://img.shields.io/npm/v/api-check.svg?style=flat-square)](https://www.npmjs.org/package/api-check)
 [![npm downloads](https://img.shields.io/npm/dm/api-check.svg?style=flat-square)](http://npm-stat.com/charts.html?package=api-check)
 [![Build Status](https://img.shields.io/travis/kentcdodds/api-check.svg?style=flat-square)](https://travis-ci.org/kentcdodds/api-check)
 [![Code Coverage](https://img.shields.io/codecov/c/github/kentcdodds/api-check.svg?style=flat-square)](https://codecov.io/github/kentcdodds/api-check)
