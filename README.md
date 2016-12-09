@@ -264,7 +264,7 @@ apiCheck.string([]); // <-- fail
 
 ```javascript
 apiCheck.range(0, 10)(4); // <-- pass
-apiCheck.rang(-100, 100)(500); // <-- fail
+apiCheck.range(-100, 100)(500); // <-- fail
 ```
 
 ### greaterThan
