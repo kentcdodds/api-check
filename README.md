@@ -7,9 +7,7 @@
 [![Code Coverage](https://img.shields.io/codecov/c/github/kentcdodds/api-check.svg?style=flat-square)](https://codecov.io/github/kentcdodds/api-check)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/kentcdodds/api-check?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-*If that build is ever red or the coverage is ever less than 100% then I want you to
-[flame me on twitter (@kentcdodds)](https://twitter.com/kentcdodds) and be sure to mention how disappointed
-[@josepheames](https://twitter.com/josepheames) would be in me*
+<a href="https://app.codesponsor.io/link/PKGFLnhDiFvsUA5P4kAXfiPs/kentcdodds/api-check" rel="nofollow"><img src="https://app.codesponsor.io/embed/PKGFLnhDiFvsUA5P4kAXfiPs/kentcdodds/api-check.svg" style="width: 888px; height: 68px;" alt="Sponsor" /></a>
 
 It's like [ReactJS `propTypes`](http://facebook.github.io/react/docs/reusable-components.html) without React. Actually,
 it's very heavily inspired by this concept. It's purpose is for normal JavaScript functions rather than just React
