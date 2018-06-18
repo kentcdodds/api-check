@@ -251,6 +251,17 @@ apiCheck.object.nullOk([]); // <--- false
 apiCheck.object.nullOk(null); // <-- pass
 ```
 
+### emptyObject *
+
+*Not available in React's `propTypes`*
+
+```javascript
+apiCheck.emptyObject({}); // <-- pass
+apiCheck.emptyObject([]); // <-- fail
+apiCheck.emptyObject(null); // <-- fail
+apiCheck.emptyObject({"foo": "bar"}) // <-- fail
+```
+
 ### string
 
 ```javascript
@@ -532,6 +543,14 @@ apiCheck.any(3.141592653); // <-- pass
 apiCheck.any(3.1415926535); // <-- pass
 apiCheck.any(3.14159265359); // <-- pass
 apiCheck.any(jfio,.jgo); // <-- Syntax error.... ಠ_ಠ
+```
+
+### null
+
+```javascript
+apiCheck.null(null); // <-- pass
+apiCheck.null(undefined); // <-- fail
+apiCheck.null('hello'); // <-- fail
 ```
 
 ## Custom Types
